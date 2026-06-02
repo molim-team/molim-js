@@ -1,0 +1,526 @@
+"use client";
+
+import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useFavorites } from '@/lib/context/FavoritesContext';
+import { Heart } from 'lucide-react';
+import AuthModal from '@/components/AuthModal';
+
+
+function Main() {
+  const navigate = useRouter();
+  const [scholarships, setScholarships] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [activeScholarshipId, setActiveScholarshipId] = useState(null);
+
+  const { favorites, toggleFav: favToggle, user, authLoading } = useFavorites();
+
+  const gridRef = useRef(null);
+  const [isDown, setIsDown] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  useEffect(() => {
+    fetch('/scholarships.json')
+      .then(res => res.json())
+      .then(data => {
+        let openOnly = data.filter(s => s.open === true || s.open === 'true');
+        if (openOnly.length === 0 && data && data.length > 0) {
+          openOnly = data;
+        }
+        setScholarships(openOnly);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('خطأ في تحميل المنح:', err);
+        setLoading(false);
+      });
+
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+      setShowBackToTop(window.scrollY > 300);
+      
+      const header = document.querySelector('header');
+      if (header) {
+        if (window.scrollY > 80) {
+          header.classList.add('header-hidden');
+        } else {
+          header.classList.remove('header-hidden');
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (loading) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.card, .about-card').forEach(card => {
+      observer.observe(card);
+    });
+
+    return () => observer.disconnect();
+  }, [scholarships, loading]);
+
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  const getCountdown = (deadline) => {
+    if (!deadline) return null;
+    const today = new Date();
+    const end = new Date(deadline);
+    const diff = Math.ceil((end - today) / (1000 * 60 * 60 * 24));
+
+    if (diff < 0) return null;
+    if (diff === 0) return { text: '⚠️ آخر يوم للتقديم!', urgent: true };
+    if (diff <= 7) return { text: `⚠️ باقي ${diff} أيام فقط!`, urgent: true };
+    return { text: `📅 باقي ${diff} يوم على إغلاق التقديم`, urgent: false };
+  };
+
+  const toggleFav = async (e, id) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const success = await favToggle(id);
+    if (!success) {
+      setShowAuthModal(true);
+    }
+  };
+
+  const shareScholarship = (e, id, name, country) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const url = `${window.location.origin}/scholarship/${id}`;
+    const text = `🎓 ${name}\n`;
+    if (navigator.share) {
+      navigator.share({ title: `منحة ${name}`, text, url });
+    } else {
+      navigator.clipboard.writeText(text + '\n' + url);
+      alert('✅ تم نسخ رابط المنحة!');
+    }
+  };
+
+  const slideCards = (direction) => {
+    if (gridRef.current) {
+      const card = gridRef.current.querySelector('.card');
+      if (!card) return;
+      const cardWidth = card.offsetWidth + 20;
+      gridRef.current.scrollBy({ left: direction * cardWidth, behavior: 'smooth' });
+    }
+  };
+
+  const handleMouseDown = (e) => {
+    setIsDown(true);
+    setStartX(e.pageX - gridRef.current.offsetLeft);
+    setScrollLeft(gridRef.current.scrollLeft);
+  };
+  const handleMouseLeave = () => setIsDown(false);
+  const handleMouseUp = () => setIsDown(false);
+  const handleMouseMove = (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - gridRef.current.offsetLeft;
+    gridRef.current.scrollLeft = scrollLeft - (x - startX) * 3;
+  };
+
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  return (
+    <div className="main-home-container px-4 md:px-6">
+      <style>{`
+        .main-home-container {
+          width: 100%;
+        }
+        .px-4 {
+          padding-left: 1rem !important;
+          padding-right: 1rem !important;
+        }
+        
+        .main-home-container > .hero {
+          margin-left: -1rem !important;
+          margin-right: -1rem !important;
+        }
+
+        @media (min-width: 768px) {
+          .md\\:px-6 {
+            padding-left: 1.5rem !important;
+            padding-right: 1.5rem !important;
+          }
+          .main-home-container > .hero {
+            margin-left: -1.5rem !important;
+            margin-right: -1.5rem !important;
+          }
+        }
+
+        #open-scholarships-grid {
+          display: flex !important;
+          flex-direction: row !important;
+          flex-wrap: nowrap !important;
+          overflow-x: auto !important;
+          -webkit-overflow-scrolling: touch;
+          scroll-behavior: smooth;
+        }
+
+        #open-scholarships-grid::-webkit-scrollbar {
+          height: 6px;
+        }
+        #open-scholarships-grid::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.05);
+          border-radius: 10px;
+        }
+        #open-scholarships-grid::-webkit-scrollbar-thumb {
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: 10px;
+        }
+
+        #open-scholarships-grid .card,
+        #open-scholarships-grid .skeleton-card {
+          flex-shrink: 0 !important;
+        }
+
+        @media (max-width: 767px) {
+          #open-scholarships-grid {
+            gap: 16px !important;
+            padding: 0 16px 20px 16px !important;
+            margin-left: -16px !important;
+            margin-right: -16px !important;
+          }
+          #open-scholarships-grid .card,
+          #open-scholarships-grid .skeleton-card {
+            width: 80% !important;
+            min-width: 270px !important;
+            max-width: 320px !important;
+          }
+          .slider-wrapper .slider-btn {
+            display: none !important;
+          }
+        }
+
+        @media (min-width: 768px) {
+          #open-scholarships-grid {
+            gap: 20px !important;
+          }
+        }
+
+        .cards-wrapper.flex-col {
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 20px !important;
+        }
+        .cards-wrapper.flex-col > .about-card,
+        .cards-wrapper.flex-col > a {
+          width: 100% !important;
+          display: block;
+        }
+        .cards-wrapper.flex-col > a > .about-card {
+          width: 100% !important;
+        }
+
+        @media (min-width: 768px) {
+          .cards-wrapper.md\\:flex-row {
+            flex-direction: row !important;
+          }
+          .cards-wrapper.md\\:flex-row > .about-card,
+          .cards-wrapper.md\\:flex-row > a {
+            flex: 1 !important;
+            width: auto !important;
+          }
+        }
+      `}</style>
+
+      {/* هيرو */}
+      <section className="hero">
+        <div className="hero-logo-wrap">
+          <img src="/images/logo.png" alt="مُلم" className="hero-logo" />
+          <div className="hero-glow"></div>
+        </div>
+        <p className="hero-sub">منصتك الأولى لاكتشاف المنح الدراسية حول العالم</p>
+        <Link href="/scholarships" className="btn-main">استعرض المنح</Link>
+        <section className="stats-section">
+          <div className="stat-item">
+            <span className="stat-number">+1000</span>
+            <span className="stat-label">🎓 مستفيد</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-number">+50</span>
+            <span className="stat-label">📚 منحة</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-number">+30</span>
+            <span className="stat-label">🌍 دولة</span>
+          </div>
+        </section>
+      </section>
+
+      {/* المنح المتاحة حالياً */}
+      <section className="open-scholarships-section">
+        <h2 className="section-title">المنح المتاحة حالياً 🟢</h2>
+        <div className="slider-wrapper">
+          <button className="slider-btn prev" onClick={() => slideCards(-1)}>&#8250;</button>
+          <div 
+            id="open-scholarships-grid" 
+            className="cards-grid flex flex-row overflow-x-auto flex-nowrap"
+            ref={gridRef}
+            onMouseDown={handleMouseDown}
+            onMouseLeave={handleMouseLeave}
+            onMouseUp={handleMouseUp}
+            onMouseMove={handleMouseMove}
+          >
+            {loading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="skeleton-card">
+                  <div className="skeleton-line skeleton-flag"></div>
+                  <div className="skeleton-line skeleton-title"></div>
+                  <div className="skeleton-line skeleton-text"></div>
+                  <div className="skeleton-line skeleton-text wide"></div>
+                  <div className="skeleton-line skeleton-btn"></div>
+                  <div className="skeleton-line skeleton-btn"></div>
+                </div>
+              ))
+            ) : scholarships.length === 0 ? (
+              <p>لا توجد منح مفتوحة حالياً</p>
+            ) : (
+              scholarships.map(s => {
+                const active = favorites.includes(String(s.id));
+                const cd = getCountdown(s.deadline);
+                return (
+                  <div key={s.id} className="card">
+                    <AuthModal isOpen={showAuthModal && activeScholarshipId === s.id} onClose={() => setShowAuthModal(false)} />
+                    <button
+  className={`fav-btn ${active ? 'active' : ''}`}
+  aria-label={active ? 'إزالة من المفضلة' : 'إضافة للمفضلة'}
+  onClick={(e) => {
+    e.preventDefault();
+    if (!user) {
+      setShowAuthModal(true); 
+      setActiveScholarshipId(s.id);
+    } else {
+      toggleFav(e, s.id);
+    }
+  }}
+  type="button"
+  style={{
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'transform 0.2s ease',
+  }}
+  onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.85)'}
+  onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+>
+  <Heart
+    size={24}
+    color={active ? '#e63946' : '#888888'}
+    fill={active ? '#e63946' : 'transparent'}
+    style={{ transition: 'all 0.3s ease' }}
+  />
+</button>
+                    
+                    {s.flag && (s.flag.startsWith('http') || s.flag.includes('/') || s.flag.includes('.')) ? (
+                      <img className="card-flag" src={s.flag} alt="flag"/>
+                    ) : (
+                      <span className="card-flag">{s.flag || ''}</span>
+                    )}
+
+                    <h3>{s.name}</h3>
+                    <p className="country">📍 {s.country}</p>
+                    <p className="degree">🎓 {s.degree}</p>
+                    <span className="status open">✅ التقديم مفتوح</span>
+                    <p className="desc">{s.description || ''}</p>
+                    {s.open_date && <p className="deadline">📅 موعد فتح التقديم: {s.open_date}</p>}
+                    {cd && (
+                      <div className={`countdown ${cd.urgent ? 'urgent' : ''}`}>
+                        {cd.text}
+                      </div>
+                    )}
+                    <p className="deadline">📅 آخر موعد للتقديم: {s.deadline}</p>
+                    
+                    <Link href={`/scholarship/${s.id}`} className="btn-details">تفاصيل المنحة كاملة ←</Link>
+                    <a href={s.link} target="_blank" rel="noreferrer" className="btn-details">زيارة الموقع الرسمي ↗</a>
+                    <button className="btn-details" onClick={(e) => shareScholarship(e, s.id, s.name, s.country)}>📤 شارك المنحة</button>
+                  </div>
+                );
+              })
+            )}
+          </div>
+          <button className="slider-btn next" onClick={() => slideCards(1)}>&#8249;</button>
+        </div>
+      </section>
+
+      {/* من نحن */}
+      <section className="about-section">
+        <h2 className="section-title"> عن مُلم </h2>
+        <div className="cards-wrapper flex-col md:flex-row">
+          <div className="about-card">
+            <span className="about-icon">🎯</span>
+            <h3>من نحن</h3>
+            <p>مُلم منصة عربية متخصصة في تجميع أبرز المنح الدراسية حول العالم في مكان واحد. نسعى لتسهيل وصول الطلاب العرب إلى فرص التعليم الدولي بمعلومات دقيقة وموثوقة.</p>
+          </div>
+          <div className="about-card">
+            <span className="about-icon">📚</span>
+            <h3>ماذا نقدم</h3>
+            <p>نوفر لك تفاصيل شاملة عن كل منحة تشمل المزايا والشروط والمستندات المطلوبة ورابط التقديم الرسمي — كل ما تحتاجه في صفحة واحدة دون الحاجة للبحث في عشرات المواقع.</p>
+          </div>
+          <div className="about-card">
+            <span className="about-icon">✅</span>
+            <h3>لماذا مُلم</h3>
+            <p>معلوماتنا محدّثة باستمرار ومصدرها المواقع الرسمية للمنح. نوضح جميع المتطلبات والشروط الدقيقة لكل منحة حتى تتقدم بثقة وملف مكتمل.</p>
+          </div>
+          
+          <a href="https://t.me/Molim_Team/4" target="_blank" rel="noreferrer">
+            <div className="about-card">
+              <span className="about-icon">💬</span>
+              <h3>مجتمع مُلم</h3>
+              <p>انضم لقروب التليجرام الخاص بنا للحصول على آخر أخبار المنح والمواعيد النهائية للتقديم، وللتواصل مع طلاب يمرون بنفس تجربتك.</p>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      {showBackToTop && (
+        <button id="back-to-top" onClick={scrollToTop}>↑</button> 
+      )}
+
+      {showAuthModal && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            width: '100vw',
+            height: '100vh',
+            backgroundColor: 'rgba(15, 23, 42, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 99999,
+          }}
+          onClick={() => setShowAuthModal(false)}
+        >
+          <div 
+            style={{
+              position: 'relative',
+              width: '90%',
+              maxWidth: '440px',
+              backgroundColor: 'var(--card-bg, #ffffff)',
+              borderRadius: '24px',
+              padding: '32px',
+              boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)',
+              border: '1px solid var(--card-border, #e0e0e0)',
+              textAlign: 'center',
+              direction: 'rtl',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => setShowAuthModal(false)}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                left: '16px',
+                background: 'none',
+                border: 'none',
+                fontSize: '22px',
+                cursor: 'pointer',
+                color: 'var(--text-color, #666)',
+              }}
+            >
+              ✕
+            </button>
+
+            <div style={{
+              width: '80px',
+              height: '80px',
+              margin: '0 auto 24px',
+              backgroundColor: 'rgba(255, 69, 0, 0.08)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#ff4500',
+              fontSize: '36px',
+            }}>
+              <i className="fa-solid fa-heart"></i>
+            </div>
+
+            <h3 style={{
+              fontSize: '22px',
+              fontWeight: '900',
+              color: 'var(--primary-color, #ff4500)',
+              marginBottom: '12px',
+            }}>
+              المنح المفضلة
+            </h3>
+
+            <p style={{
+              color: 'var(--text-color, #333)',
+              fontSize: '16px',
+              lineHeight: '1.6',
+              marginBottom: '32px',
+            }}>
+              الرجاء تسجيل الدخول للاستفادة من ميزة المنح المفضلة.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <button
+                onClick={() => {
+                  setShowAuthModal(false);
+                  navigate.push('/login');
+                }}
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  backgroundColor: '#ff4500',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '12px',
+                  fontSize: '16px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(255, 69, 0, 0.2)',
+                }}
+              >
+                تسجيل الدخول
+              </button>
+              <button
+                onClick={() => setShowAuthModal(false)}
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  backgroundColor: 'transparent',
+                  color: 'var(--text-color, #666)',
+                  border: '2px solid var(--primary-color, #ff4500)',
+                  borderRadius: '12px',
+                  fontSize: '16px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                }}
+              >
+                إلغاء
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default Main;
