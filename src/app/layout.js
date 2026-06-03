@@ -5,14 +5,11 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { onAuthStateChanged } from "firebase/auth";
-
 import { auth } from '../lib/firebase';
 import { FavoritesProvider } from '../lib/context/FavoritesContext';
-
 import './globals.css';
-
-
 import LlamamBot from '../components/LlamamBot';
+import ScrollToTop from '../components/ScrollToTop';
 
 function Header() {
   const [user, setUser] = useState(null);
@@ -149,6 +146,7 @@ export default function RootLayout({ children }) {
           <LlamamBot />
           <Footer />
         </FavoritesProvider>
+        <ScrollToTop />
       </body>
     </html>
   );
