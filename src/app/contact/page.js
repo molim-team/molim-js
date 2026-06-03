@@ -9,6 +9,14 @@ export default function Contact() {
       className: 'telegram',
     },
     {
+      name: 'واتساب',
+      handle: '@Molim_Team', 
+      link: 'https://whatsapp.com/channel/0029VbCfp9oIHphC6stwib02',
+      iconClass: 'fa-brands fa-whatsapp',
+      className: 'whatsapp',
+
+    },
+    {
       name: 'تيك توك',
       handle: '@Molim_team',
       link: 'https://www.tiktok.com/@Molim_team',
