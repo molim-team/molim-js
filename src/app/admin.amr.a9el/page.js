@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 
 function Admin() {
   const OWNER = 'molim-team';
-  const REPO = 'molim.team';
+  const REPO = 'molim-js';
   const FILE = 'public/scholarships.json';
 
   const [token, setToken] = useState('');
