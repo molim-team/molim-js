@@ -697,50 +697,6 @@
     "discussionLink": "https://t.me/sc2026hh"
   },
   {
-    "id": "colombia-gov",
-    "name": "منحة الحكومة الكولومبية",
-    "name_en": "Colombia-gov",
-    "country": "كولومبيا",
-    "flag": "https://flagcdn.com/w40/co.png",
-    "degree": "ماجستير, تخصص, دكتوراه",
-    "language": "الإسبانية",
-    "description": "منحة مقدمة من الحكومة الكولومبية بالتعاون مع مؤسسة ICETEX للطلاب الراغبين باكمال دراستهم العليا",
-    "benefits": [
-      "تغطية الرسوم الدراسية",
-      "راتب شهري",
-      "تامين صحي",
-      "تكاليف التأشيرة",
-      "بدل سكن",
-      "كورس تحضيري لتعلم اللغة الإسبانية"
-    ],
-    "requirements": [
-      "ان يكون المتقدم من خارج كولومبيا ولا يحمل الجنسية الكولومبية",
-      "الا يتجاوز عمر المتقدم 50 عام"
-    ],
-    "majors": [
-      "جميع التخصصات متاحة باستثناء الطب والتمريض والصيدلة"
-    ],
-    "open_date": "2026-05-01",
-    "deadline": "2026-06-05",
-    "documents": {
-      "required": [
-        "جواز السفر",
-        "شهادة اخر مرحلة دراسية",
-        "السجل الاكاديمي",
-        "CV",
-        "خطاب نية",
-        "خطاب توصية",
-        "شهادة صحية"
-      ],
-      "optional": []
-    },
-    "link": "https://internacionalizacion.icetex.gov.co/login/auth/login",
-    "open": true,
-    "notes": "المنحة لا تشمل درجة البكالوريوس, \nمدة الدراسة:\nالتخصص 18 شهر\nالماجستير سنتان\nالدكتوراه 4 سنوات",
-    "groupLink": "https://t.me/T2026R",
-    "discussionLink": "https://t.me/sc2026hh"
-  },
-  {
     "id": "negeri-padang-scholarship",
     "name": "منحة جامعة نيجري بادانج",
     "name_en": "Negeri Padang Scholarship",
