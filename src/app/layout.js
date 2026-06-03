@@ -11,6 +11,22 @@ import './globals.css';
 import LlamamBot from '../components/LlamamBot';
 import ScrollToTop from '../components/ScrollToTop';
 
+import { Cairo, Tajawal } from 'next/font/google';
+
+const cairo = Cairo({ 
+  subsets: ['arabic'],
+  weight: ['400', '600', '700', '900'],
+  variable: '--font-cairo',
+  display: 'swap',
+});
+
+const tajawal = Tajawal({
+  subsets: ['arabic'],
+  weight: ['400', '700', '900'],
+  variable: '--font-tajawal',
+  display: 'swap',
+});
+
 function Header() {
   const [user, setUser] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -137,7 +153,7 @@ function Footer() {
 export default function RootLayout({ children }) {
   return (
     <html lang="ar" dir="rtl">
-      <body>
+      <body className={`${cairo.variable} ${tajawal.variable}`}>
         <FavoritesProvider>
           <Header />
           <main className="main-content-wrapper">
