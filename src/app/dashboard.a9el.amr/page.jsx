@@ -7,6 +7,9 @@ export default function Dashboard() {
     email: '',
     cert_type: 'شهادة تطوع',
     certificateText: '',
+    nameEn: '',
+    certificateTextEn: '',
+    cert_typeEn: 'Volunteer Certificate',
   });
   const [token, setToken] = useState('');
   const [loading, setLoading] = useState(false);
@@ -125,7 +128,6 @@ export default function Dashboard() {
             اكتب النص كاملاً بما في ذلك القسم وعدد الساعات.
           </p>
           <textarea
-            placeholder="وذلك تقديراً لمجهوداته المتميزة..."
             value={formData.certificateText}
             onChange={(e) => setFormData({ ...formData, certificateText: e.target.value })}
             required
@@ -133,6 +135,50 @@ export default function Dashboard() {
             style={{ ...inputStyle, resize: 'vertical', lineHeight: '1.7', minHeight: '120px' }}
           />
         </div>
+
+        {/* الاسم بالإنجليزي */}
+<div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+  <label style={{ fontWeight: '600', fontSize: '14px', color: '#333' }}>
+    Full Name (English)
+  </label>
+  <input
+    type="text"
+    value={formData.nameEn}
+    onChange={(e) => setFormData({ ...formData, nameEn: e.target.value })}
+    required
+    style={{ ...inputStyle, direction: 'ltr' }}
+  />
+</div>
+
+{/* cert_type بالإنجليزي */}
+<div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+  <label style={{ fontWeight: '600', fontSize: '14px', color: '#333' }}>
+    Certificate Type (English)
+  </label>
+  <select
+    value={formData.cert_typeEn}
+    onChange={(e) => setFormData({ ...formData, cert_typeEn: e.target.value })}
+    style={{ ...inputStyle, direction: 'ltr' }}
+  >
+    <option value="Volunteer Certificate">Volunteer Certificate</option>
+    <option value="Experience Certificate">Experience Certificate</option>
+    <option value="Participation Certificate">Participation Certificate</option>
+  </select>
+</div>
+
+{/* نص الشهادة بالإنجليزي */}
+<div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+  <label style={{ fontWeight: '600', fontSize: '14px', color: '#333' }}>
+    Certificate Text (English)
+  </label>
+  <textarea
+    value={formData.certificateTextEn}
+    onChange={(e) => setFormData({ ...formData, certificateTextEn: e.target.value })}
+    required
+    rows={5}
+    style={{ ...inputStyle, direction: 'ltr', resize: 'vertical', minHeight: '120px' }}
+  />
+</div>
 
         <button
           type="submit"
