@@ -107,17 +107,29 @@ export default function ScholarshipDetails() {
         )}
 
         {scholarship.documents && (
-          <div className="details-card">
-            <h2>📎 الملفات المطلوبة</h2>
-            {scholarship.documents.required?.length > 0 && (
-              <>
-                <p><strong>🔴 إجباري:</strong></p>
-                <ul>{scholarship.documents.required.map((d, i) => <li key={i}>{d}</li>)}</ul>
-              </>
-            )}
-          </div>
-        )}
+  <div className="details-card">
+    <h2>الملفات المطلوبة 📄</h2>
+    
+    {/* عرض الملفات الإجبارية */}
+    {scholarship.documents.required?.length > 0 && (
+      <>
+        <p><strong>🔴 إجباري:</strong></p>
+        <ul>
+          {scholarship.documents.required.map((d, i) => <li key={i}>{d}</li>)}
+        </ul>
+      </>
+    )}
 
+    {scholarship.documents.optional?.length > 0 && (
+      <>
+        <p><strong>🟡 اختياري:</strong></p>
+        <ul>
+          {scholarship.documents.optional.map((d, i) => <li key={i}>{d}</li>)}
+        </ul>
+      </>
+    )}
+  </div>
+)}
         {scholarship.groupLink && (
           <div className="btn-split">
             <a href={scholarship.groupLink} target="_blank" rel="noreferrer" className="btn-main btn-split-half">

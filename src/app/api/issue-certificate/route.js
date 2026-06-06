@@ -123,19 +123,26 @@ async function buildEnglishPDF(pdfDoc, customFont, qrCodeBuffer, data, type) {
 
   const embeddedQr = await pdfDoc.embedPng(qrCodeBuffer);
   page.drawImage(embeddedQr, { x: 440, y: 55, width: 120, height: 120 });
-  // إضافة نص التحقق تحت الباركود الإنجليزي
-        const verifyText = "Scan to Verify";
-        const verifyTextSize = 10;
-        const verifyTextWidth = customFont.widthOfTextAtSize(verifyText, verifyTextSize);
 
-        page.drawText(verifyText, {
-            x: 500 - (verifyTextWidth / 2), 
-            y: 40, 
-            size: verifyTextSize,
-            font: customFont,
-            color: TEXT_COLOR,
-        });
+  // إضافة تاريخ الإصدار تحت الباركود الإنجليزي
+    const dateObj = new Date();
+    const formattedDate = `Date of Issue: ${dateObj.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    })}`;
+    
+    const dateTextSize = 10;
+    const dateTextWidth = customFont.widthOfTextAtSize(formattedDate, dateTextSize);
 
+    page.drawText(formattedDate, {
+        x: 500 - (dateTextWidth / 2),
+        y: 40,
+        size: dateTextSize,
+        font: customFont,
+        color: TEXT_COLOR,
+    });
+ 
   // عنوان الشهادة
   drawCenteredEn(page, cert_typeEn, customFont, 32, 530, TEXT_COLOR, PAGE_WIDTH);
 

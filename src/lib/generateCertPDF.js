@@ -3,6 +3,12 @@ import path from 'path';
 
 export async function generateArabicCertPDF({ name, cert_type, certificateText, qrCodeBase64, type }) {
 
+  const issueDate = new Date().toLocaleDateString('ar-EG', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+  });
+
   // اختيار الخلفية بناءً على نوع الشهادة فقط
   let imgFileName;
   switch (type) {
@@ -61,7 +67,7 @@ export async function generateArabicCertPDF({ name, cert_type, certificateText, 
         }
         .qr-code {
           position: absolute;
-          bottom: 45px;
+          bottom: 50px;
           left: 50%;
           transform: translateX(-50%);
           display: flex;
@@ -69,15 +75,16 @@ export async function generateArabicCertPDF({ name, cert_type, certificateText, 
           align-items: center;
           gap: 5px;
         }
-        .qr-text {
-        font-size: 11px;
-        color: #000;
-        font-weight: bold;
-        }
         .qr-code img {
           width: 110px;
           height: 110px;
         }
+        .cert-date {
+        font-size: 11px;
+        color: #555;
+        font-weight: bold;
+        white-space: nowrap;
+        }  
         .body-text b {
           font-weight: 900;
           color: #000;
@@ -98,7 +105,7 @@ export async function generateArabicCertPDF({ name, cert_type, certificateText, 
       </div>
       <div class="qr-code">
         <img src="data:image/png;base64,${qrCodeBase64}" />
-        <span class="qr-text">امسح للتحقق</span>
+        <span class="cert-date">تاريخ الإصدار: ${issueDate}</span>
       </div>
     </body>
     </html>
