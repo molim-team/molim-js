@@ -672,11 +672,9 @@ footer p {
   border-bottom: none;
 }
 
-.details-card ul li::before {
-  content: "✓ ";
-  color: var(--primary-color);
-  font-weight: 700;
-  transition: color 0.5s ease;
+.details-card ul {
+  list-style-type: none;
+  padding: 0;
 }
 
 /* ===== FAQ PAGE ===== */
