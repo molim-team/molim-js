@@ -130,6 +130,14 @@ export default function ScholarshipDetails() {
     )}
   </div>
 )}
+
+        {scholarship.notes && (
+  <div className="details-card">
+    <h2>ملاحظات وتفاصيل إضافية 📝</h2>
+    <p style={{ whiteSpace: 'pre-wrap' }}>{scholarship.notes}</p>
+  </div>
+)}
+
         {scholarship.groupLink && (
           <div className="btn-split">
             <a href={scholarship.groupLink} target="_blank" rel="noreferrer" className="btn-main btn-split-half">
