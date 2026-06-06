@@ -65,7 +65,7 @@ export default function ScholarshipDetails() {
 
   return (
     <div id="scholarship-details" className="details-container">
-      <div className="details-hero">
+      <div className="details-hero-container">
         {scholarship.flag && (
           <img src={scholarship.flag} alt="flag" className="details-flag" />
         )}

@@ -13,7 +13,7 @@
   --card-border: #e0e0e0;
   --primary-color: #ff4500;
   --secondary-color: #1a3a6e;
-  --hero-bg-gradient: linear-gradient(135deg, rgba(5,15,40,0.80), rgba(20,20,20,0.65));
+  --hero-bg-gradient: #ffffff;
   --hero-logo-shadow: rgba(255, 69, 0, 0.7);
   --hero-logo-hover-shadow: rgba(255, 69, 0, 1);
   --page-hero-bg: linear-gradient(135deg, #2d1f5e, #3b1a6e, #ff4500);
@@ -243,17 +243,30 @@ nav a:hover {
   color: var(--secondary-color);
 }
 
-/* ===== HERO ===== */
-.hero {
-  margin-top: 0;
-  text-align: center;
-  padding: 80px 20px;
-  background:
-    var(--hero-bg-gradient),
-    url('/images/hero-bg.jpg') center center / cover no-repeat;
-  background-attachment: scroll;
-  position: relative;
-  transition: background 0.5s ease;
+/* ===== HERO ===== */.hero {
+    margin-top: 0;
+    text-align: center;
+    padding: 80px 20px;
+    background: linear-gradient(135deg, rgba(5,15,40,0.80), rgba(20,20,20,0.65)), url('/images/hero-bg.jpg') center center / cover no-repeat;
+    background-attachment: scroll;
+    position: relative;
+    transition: background 0.5s ease;
+}
+
+
+.details-hero-container {
+    background: #ffffff; 
+    color: #ff4500;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    padding: 40px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    text-align: center;
+}
+
+
+[data-theme="dark"] .details-hero-container {
+    background: #0f172a; 
 }
 
 .hero-logo-wrap {
@@ -616,7 +629,7 @@ footer p {
 .details-hero {
   text-align: center;
   padding: 40px 20px;
-  background: #ffffff !important;
+  
   border-radius: 12px;
   margin-bottom: 30px;
   transition: background 0.5s ease;
