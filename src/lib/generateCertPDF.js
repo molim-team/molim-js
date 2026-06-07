@@ -1,5 +1,3 @@
-import fs from 'fs';
-import path from 'path';
 
 export async function generateArabicCertPDF({ name, cert_type, certificateText, qrCodeBase64, type }) {
 
