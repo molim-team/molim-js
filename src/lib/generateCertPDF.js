@@ -60,14 +60,37 @@ export async function generateArabicCertPDF({ name, cert_type, certificateText, 
           font-size: 28px; font-weight: 700;
           margin-bottom: 30px; min-width: 300px; text-align: center;
         }
-        .body-text { font-size: 17px; line-height: 1.9; text-align: center; max-width: 820px; padding: 0 40px; }
+        .body-text { font-size: 17px;
+         line-height: 1.9;
+          text-align: center;
+           max-width: 820px;
+            padding: 0 40px;
+            right: 25px;
+             }
         .signature-area {
-          position: absolute; bottom: 125px; right: 165px;
-          text-align: center; font-size: 13px; color: #333; line-height: 1.6;
-        }
+    position: absolute;
+    bottom: 117px; 
+    right: 145px; 
+    text-align: right;
+    font-size: 13px;
+    color: #333;
+    line-height: 1.4;
+}
+          .sig-title {
+          font-size: 11px;
+          color: #666
+          }
+
+          .sig-name {
+          font-size: 15px;
+          color: #111;
+          font-weight: 900;
+          margin-top: 3px;
+          } 
+
         .qr-code {
           position: absolute;
-          bottom: 50px;
+          bottom: 25px;
           left: 50%;
           transform: translateX(-50%);
           display: flex;
@@ -100,8 +123,8 @@ export async function generateArabicCertPDF({ name, cert_type, certificateText, 
         <div class="body-text">${formattedCertText}</div>
       </div>
       <div class="signature-area">
-        <div>مدير فريق ملم</div>
-        <div>أصيل الصلوي</div>
+        <div class="sig-title">مدير فريق ملم</div>
+        <div class="sig-name">أصيل الصلوي</div>
       </div>
       <div class="qr-code">
         <img src="data:image/png;base64,${qrCodeBase64}" />

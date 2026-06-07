@@ -7,6 +7,7 @@ import path from 'path';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import { generateArabicCertPDF } from '@/lib/generateCertPDF';
 import fontkit from '@pdf-lib/fontkit';
+import { supabase } from '@/lib/supabase';
 
 const ADMIN_TOKEN = process.env.CERT_ADMIN_TOKEN;
 
@@ -82,7 +83,7 @@ function wrapEnglishText(rawText, font, boldFont, fontSize, maxWidth) {
   return lines;
 }
 
-// ─── مساعد: حساب العرض الكلي لسطر ────────────────────────────────────────────
+// ─── مساعد: حساب العرض الكلي لسطر 
 function calcLineWidth(lineSegs, font, boldFont, fontSize) {
   return lineSegs.reduce((total, seg) => {
     const segFont = seg.bold ? boldFont : font;
@@ -90,7 +91,7 @@ function calcLineWidth(lineSegs, font, boldFont, fontSize) {
   }, 0);
 }
 
-// ─── مساعد: رسم نص في المنتصف ─────────────────────────────────────────────────
+// ─── مساعد: رسم نص في المنتصف 
 function drawCenteredEn(page, text, font, size, y, color, pageW) {
   const w = font.widthOfTextAtSize(text, size);
   page.drawText(text, {
@@ -102,7 +103,7 @@ function drawCenteredEn(page, text, font, size, y, color, pageW) {
   });
 }
 
-// ─── بناء PDF الإنجليزي ────────────────────────────────────────────────────────
+// ─── بناء PDF الإنجليزي 
 async function buildEnglishPDF(pdfDoc, customFont, qrCodeBuffer, data, type) {
   const { nameEn, cert_typeEn, certificateTextEn } = data;
 
@@ -122,7 +123,7 @@ async function buildEnglishPDF(pdfDoc, customFont, qrCodeBuffer, data, type) {
   page.drawImage(embeddedImage, { x: 0, y: 0, width: PAGE_WIDTH, height: PAGE_HEIGHT });
 
   const embeddedQr = await pdfDoc.embedPng(qrCodeBuffer);
-  page.drawImage(embeddedQr, { x: 440, y: 55, width: 120, height: 120 });
+  page.drawImage(embeddedQr, { x: 440, y: 40, width: 120, height: 120 });
 
   // إضافة تاريخ الإصدار تحت الباركود الإنجليزي
     const dateObj = new Date();
@@ -137,7 +138,7 @@ async function buildEnglishPDF(pdfDoc, customFont, qrCodeBuffer, data, type) {
 
     page.drawText(formattedDate, {
         x: 500 - (dateTextWidth / 2),
-        y: 40,
+        y: 30,
         size: dateTextSize,
         font: customFont,
         color: TEXT_COLOR,
@@ -159,7 +160,7 @@ async function buildEnglishPDF(pdfDoc, customFont, qrCodeBuffer, data, type) {
   // ── نص الشهادة مع دعم Bold بالنجمتين ──
   const BODY_FONT_SIZE = 17;
   const LINE_HEIGHT = 30;
-  const MAX_WIDTH = 820;
+  const MAX_WIDTH = 800;
   const BODY_Y = 320;
 
   const lines = wrapEnglishText(
@@ -174,7 +175,7 @@ async function buildEnglishPDF(pdfDoc, customFont, qrCodeBuffer, data, type) {
     const y = BODY_Y - lineIndex * LINE_HEIGHT;
 
     const totalWidth = calcLineWidth(lineSegs, customFont, boldFont, BODY_FONT_SIZE);
-    let currentX = (PAGE_WIDTH - totalWidth) / 2;
+    let currentX = ((PAGE_WIDTH - totalWidth) / 2) + 25;
 
     lineSegs.forEach(seg => {
       const segFont = seg.bold ? boldFont : customFont;
@@ -190,13 +191,22 @@ async function buildEnglishPDF(pdfDoc, customFont, qrCodeBuffer, data, type) {
     });
   });
 
-  // اسم المدير
-  page.drawText('Head of Molim Team', {
-    x: 730, y: 155, size: 14, font: customFont, color: TEXT_COLOR,
-  });
-  page.drawText('ASEEL AL-SELWE', {
-    x: 730, y: 135, size: 14, font: customFont, color: TEXT_COLOR,
-  });
+  // اسم المدير 
+    page.drawText('Head of Molim Team', {
+        x: 730,
+        y: 146,
+        size: 11,
+        font: customFont,
+        color: rgb(0.4, 0.4, 0.4), 
+    });
+
+    page.drawText('ASEEL AL-SELWI', {
+        x: 730,
+        y: 123,
+        size: 14,
+        font: boldFont, 
+        color: rgb(0.1, 0.1, 0.1),
+    });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -240,7 +250,7 @@ export async function POST(request) {
       cert_type,
       certificateText,
       qrCodeBase64,
-      type,   // ← يُمرَّر لاختيار التمبلت
+      type,   
     });
 
     // ── بناء PDF الإنجليزي (pdf-lib) ──
@@ -256,17 +266,27 @@ export async function POST(request) {
       customFontEn,
       qrBufferEn,
       { nameEn, cert_typeEn, certificateTextEn },
-      type,   // ← يُمرَّر لاختيار التمبلت
+      type,  
     );
 
     const pdfBytesEn = await pdfDocEn.save();
 
-    // ── حفظ في قاعدة البيانات ──
-    const insert = db.prepare(`
-      INSERT INTO certificates (id, name, email, cert_type, certificate_text)
-      VALUES (?, ?, ?, ?, ?)
-    `);
-    insert.run(certId, name, email, cert_type, certificateText);
+   // —— حفظ في قاعدة البيانات (Supabase) ——
+        const { error: supabaseError } = await supabase
+            .from('certificates')
+            .insert([
+                { 
+                    id: certId,
+                    name: name, 
+                    cert_type: cert_type, 
+                    certificate_text: certificateText
+                }
+            ]);
+
+        if (supabaseError) {
+            console.error('حدث خطأ أثناء الحفظ في Supabase:', supabaseError);
+            return NextResponse.json({ error: 'فشل حفظ الشهادة في قاعدة البيانات السحابية' }, { status: 500 });
+        }
 
     // ── إرسال الإيميل ──
     const transporter = nodemailer.createTransport({
