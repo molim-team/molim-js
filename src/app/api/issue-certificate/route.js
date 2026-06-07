@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import path from 'path';
+import fs from 'fs';
 import QRCode from 'qrcode';
 import nodemailer from 'nodemailer';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
