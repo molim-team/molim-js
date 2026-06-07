@@ -195,7 +195,7 @@ async function buildEnglishPDF(pdfDoc, customFont, qrCodeBuffer, data, type) {
   // اسم المدير 
     page.drawText('Head of Molim Team', {
         x: 730,
-        y: 146,
+        y: 145,
         size: 11,
         font: customFont,
         color: rgb(0.4, 0.4, 0.4), 
