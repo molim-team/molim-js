@@ -7,6 +7,8 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import { generateArabicCertPDF } from '@/lib/generateCertPDF';
 import fontkit from '@pdf-lib/fontkit';
 import { supabase } from '@/lib/supabase';
+export const maxDuration = 60;
+export const dynamic = "force-dynamic"
 
 const ADMIN_TOKEN = process.env.CERT_ADMIN_TOKEN;
 

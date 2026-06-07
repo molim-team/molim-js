@@ -26,8 +26,7 @@ export async function generateArabicCertPDF({ name, cert_type, certificateText, 
 
   const imgPath = path.resolve(process.cwd(), `public/templates/${imgFileName}`);
   const imgBase64 = fs.readFileSync(imgPath).toString('base64');
-  const fontPath = path.resolve(process.cwd(), 'public/fonts/Cairo-Regular.ttf');
-  const fontBase64 = fs.readFileSync(fontPath).toString('base64');
+  
 
   // لتغميق أي جملة بين نجمتين
   const formattedCertText = certificateText.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
@@ -37,6 +36,17 @@ export async function generateArabicCertPDF({ name, cert_type, certificateText, 
     <html dir="rtl" lang="ar">
     <head>
       <meta charset="UTF-8">
+
+      <head>
+    <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
       <style>
         @font-face {
           font-family: 'Cairo';
