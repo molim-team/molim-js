@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import QRCode from 'qrcode';
 import nodemailer from 'nodemailer';
-import fs from 'fs';
-import path from 'path';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import { generateArabicCertPDF } from '@/lib/generateCertPDF';
 import fontkit from '@pdf-lib/fontkit';
