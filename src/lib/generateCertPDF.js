@@ -1,4 +1,5 @@
-
+import path from 'path';
+import fs from 'fs';
 export async function generateArabicCertPDF({ name, cert_type, certificateText, qrCodeBase64, type }) {
 
   const issueDate = new Date().toLocaleDateString('ar-EG', {
