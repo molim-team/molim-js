@@ -3,7 +3,7 @@ import path from 'path';
 import HeroSection from '@/components/home/HeroSection';
 import AboutSection from '@/components/home/AboutSection';
 import ScholarshipsSlider from '@/components/home/ScholarshipsSlider';
-import { getIsOpen } from '@/lib/scolarshipUtils';
+import { getIsOpen } from '@/lib/scholarshipUtils';
 
 async function getScholarships() {
   const filePath = path.join(process.cwd(), 'public', 'scholarships.json');

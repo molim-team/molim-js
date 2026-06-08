@@ -1,6 +1,5 @@
 /**
  * حساب حالة المنحة تلقائياً بناءً على التواريخ.
- * إذا ما فيه تواريخ → يرجع للحقل اليدوي s.open
  */
 export function getIsOpen(s) {
   const today = new Date();

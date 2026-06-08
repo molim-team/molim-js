@@ -356,7 +356,6 @@ nav a:hover {
 }
 
 /* ===== CARD ===== */
-/* التأكد من أن البطاقات تستخدم المتغير بشكل صحيح */
 .card {
   background: var(--card-bg);
   border-radius: 12px;
@@ -465,6 +464,20 @@ nav a:hover {
   color: var(--secondary-color);
   margin-bottom: 12px;
   transition: color 0.5s ease;
+}
+
+/* تناسق ارتفاع الكروت */
+.card {
+  display: flex;
+  flex-direction: column;
+}
+
+.card .desc {
+  flex: 1;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 
 /* ===== FOOTER ===== */

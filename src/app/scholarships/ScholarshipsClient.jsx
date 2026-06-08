@@ -1,4 +1,3 @@
-// src/app/scholarships/ScholarshipsClient.jsx
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -6,10 +5,12 @@ import Link from 'next/link';
 import { useFavorites } from '@/lib/context/FavoritesContext.js';
 import { Heart } from 'lucide-react';
 import AuthModal from '@/components/AuthModal';
+import { getIsOpen } from '@/lib/scholarshipUtils'; 
 
 const ScholarshipCard = ({ s, user, favToggle, favorites }) => {
   const isFav = favorites.includes(String(s.id));
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const isOpen = getIsOpen(s); 
 
   const shareScholarship = (e) => {
     e.preventDefault();
@@ -67,8 +68,8 @@ const ScholarshipCard = ({ s, user, favToggle, favorites }) => {
       <h3>{s.name}</h3>
       <p className="country">📍 {s.country}</p>
       <p className="degree">🎓 {s.degree}</p>
-      <span className={`status ${(s.open === true || s.open === 'true') ? 'open' : 'closed'}`}>
-        {(s.open === true || s.open === 'true') ? '✅ التقديم مفتوح' : '🔴 التقديم مغلق'}
+      <span className={`status ${isOpen ? 'open' : 'closed'}`}>
+        {isOpen ? '✅ التقديم مفتوح' : '🔴 التقديم مغلق'}
       </span>
       <p className="desc">{s.description || ''}</p>
       {s.open_date && <p className="deadline">📅 موعد فتح التقديم: {s.open_date}</p>}
@@ -77,17 +78,16 @@ const ScholarshipCard = ({ s, user, favToggle, favorites }) => {
       <Link href={`/scholarship/${s.id}`} className="btn-details">تفاصيل المنحة كاملة ←</Link>
       <a href={s.link} target="_blank" rel="noreferrer" className="btn-details">زيارة الموقع الرسمي ↗</a>
       <a
-         href="#"
-         className="btn-details"
-         onClick={(e) => { e.preventDefault(); shareScholarship(e); }}
->
-         شارك المنحة
-     </a>
+        href="#"
+        className="btn-details"
+        onClick={(e) => { e.preventDefault(); shareScholarship(e); }}
+      >
+        شارك المنحة
+      </a>
     </div>
   );
 };
 
-//  المكوّن الرئيسي — يستقبل البيانات جاهزة من page.js
 export default function ScholarshipsClient({ scholarships }) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -108,7 +108,7 @@ export default function ScholarshipsClient({ scholarships }) {
     const matchSearch =
       s.name.toLowerCase().includes(searchLower) ||
       s.country.toLowerCase().includes(searchLower);
-    const isOpen = s.open === true || s.open === 'true';
+    const isOpen = getIsOpen(s); // ← جديد: بدل s.open === true || s.open === 'true'
     const matchStatus =
       statusFilter === 'all' ||
       (statusFilter === 'open' ? isOpen : !isOpen);
