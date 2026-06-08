@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 export const maxDuration = 60;
-export const runtime = 'node.js';
+export const runtime = 'nodejs';
 
 const rateLimitMap = new Map();
 
