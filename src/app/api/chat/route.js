@@ -1,19 +1,13 @@
-import { NextResponse } from 'next/server';
 export const maxDuration = 60;
 export const runtime = 'nodejs';
 
 const rateLimitMap = new Map();
 
 export async function POST(req) {
-  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+  const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
   const origin = req.headers.get('origin') || '';
-  const allowedOrigins = [
-    'https://molim.team',
-    'https://www.molim.team',
-    'http://localhost:3000'
-  ];
-
+  const allowedOrigins = ['https://molim.team', 'https://www.molim.team', 'http://localhost:3000'];
   const isAllowedOrigin = allowedOrigins.includes(origin);
   const corsHeaders = {
     'Access-Control-Allow-Origin': isAllowedOrigin ? origin : 'https://molim.team',
@@ -22,27 +16,20 @@ export async function POST(req) {
   };
 
   if (!isAllowedOrigin && origin !== '') {
-    return new Response(JSON.stringify({ error: 'Unauthorized Access' }), { status: 403, headers: corsHeaders });
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 403, headers: corsHeaders });
   }
 
   const ip = req.headers.get('x-forwarded-for') || 'unknown';
   if (ip !== 'unknown') {
     const now = Date.now();
-    const windowMs = 60 * 1000;
-    const maxRequests = 15;
-
     const userRecord = rateLimitMap.get(ip) || { count: 0, startTime: now };
-
-    if (now - userRecord.startTime > windowMs) {
+    if (now - userRecord.startTime > 60000) {
       userRecord.count = 1;
       userRecord.startTime = now;
     } else {
       userRecord.count++;
-      if (userRecord.count > maxRequests) {
-        return new Response(JSON.stringify({ error: 'الرجاء الانتظار قليلاً قبل إرسال المزيد من الرسائل.' }), {
-          status: 429,
-          headers: corsHeaders
-        });
+      if (userRecord.count > 15) {
+        return new Response(JSON.stringify({ error: 'الرجاء الانتظار قليلاً' }), { status: 429, headers: corsHeaders });
       }
     }
     rateLimitMap.set(ip, userRecord);
@@ -55,70 +42,36 @@ export async function POST(req) {
       return new Response(JSON.stringify({ error: 'بيانات غير صالحة' }), { status: 400, headers: corsHeaders });
     }
 
-    let contents = history.map(m => {
-      const role = m.role === 'assistant' ? 'model' : 'user';
-
-      if (typeof m.content === 'string' && m.content.trim()) {
-        return { role, parts: [{ text: m.content }] };
-      }
-
-      if (Array.isArray(m.content) && m.content.length > 0) {
-        return { role, parts: m.content };
-      }
-
-      return null;
-    }).filter(Boolean);
-
-    if (contents.length === 0) {
-      return new Response(JSON.stringify({ error: 'لا يوجد محتوى صالح' }), { status: 400, headers: corsHeaders });
-    }
-
-    if (contents[0].role === 'model') {
-      contents.shift();
-    }
-
-    const validatedContents = [];
-    for (let i = 0; i < contents.length; i++) {
-      if (validatedContents.length === 0 || validatedContents[validatedContents.length - 1].role !== contents[i].role) {
-        validatedContents.push(contents[i]);
-      } else {
-        const lastParts = validatedContents[validatedContents.length - 1].parts;
-        validatedContents[validatedContents.length - 1].parts = lastParts.concat(contents[i].parts);
-      }
-    }
-
-    if (validatedContents.length === 0) {
-      return new Response(JSON.stringify({ error: 'لا يوجد محتوى صالح بعد التحقق' }), { status: 400, headers: corsHeaders });
-    }
-
-    if (!GEMINI_API_KEY) {
-      return new Response(JSON.stringify({ error: 'مفتاح API غير متوفر' }), { status: 500, headers: corsHeaders });
-    }
-
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`,
+    const messages = [
       {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          systemInstruction: {
-            parts: [{
-              text: 'أنت مساعد ذكي اسمك لمام في منصة مُلم. تساعد الطلاب في الإجابة عن كل مايتعلق بالمنح الدراسية وإعداد الملفات الخاصة بها كالسيرة الذاتية وخطاب الحافز. يجب أن تتحدث دائماً باللغة العربية الفصحى البسيطة فقط. استخدم أسلوباً ودوداً وواضحاً، وتجنب الإجابات المقطوعة.'
-            }]
-          },
-          contents: validatedContents,
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 4096
-          }
-        })
-      }
-    );
+        role: 'system',
+        content: 'أنت مساعد ذكي اسمك لمام في منصة مُلم. تساعد الطلاب في الإجابة عن كل مايتعلق بالمنح الدراسية وإعداد الملفات الخاصة بها كالسيرة الذاتية وخطاب الحافز. يجب أن تتحدث دائماً باللغة العربية الفصحى البسيطة فقط. استخدم أسلوباً ودوداً وواضحاً، وتجنب الإجابات المقطوعة.'
+      },
+      ...history.map(m => ({
+        role: m.role === 'assistant' ? 'assistant' : 'user',
+        content: typeof m.content === 'string' ? m.content : m.content?.[0]?.text || ''
+      }))
+    ];
 
-    if (!geminiRes.ok) {
-      const errorDetails = await geminiRes.text();
-      console.error('Gemini Error:', geminiRes.status, errorDetails);
-      return new Response(JSON.stringify({ error: 'خطأ في الاتصال بالخادم الذكي', details: errorDetails }), {
+    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GROQ_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages,
+        stream: true,
+        max_tokens: 4096,
+        temperature: 0.7
+      })
+    });
+
+    if (!groqRes.ok) {
+      const errorDetails = await groqRes.text();
+      console.error('Groq Error:', groqRes.status, errorDetails);
+      return new Response(JSON.stringify({ error: 'خطأ في الاتصال', details: errorDetails }), {
         status: 502,
         headers: { 'Content-Type': 'application/json', ...corsHeaders }
       });
@@ -126,7 +79,7 @@ export async function POST(req) {
 
     const encoder = new TextEncoder();
     const decoder = new TextDecoder('utf-8');
-    const reader = geminiRes.body.getReader();
+    const reader = groqRes.body.getReader();
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -137,31 +90,23 @@ export async function POST(req) {
             if (done) break;
 
             buffer += decoder.decode(value, { stream: true });
-            const boundaryRegex = /(?:\r?\n){2}/g;
-            let match;
-            let lastIndex = 0;
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
 
-            while ((match = boundaryRegex.exec(buffer)) !== null) {
-              const chunk = buffer.slice(lastIndex, match.index);
-              lastIndex = match.index + match[0].length;
-              const trimmedChunk = chunk.trim();
-              if (trimmedChunk.startsWith('data:')) {
-                const dataStr = trimmedChunk.slice(5).trim();
-                if (dataStr !== '[DONE]') {
-                  try {
-                    const json = JSON.parse(dataStr);
-                    const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
-                    if (text) {
-                      controller.enqueue(encoder.encode(text));
-                    }
-                  } catch (e) {}
-                }
+            for (const line of lines) {
+              const trimmed = line.trim();
+              if (!trimmed || trimmed === 'data: [DONE]') continue;
+              if (trimmed.startsWith('data: ')) {
+                try {
+                  const json = JSON.parse(trimmed.slice(6));
+                  const text = json.choices?.[0]?.delta?.content;
+                  if (text) controller.enqueue(encoder.encode(text));
+                } catch (e) {}
               }
             }
-            buffer = buffer.slice(lastIndex);
           }
         } catch (err) {
-          console.error('Stream processing error:', err);
+          console.error('Stream error:', err);
         } finally {
           controller.close();
         }
