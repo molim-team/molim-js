@@ -7,6 +7,12 @@ const rateLimitMap = new Map();
 export async function POST(req) {
   const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
+    return new Response(JSON.stringify({ 
+  debug: true,
+  env: GEMINI_API_KEY ? 'KEY_EXISTS' : 'KEY_MISSING',
+  origin: req.headers.get('origin')
+}), { status: 200, headers: { 'Content-Type': 'application/json' } });
+
   const origin = req.headers.get('origin') || '';
   const allowedOrigins = [
     'https://molim.team',
