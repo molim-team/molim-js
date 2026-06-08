@@ -9,11 +9,11 @@ export async function POST(req) {
 
   const origin = req.headers.get('origin') || '';
   const allowedOrigins = [
-    'https://molim.team', 
-    'https://www.molim.team', 
+    'https://molim.team',
+    'https://www.molim.team',
     'http://localhost:3000'
   ];
-  
+
   const isAllowedOrigin = allowedOrigins.includes(origin);
   const corsHeaders = {
     'Access-Control-Allow-Origin': isAllowedOrigin ? origin : 'https://molim.team',
@@ -28,11 +28,11 @@ export async function POST(req) {
   const ip = req.headers.get('x-forwarded-for') || 'unknown';
   if (ip !== 'unknown') {
     const now = Date.now();
-    const windowMs = 60 * 1000; 
-    const maxRequests = 15; 
+    const windowMs = 60 * 1000;
+    const maxRequests = 15;
 
     const userRecord = rateLimitMap.get(ip) || { count: 0, startTime: now };
-    
+
     if (now - userRecord.startTime > windowMs) {
       userRecord.count = 1;
       userRecord.startTime = now;
@@ -40,7 +40,7 @@ export async function POST(req) {
       userRecord.count++;
       if (userRecord.count > maxRequests) {
         return new Response(JSON.stringify({ error: 'الرجاء الانتظار قليلاً قبل إرسال المزيد من الرسائل.' }), {
-          status: 429, 
+          status: 429,
           headers: corsHeaders
         });
       }
@@ -55,15 +55,19 @@ export async function POST(req) {
       return new Response(JSON.stringify({ error: 'بيانات غير صالحة' }), { status: 400, headers: corsHeaders });
     }
 
-    let contents = history
-      .map(m => {
-        const role = m.role === 'assistant' ? 'model' : 'user';
-        if (typeof m.content === 'string' && m.content.trim()) {
-          return { role, parts: [{ text: m.content }] };
-        }
-        return null;
-      })
-      .filter(Boolean);
+    let contents = history.map(m => {
+      const role = m.role === 'assistant' ? 'model' : 'user';
+
+      if (typeof m.content === 'string' && m.content.trim()) {
+        return { role, parts: [{ text: m.content }] };
+      }
+
+      if (Array.isArray(m.content) && m.content.length > 0) {
+        return { role, parts: m.content };
+      }
+
+      return null;
+    }).filter(Boolean);
 
     if (contents.length === 0) {
       return new Response(JSON.stringify({ error: 'لا يوجد محتوى صالح' }), { status: 400, headers: corsHeaders });
@@ -73,6 +77,7 @@ export async function POST(req) {
       contents.shift();
     }
 
+    // 4. بناء validatedContents
     const validatedContents = [];
     for (let i = 0; i < contents.length; i++) {
       if (validatedContents.length === 0 || validatedContents[validatedContents.length - 1].role !== contents[i].role) {
@@ -81,6 +86,11 @@ export async function POST(req) {
         const lastParts = validatedContents[validatedContents.length - 1].parts;
         validatedContents[validatedContents.length - 1].parts = lastParts.concat(contents[i].parts);
       }
+    }
+
+    // 5. تحقق من validatedContents
+    if (validatedContents.length === 0) {
+      return new Response(JSON.stringify({ error: 'لا يوجد محتوى صالح بعد التحقق' }), { status: 400, headers: corsHeaders });
     }
 
     if (!GEMINI_API_KEY) {
@@ -101,7 +111,7 @@ export async function POST(req) {
           contents: validatedContents,
           generationConfig: {
             temperature: 0.7,
-            maxOutputTokens: 4096 
+            maxOutputTokens: 4096
           }
         })
       }
@@ -109,9 +119,9 @@ export async function POST(req) {
 
     if (!geminiRes.ok) {
       const errorDetails = await geminiRes.text();
-      return new Response(JSON.stringify({ error: 'خطأ في الاتصال بالخادم الذكي', details: errorDetails }), { 
-        status: 502, 
-        headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+      return new Response(JSON.stringify({ error: 'خطأ في الاتصال بالخادم الذكي', details: errorDetails }), {
+        status: 502,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
       });
     }
 
@@ -166,6 +176,7 @@ export async function POST(req) {
         ...corsHeaders,
       },
     });
+
   } catch (error) {
     console.error('Server error:', error);
     return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500, headers: corsHeaders });
@@ -173,8 +184,8 @@ export async function POST(req) {
 }
 
 export async function OPTIONS() {
-  return new Response(null, { 
-    status: 200, 
+  return new Response(null, {
+    status: 200,
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
