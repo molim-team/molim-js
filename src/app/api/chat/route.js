@@ -77,7 +77,6 @@ export async function POST(req) {
       contents.shift();
     }
 
-    // 4. بناء validatedContents
     const validatedContents = [];
     for (let i = 0; i < contents.length; i++) {
       if (validatedContents.length === 0 || validatedContents[validatedContents.length - 1].role !== contents[i].role) {
@@ -88,7 +87,6 @@ export async function POST(req) {
       }
     }
 
-    // 5. تحقق من validatedContents
     if (validatedContents.length === 0) {
       return new Response(JSON.stringify({ error: 'لا يوجد محتوى صالح بعد التحقق' }), { status: 400, headers: corsHeaders });
     }
@@ -119,6 +117,7 @@ export async function POST(req) {
 
     if (!geminiRes.ok) {
       const errorDetails = await geminiRes.text();
+      console.error('Gemini Error:', geminiRes.status, errorDetails);
       return new Response(JSON.stringify({ error: 'خطأ في الاتصال بالخادم الذكي', details: errorDetails }), {
         status: 502,
         headers: { 'Content-Type': 'application/json', ...corsHeaders }
