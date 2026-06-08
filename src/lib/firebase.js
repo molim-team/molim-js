@@ -25,7 +25,7 @@ let appCheckReady = Promise.resolve();
 if (typeof window !== "undefined") {
   const siteKey = process.env.NEXT_PUBLIC_FIREBASE_APP_CHECK_SITE_KEY;
   
-  if (siteKey && process.env.NODE_ENV !== "development") {
+  if (false) {
     const appCheck = initializeAppCheck(app, {
       provider: new ReCaptchaV3Provider(siteKey),
       isTokenAutoRefreshEnabled: true
