@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useFavorites } from '@/lib/context/FavoritesContext';
 import { Heart } from 'lucide-react';
 import AuthModal from '@/components/AuthModal';
-import { getlsOpen } from '@/lib/scolarshipUtils';
+import { getIsOpen } from '@/lib/scolarshipUtils';
 
 
 function Main() {
@@ -30,7 +30,7 @@ function Main() {
     fetch('/scholarships.json')
       .then(res => res.json())
       .then(data => {
-        let openOnly = data.filter(s => getlsOpen(s));
+        let openOnly = data.filter(s => getIsOpen(s));
         if (openOnly.length === 0 && data && data.length > 0) {
           openOnly = data;
         }
