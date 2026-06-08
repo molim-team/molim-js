@@ -183,7 +183,7 @@ function Quiz() {
 
                     <div style={{ marginTop: '0.6rem', marginBottom: '0.2rem' }}>
                       <Link
-                        href={`/majors?targetMajor=${key}`}
+                        href={`/majors?major=${key}`}
                       >
                         <span>تفاصيل التخصص</span>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
