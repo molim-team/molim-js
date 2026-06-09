@@ -106,7 +106,7 @@ export default function ScholarshipsSlider({ scholarships }) {
                 const cd = getCountdown(s.deadline);
                 return (
                   <div key={s.id} className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
-                    <div style={{flex: 1}}>
+                    <div>
                       <button
                         className={`fav-btn ${active ? 'active' : ''}`}
                         aria-label={active ? 'إزالة من المفضلة' : 'إضافة للمفضلة'}
