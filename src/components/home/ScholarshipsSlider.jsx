@@ -105,40 +105,46 @@ export default function ScholarshipsSlider({ scholarships }) {
                 const active = favorites.includes(String(s.id));
                 const cd = getCountdown(s.deadline);
                 return (
-                  <div key={s.id} className="card">
-                    <button
-                      className={`fav-btn ${active ? 'active' : ''}`}
-                      aria-label={active ? 'إزالة من المفضلة' : 'إضافة للمفضلة'}
-                      onClick={(e) => {
-                        if (!user) { setShowAuthModal(true); }
-                        else { toggleFav(e, s.id); }
-                      }}
-                      type="button"
-                      style={{ background:'none', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', transition:'transform 0.2s ease' }}
-                      onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.85)'}
-                      onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                    >
-                      <Heart size={24} color={active ? '#e63946' : '#888888'} fill={active ? '#e63946' : 'transparent'} style={{ transition: 'all 0.3s ease' }} />
-                    </button>
+                  <div key={s.id} className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
+                    <div style={{flex: 1}}>
+                      <button
+                        className={`fav-btn ${active ? 'active' : ''}`}
+                        aria-label={active ? 'إزالة من المفضلة' : 'إضافة للمفضلة'}
+                        onClick={(e) => {
+                          if (!user) { setShowAuthModal(true); }
+                          else { toggleFav(e, s.id); }
+                        }}
+                        type="button"
+                        style={{ background:'none', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', transition:'transform 0.2s ease' }}
+                        onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.85)'}
+                        onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                      >
+                        <Heart size={24} color={active ? '#e63946' : '#888888'} fill={active ? '#e63946' : 'transparent'} style={{ transition: 'all 0.3s ease' }} />
+                      </button>
 
-                    {s.flag && (s.flag.startsWith('http') || s.flag.includes('/') || s.flag.includes('.')) ? (
-                      <img className="card-flag" src={s.flag} alt="flag" />
-                    ) : (
-                      <span className="card-flag">{s.flag || ''}</span>
-                    )}
+                      {s.flag && (s.flag.startsWith('http') || s.flag.includes('/') || s.flag.includes('.')) ? (
+                        <img className="card-flag" src={s.flag} alt="flag" />
+                      ) : (
+                        <span className="card-flag">{s.flag || ''}</span>
+                      )}
 
-                    <h3>{s.name}</h3>
-                    <p className="country">📍 {s.country}</p>
-                    <p className="degree">🎓 {s.degree}</p>
-                    <span className="status open">✅ التقديم مفتوح</span>
-                    <p className="desc">{s.description || ''}</p>
-                    {s.open_date && <p className="deadline">📅 موعد فتح التقديم: {s.open_date}</p>}
-                    {cd && <div className={`countdown ${cd.urgent ? 'urgent' : ''}`}>{cd.text}</div>}
-                    <p className="deadline">📅 آخر موعد للتقديم: {s.deadline}</p>
+                      <h3>{s.name}</h3>
+                      <p className="country">📍 {s.country}</p>
+                      <p className="degree">🎓 {s.degree}</p>
+                      <span className="status open">✅ التقديم مفتوح</span>
+                      <p className="desc">{s.description || ''}</p>
+                      {s.open_date && <p className="deadline">📅 موعد فتح التقديم: {s.open_date}</p>}
+                      {cd && <div className={`countdown ${cd.urgent ? 'urgent' : ''}`}>{cd.text}</div>}
+                      <p className="deadline">📅 آخر موعد للتقديم: {s.deadline}</p>
+                    </div>
 
-                    <Link href={`/scholarship/${s.id}`} className="btn-details">تفاصيل المنحة كاملة ←</Link>
-                    <a href={s.link} target="_blank" rel="noreferrer" className="btn-details">زيارة الموقع الرسمي ↗</a>
-                    <button className="btn-details" onClick={(e) => shareScholarship(e, s.id, s.name)}>📤 شارك المنحة</button>
+                    {/* الأزرار دائماً في الأسفل */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: 'auto' }}>
+                      <Link href={`/scholarship/${s.id}`} className="btn-details">تفاصيل المنحة كاملة ←</Link>
+                      <a href={s.link} target="_blank" rel="noreferrer" className="btn-details">زيارة الموقع الرسمي ↗</a>
+                      <button className="btn-details" onClick={(e) => shareScholarship(e, s.id, s.name)}>📤 شارك المنحة</button>
+                    </div>
+
                   </div>
                 );
               })
