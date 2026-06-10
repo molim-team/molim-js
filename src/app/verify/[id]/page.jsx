@@ -23,7 +23,7 @@ export default async function VerifyPage({ params }) {
       <p><strong>الاسم:</strong> {data.name}</p>
       <p><strong>نوع الشهادة:</strong> {data.cert_type}</p>
       <p><strong>رقم الشهادة:</strong> {data.id}</p>
-      <p><strong>تاريخ الإصدار:</strong> {new Date(data.created_at).toLocaleDateString('ar-EG', {
+      <p><strong>تاريخ الإصدار:</strong> {new Date(data.issued_date).toLocaleDateString('ar-EG', {
        year: 'numeric',
        month: 'long', 
        day: 'numeric'

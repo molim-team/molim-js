@@ -280,7 +280,9 @@ export async function POST(request) {
                     id: certId,
                     name: name, 
                     cert_type: cert_type, 
-                    certificate_text: certificateText
+                    certificate_text: certificateText,
+                    issued_date: new
+                    Date().toISOString()
                 }
             ]);
 
