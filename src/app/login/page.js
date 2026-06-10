@@ -2,10 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { auth, db } from '../../lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import {
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  sendEmailVerification,
+} from 'firebase/auth';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -14,19 +17,17 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [notifyConsent, setNotifyConsent] = useState(false);
   const [hideNotify, setHideNotify] = useState(false);
-
-  const router = useRouter();
+  const [showResend, setShowResend] = useState(false);
 
   useEffect(() => {
     const answered = localStorage.getItem('notifyConsentAnswered');
-    if (answered === 'true') {
-      setHideNotify(true);
-    }
+    if (answered === 'true') setHideNotify(true);
   }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setMessage({ text: '', type: '' });
+    setShowResend(false);
 
     if (!email.trim() || !password) {
       setMessage({ text: '⚠️ يرجى تعبئة جميع الحقول', type: 'error' });
@@ -41,37 +42,43 @@ export default function Login() {
       if (!userCredential.user.emailVerified) {
         await auth.signOut();
         setLoading(false);
-        setMessage({ text: '⚠️ يرجى تأكيد بريدك الإلكتروني أولاً. تحقق من صندوق الوارد أو البريد المزعج.', type: 'error' });
+        setShowResend(true);
+        setMessage({
+          text: '⚠️ يرجى تأكيد بريدك الإلكتروني أولاً. تحقق من صندوق الوارد أو البريد المزعج.',
+          type: 'error',
+        });
         return;
+      }
+
+      const uid = userCredential.user.uid;
+
+      // تحديث Firestore - لا يوقف التحويل في حال الفشل
+      try {
+        updateDoc(doc(db, 'users', uid), {
+          notifyOnNewScholarship: notifyConsent,
+          notifyConsentAnswered: true,
+        });
+        if (notifyConsent) localStorage.setItem('notifyConsentAnswered', 'true');
+      } catch (firestoreError) {
+        console.error('Firestore update error:', firestoreError);
       }
 
       setMessage({ text: '✅ تم تسجيل الدخول بنجاح! جاري التحويل...', type: 'success' });
 
-      const uid = userCredential.user.uid;
-
-      try {
-        await updateDoc(doc(db, 'users', uid), {
-          notifyOnNewScholarship: notifyConsent,
-          notifyConsentAnswered: true,
-        });
-        if (notifyConsent) {
-          localStorage.setItem('notifyConsentAnswered', 'true');
-        }
-      } catch (firestoreError) {
-        console.error('Firestore error:', firestoreError);
-      }
-
-      router.push('/');
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 800);
 
     } catch (error) {
       setLoading(false);
       console.error(error);
+
       if (
         error.code === 'auth/user-not-found' ||
         error.code === 'auth/wrong-password' ||
         error.code === 'auth/invalid-credential'
       ) {
-        setMessage({ text: '⚠️ البريد الإلكتروني أو كلمة المرور غير صحيحة. يرجى التحقق وإعادة المحاولة.', type: 'error' });
+        setMessage({ text: '⚠️ البريد الإلكتروني أو كلمة المرور غير صحيحة.', type: 'error' });
       } else if (error.code === 'auth/too-many-requests') {
         setMessage({ text: '⚠️ تم حظر المحاولات مؤقتاً بسبب كثرة الأخطاء. يرجى المحاولة لاحقاً.', type: 'error' });
       } else if (error.code === 'auth/invalid-email') {
@@ -84,18 +91,32 @@ export default function Login() {
 
   const handleForgotPassword = async () => {
     setMessage({ text: '', type: '' });
-
     if (!email.trim()) {
-      setMessage({ text: '⚠️ أدخل بريدك الإلكتروني أولاً في الحقل المخصص لإرسال الرابط', type: 'error' });
+      setMessage({ text: '⚠️ أدخل بريدك الإلكتروني أولاً في الحقل المخصص', type: 'error' });
       return;
     }
-
     try {
       await sendPasswordResetEmail(auth, email.trim());
       setMessage({ text: '✅ تم إرسال رابط إعادة تعيين كلمة المرور لبريدك الإلكتروني', type: 'success' });
     } catch (error) {
       setMessage({ text: '⚠️ تعذر إرسال الرابط، تأكد من صحة البريد الإلكتروني المكتوب', type: 'error' });
-      console.error(error);
+    }
+  };
+
+  // لإعادة إرسال رسالة التأكيد للحسابات المعلّقة
+  const handleResendVerification = async () => {
+    if (!email.trim() || !password) {
+      setMessage({ text: '⚠️ تأكد من كتابة البريد وكلمة المرور أعلاه أولاً', type: 'error' });
+      return;
+    }
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email.trim(), password);
+      await sendEmailVerification(userCredential.user);
+      await auth.signOut();
+      setShowResend(false);
+      setMessage({ text: '✅ تم إعادة إرسال رسالة التأكيد. تحقق من الوارد والسبام.', type: 'success' });
+    } catch {
+      setMessage({ text: '⚠️ تعذر إرسال الرسالة، حاول مرة أخرى', type: 'error' });
     }
   };
 
@@ -109,6 +130,17 @@ export default function Login() {
           <div className={`auth-msg ${message.type}`}>
             {message.text}
           </div>
+        )}
+
+        {showResend && (
+          <button
+            type="button"
+            className="btn-link"
+            onClick={handleResendVerification}
+            style={{ display: 'block', margin: '4px auto 12px', color: '#ff4500', fontSize: '14px' }}
+          >
+            إعادة إرسال رسالة تأكيد البريد الإلكتروني
+          </button>
         )}
 
         <form onSubmit={handleLogin}>
@@ -133,28 +165,17 @@ export default function Login() {
           </div>
 
           <div className="forgot-password">
-            <button
-              type="button"
-              className="btn-link"
-              onClick={handleForgotPassword}
-            >
+            <button type="button" className="btn-link" onClick={handleForgotPassword}>
               نسيت كلمة المرور؟
             </button>
           </div>
 
-          <button
-            type="submit"
-            className="btn-auth"
-            disabled={loading}
-          >
+          <button type="submit" className="btn-auth" disabled={loading}>
             {loading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
           </button>
 
           {!hideNotify && (
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: '8px',
-              marginTop: '12px', direction: 'rtl'
-            }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px', direction: 'rtl' }}>
               <input
                 type="checkbox"
                 id="notify-consent"
