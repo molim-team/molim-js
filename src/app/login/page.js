@@ -23,28 +23,28 @@ export default function Login() {
   const [notifyConsent, setNotifyConsent] = useState(false);
   const [hideNotify, setHideNotify] = useState(false);
   const [showResend, setShowResend] = useState(false);
+  const [googleUser, setGoogleUser] = useState(null);
 
   useEffect(() => {
     const answered = localStorage.getItem('notifyConsentAnswered');
     if (answered === 'true') setHideNotify(true);
 
-     const unsubscribe = auth.onAuthStateChanged((user) => {
-    if (user) {
-      window.location.href = '/';
-    }
-  });
-  return () => unsubscribe();
-}, []);
-
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user && !googleUser) {
+        window.location.href = '/';
+      }
+    });
+    return () => unsubscribe();
+  }, [googleUser]);
 
   const handleGoogleLogin = async () => {
     setMessage({ text: '', type: '' });
     setGoogleLoading(true);
 
-    
     try {
       const userCredential = await signInWithPopup(auth, googleProvider);
       const uid = userCredential.user.uid;
+
       try {
         await setDoc(doc(db, 'users', uid), {
           email: userCredential.user.email,
@@ -55,8 +55,15 @@ export default function Login() {
       } catch (firestoreError) {
         console.error('Firestore error:', firestoreError);
       }
-      setMessage({ text: '✅ تم تسجيل الدخول بنجاح! جاري التحويل...', type: 'success' });
-      window.location.href='/'; 
+
+      if (localStorage.getItem('notifyConsentAnswered') === 'true') {
+        window.location.href = '/';
+        return;
+      }
+
+      setGoogleLoading(false);
+      setGoogleUser({ uid });
+
     } catch (error) {
       setGoogleLoading(false);
       if (
@@ -68,6 +75,19 @@ export default function Login() {
         setMessage({ text: '⚠️ حدث خطأ أثناء تسجيل الدخول بـ Google.', type: 'error' });
       }
     }
+  };
+
+  const handleGoogleNotifyAnswer = async (wantsNotify) => {
+    try {
+      await updateDoc(doc(db, 'users', googleUser.uid), {
+        notifyOnNewScholarship: wantsNotify,
+        notifyConsentAnswered: true,
+      });
+      if (wantsNotify) localStorage.setItem('notifyConsentAnswered', 'true');
+    } catch (e) {
+      console.error('Firestore notify update error:', e);
+    }
+    window.location.href = '/';
   };
 
   const handleLogin = async (e) => {
@@ -161,6 +181,35 @@ export default function Login() {
     }
   };
 
+  if (googleUser) {
+    return (
+      <div className="auth-container">
+        <div className="auth-card" style={{ textAlign: 'center', direction: 'rtl' }}>
+          <h2 style={{ marginBottom: '12px' }}>🔔 إشعارات المنح</h2>
+          <p style={{ color: '#555', marginBottom: '28px', fontSize: '15px' }}>
+            هل تريد تلقّي إشعار بالبريد الإلكتروني عند فتح منحة دراسية جديدة؟
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <button
+              className="btn-auth"
+              onClick={() => handleGoogleNotifyAnswer(true)}
+            >
+              نعم، أريد الإشعارات
+            </button>
+            <button
+              type="button"
+              className="btn-link"
+              onClick={() => handleGoogleNotifyAnswer(false)}
+              style={{ fontSize: '14px', color: '#888' }}
+            >
+              لا، شكراً
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="auth-container">
       <div className="auth-card">
@@ -184,7 +233,6 @@ export default function Login() {
           </button>
         )}
 
-        {/* زر Google */}
         <button
           type="button"
           onClick={handleGoogleLogin}
