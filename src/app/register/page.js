@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { auth, db } from '../../lib/firebase';
 import { doc, setDoc, updateDoc } from "firebase/firestore";
@@ -28,15 +28,16 @@ export default function Register() {
   const [notifyConsent, setNotifyConsent] = useState(false);
   const [isDone, setIsDone] = useState(false);
   const [googleUser, setGoogleUser] = useState(null);
+  const googleUserRef = useRef(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user && !googleUser) {
+      if (user && !googleUserRef.current) {
         window.location.href = '/';
       }
     });
     return () => unsubscribe();
-  }, [googleUser]);
+  }, []);
 
   const handleGoogleRegister = async () => {
     setMessage({ text: '', type: '' });
@@ -64,6 +65,7 @@ export default function Register() {
         return;
       }
 
+      googleUserRef.current = true;
       setGoogleLoading(false);
       setGoogleUser({ uid });
 
