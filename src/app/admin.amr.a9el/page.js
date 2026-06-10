@@ -129,6 +129,13 @@ function Admin() {
       currentList.push(newEntry);
       await saveGitHubFile(fileData.sha, currentList, `إضافة منحة: ${newEntry.name}`);
       setMessage({ text: '✅ تمت إضافة المنحة بنجاح! ستظهر على الموقع خلال دقائق.', type: 'success' });
+if (newEntry.open) {
+  fetch('/api/notify-scholarship', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ scholarship: newEntry }),
+  }).catch(console.error);
+}
       setAddForm(initialFormState);
     } catch (e) {
       setMessage({ text: `❌ حدث خطأ: ${e.message}`, type: 'error' });
@@ -191,6 +198,7 @@ function Admin() {
     try {
       const updatedList = [...scholarships];
       const oldData = updatedList[editingIndex];
+      const wasOpen = oldDate?.open;
 
       updatedList[editingIndex] = {
         ...oldData,
@@ -221,6 +229,14 @@ function Admin() {
       await saveGitHubFile(fileData.sha, updatedList, `تعديل منحة: ${editForm.title}`);
 
       setEditMessage({ text: '✅ تم حفظ التعديلات بنجاح!', type: 'success' });
+      const isNowOpen = editForm.status === 'open';
+if (!wasOpen && isNowOpen) {
+  fetch('/api/notify-scholarship', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ scholarship: updatedList[editingIndex] }),
+  }).catch(console.error);
+}
       setTimeout(() => {
         setIsModalOpen(false);
         handleLoadScholarships();

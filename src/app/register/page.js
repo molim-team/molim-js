@@ -20,6 +20,7 @@ export default function Register() {
   // حالة رسائل الخطأ والنجاح والتحميل
   const [message, setMessage] = useState({ text: '', type: '' });
   const [loading, setLoading] = useState(false);
+  const [notifyConsent, setNotifyConsent] = useState(false);
   
   const router = useRouter();
 
@@ -61,7 +62,9 @@ export default function Register() {
         email: email.trim(),
         role: 'student', // تحديد نوع الحساب "student"
         registrationDate: new Date().toISOString(), // تاريخ التسجيل
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        notifyOnNewScholarship: notifyConsent,
+        notifyConsentAnswered: true,
       });
 
     
@@ -160,6 +163,21 @@ export default function Register() {
           >
             {loading ? 'جاري إنشاء الحساب...' : 'إنشاء الحساب'}
           </button>
+           <div style={{
+  display: 'flex', alignItems: 'center', gap: '8px',
+  marginTop: '12px', direction: 'rtl'
+}}>
+  <input
+    type="checkbox"
+    id="notify-consent"
+    checked={notifyConsent}
+    onChange={(e) => setNotifyConsent(e.target.checked)}
+    style={{ width: '16px', height: '16px', accentColor: '#ff4500', cursor: 'pointer' }}
+  />
+  <label htmlFor="notify-consent" style={{ fontSize: '14px', color: '#555', cursor: 'pointer' }}>
+    أرغب في تلقّي إشعار بالبريد الإلكتروني عند فتح منحة دراسية جديدة
+  </label>
+</div>
         </form>
 
         <div className="auth-switch">

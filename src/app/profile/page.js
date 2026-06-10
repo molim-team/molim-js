@@ -52,7 +52,7 @@ function Profile() {
             <div className="auth-links">
               <Link href="/login">تسجيل الدخول</Link>
               <span className="divider-slash">|</span>
-              <Link to="/register">إنشاء حساب جديد</Link>
+              <Link href="/register">إنشاء حساب جديد</Link>
             </div>
           </div>
         </div>

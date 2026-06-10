@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { auth } from '../../lib/firebase'; 
+import { auth, db } from '../../lib/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 
 export default function Login() {
@@ -11,10 +12,18 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState({ text: '', type: '' });
   const [loading, setLoading] = useState(false);
-  
+  const [notifyConsent, setNotifyConsent] = useState(false);
+  const [hideNotify, setHideNotify] = useState(false);
+
   const router = useRouter();
 
-  // منطق تسجيل الدخول
+  useEffect(() => {
+    const answered = localStorage.getItem('notifyConsentAnswered');
+    if (answered === 'true') {
+      setHideNotify(true);
+    }
+  }, []);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setMessage({ text: '', type: '' });
@@ -27,10 +36,8 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // التحقق من البريد وكلمة المرور باستخدام Firebase
       const userCredential = await signInWithEmailAndPassword(auth, email.trim(), password);
 
-      // التحقق من أن البريد الإلكتروني مؤكد
       if (!userCredential.user.emailVerified) {
         await auth.signOut();
         setLoading(false);
@@ -39,16 +46,29 @@ export default function Login() {
       }
 
       setMessage({ text: '✅ تم تسجيل الدخول بنجاح! جاري التحويل...', type: 'success' });
-      
-      // التوجيه فوراً إلى الصفحة الرئيسية
+
+      const uid = userCredential.user.uid;
+
+      try {
+        await updateDoc(doc(db, 'users', uid), {
+          notifyOnNewScholarship: notifyConsent,
+          notifyConsentAnswered: true,
+        });
+        if (notifyConsent) {
+          localStorage.setItem('notifyConsentAnswered', 'true');
+        }
+      } catch (firestoreError) {
+        console.error('Firestore error:', firestoreError);
+      }
+
       router.push('/');
 
     } catch (error) {
       setLoading(false);
       console.error(error);
       if (
-        error.code === 'auth/user-not-found' || 
-        error.code === 'auth/wrong-password' || 
+        error.code === 'auth/user-not-found' ||
+        error.code === 'auth/wrong-password' ||
         error.code === 'auth/invalid-credential'
       ) {
         setMessage({ text: '⚠️ البريد الإلكتروني أو كلمة المرور غير صحيحة. يرجى التحقق وإعادة المحاولة.', type: 'error' });
@@ -62,7 +82,6 @@ export default function Login() {
     }
   };
 
-  // منطق استعادة كلمة المرور
   const handleForgotPassword = async () => {
     setMessage({ text: '', type: '' });
 
@@ -95,9 +114,9 @@ export default function Login() {
         <form onSubmit={handleLogin}>
           <div className="form-group">
             <label>البريد الإلكتروني</label>
-            <input 
-              type="email" 
-              placeholder="amr@email.com" 
+            <input
+              type="email"
+              placeholder="amr@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -105,31 +124,49 @@ export default function Login() {
 
           <div className="form-group">
             <label>كلمة المرور</label>
-            <input 
-              type="password" 
-              placeholder="كلمة المرور" 
+            <input
+              type="password"
+              placeholder="كلمة المرور"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
           <div className="forgot-password">
-            <button 
-              type="button" 
-              className="btn-link" 
+            <button
+              type="button"
+              className="btn-link"
               onClick={handleForgotPassword}
             >
               نسيت كلمة المرور؟
             </button>
           </div>
 
-          <button 
-            type="submit" 
-            className="btn-auth" 
+          <button
+            type="submit"
+            className="btn-auth"
             disabled={loading}
           >
             {loading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
           </button>
+
+          {!hideNotify && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '8px',
+              marginTop: '12px', direction: 'rtl'
+            }}>
+              <input
+                type="checkbox"
+                id="notify-consent"
+                checked={notifyConsent}
+                onChange={(e) => setNotifyConsent(e.target.checked)}
+                style={{ width: '16px', height: '16px', accentColor: '#ff4500', cursor: 'pointer' }}
+              />
+              <label htmlFor="notify-consent" style={{ fontSize: '14px', color: '#555', cursor: 'pointer' }}>
+                أرغب في تلقّي إشعار بالبريد الإلكتروني عند فتح منحة دراسية جديدة
+              </label>
+            </div>
+          )}
         </form>
 
         <div className="auth-switch">
