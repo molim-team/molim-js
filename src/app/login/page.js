@@ -8,8 +8,7 @@ import {
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
   sendEmailVerification,
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
   GoogleAuthProvider,
 } from 'firebase/auth';
 
@@ -20,6 +19,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState({ text: '', type: '' });
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [notifyConsent, setNotifyConsent] = useState(false);
   const [hideNotify, setHideNotify] = useState(false);
   const [showResend, setShowResend] = useState(false);
@@ -27,29 +27,37 @@ export default function Login() {
   useEffect(() => {
     const answered = localStorage.getItem('notifyConsentAnswered');
     if (answered === 'true') setHideNotify(true);
+  }, []);
 
-    // استقبال نتيجة Google Redirect
-    getRedirectResult(auth).then(async (result) => {
-      if (!result) return;
-      const uid = result.user.uid;
+  const handleGoogleLogin = async () => {
+    setMessage({ text: '', type: '' });
+    setGoogleLoading(true);
+    try {
+      const userCredential = await signInWithPopup(auth, googleProvider);
+      const uid = userCredential.user.uid;
       try {
         await setDoc(doc(db, 'users', uid), {
-          email: result.user.email,
-          name: result.user.displayName,
+          email: userCredential.user.email,
+          name: userCredential.user.displayName,
           notifyOnNewScholarship: false,
           notifyConsentAnswered: false,
         }, { merge: true });
-      } catch (e) {
-        console.error('Firestore error:', e);
+      } catch (firestoreError) {
+        console.error('Firestore error:', firestoreError);
       }
-      window.location.href = '/';
-    }).catch((error) => {
-      console.error('Redirect error:', error);
-    });
-  }, []);
-
-  const handleGoogleLogin = () => {
-    signInWithRedirect(auth, googleProvider);
+      setMessage({ text: '✅ تم تسجيل الدخول بنجاح! جاري التحويل...', type: 'success' });
+      setTimeout(() => { window.location.href = '/'; }, 800);
+    } catch (error) {
+      setGoogleLoading(false);
+      if (
+        error.code === 'auth/popup-closed-by-user' ||
+        error.code === 'auth/cancelled-popup-request'
+      ) {
+        setMessage({ text: '⚠️ تم إغلاق نافذة تسجيل الدخول.', type: 'error' });
+      } else {
+        setMessage({ text: '⚠️ حدث خطأ أثناء تسجيل الدخول بـ Google.', type: 'error' });
+      }
+    }
   };
 
   const handleLogin = async (e) => {
@@ -170,7 +178,7 @@ export default function Login() {
         <button
           type="button"
           onClick={handleGoogleLogin}
-          disabled={loading}
+          disabled={googleLoading || loading}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -181,7 +189,7 @@ export default function Login() {
             borderRadius: '8px',
             border: '2px solid #e0e0e0',
             backgroundColor: 'white',
-            cursor: 'pointer',
+            cursor: googleLoading ? 'not-allowed' : 'pointer',
             fontSize: '15px',
             fontWeight: 'bold',
             color: '#333',
@@ -194,7 +202,7 @@ export default function Login() {
             <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
             <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
           </svg>
-          تسجيل الدخول بـ Google
+          {googleLoading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول بـ Google'}
         </button>
 
         <div style={{ textAlign: 'center', color: '#aaa', marginBottom: '16px', fontSize: '13px' }}>
@@ -228,7 +236,7 @@ export default function Login() {
             </button>
           </div>
 
-          <button type="submit" className="btn-auth" disabled={loading}>
+          <button type="submit" className="btn-auth" disabled={loading || googleLoading}>
             {loading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
           </button>
 
