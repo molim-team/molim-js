@@ -46,7 +46,7 @@ export default function Login() {
         console.error('Firestore error:', firestoreError);
       }
       setMessage({ text: '✅ تم تسجيل الدخول بنجاح! جاري التحويل...', type: 'success' });
-      setTimeout(() => { window.location.replace = '/'; }, 800);
+      setTimeout(() => { window.location.replace = ('/'); }, 800);
     } catch (error) {
       setGoogleLoading(false);
       if (
