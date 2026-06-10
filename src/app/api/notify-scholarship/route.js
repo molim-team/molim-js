@@ -7,6 +7,12 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://molim.team";
 
 export async function POST(request) {
+
+   const secret = request.headers.get('x-notify-secret');
+  if (secret !== process.env.NOTIFY_SECRET) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { scholarship } = await request.json();
 
@@ -23,7 +29,7 @@ export async function POST(request) {
     const results = await Promise.allSettled(
       emails.map((email) =>
         resend.emails.send({
-          from: "مُلم <onboarding@resend.dev>",
+          from: "مُلم <noreply@molim.team>",
           to: email,
           subject: `منحة جديدة متاحة: ${scholarship.name}`,
           html: buildEmailHTML(scholarship),
