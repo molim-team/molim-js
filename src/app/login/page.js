@@ -8,7 +8,8 @@ import {
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
   sendEmailVerification,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider,
 } from 'firebase/auth';
 
@@ -26,37 +27,29 @@ export default function Login() {
   useEffect(() => {
     const answered = localStorage.getItem('notifyConsentAnswered');
     if (answered === 'true') setHideNotify(true);
-  }, []);
 
-  const handleGoogleLogin = async () => {
-    setMessage({ text: '', type: '' });
-    setLoading(true);
-    try {
-      const userCredential = await signInWithPopup(auth, googleProvider);
-      const uid = userCredential.user.uid;
-
-      // إنشاء/تحديث بيانات المستخدم في Firestore
+    // استقبال نتيجة Google Redirect
+    getRedirectResult(auth).then(async (result) => {
+      if (!result) return;
+      const uid = result.user.uid;
       try {
         await setDoc(doc(db, 'users', uid), {
-          email: userCredential.user.email,
-          name: userCredential.user.displayName,
+          email: result.user.email,
+          name: result.user.displayName,
           notifyOnNewScholarship: false,
           notifyConsentAnswered: false,
         }, { merge: true });
-      } catch (firestoreError) {
-        console.error('Firestore error:', firestoreError);
+      } catch (e) {
+        console.error('Firestore error:', e);
       }
+      window.location.href = '/';
+    }).catch((error) => {
+      console.error('Redirect error:', error);
+    });
+  }, []);
 
-      setMessage({ text: '✅ تم تسجيل الدخول بنجاح! جاري التحويل...', type: 'success' });
-      setTimeout(() => { window.location.href = '/'; }, 800);
-    } catch (error) {
-      setLoading(false);
-      if (error.code === 'auth/popup-closed-by-user') {
-        setMessage({ text: '⚠️ تم إغلاق نافذة تسجيل الدخول.', type: 'error' });
-      } else {
-        setMessage({ text: '⚠️ حدث خطأ أثناء تسجيل الدخول بـ Google.', type: 'error' });
-      }
-    }
+  const handleGoogleLogin = () => {
+    signInWithRedirect(auth, googleProvider);
   };
 
   const handleLogin = async (e) => {
