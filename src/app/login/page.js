@@ -27,11 +27,21 @@ export default function Login() {
   useEffect(() => {
     const answered = localStorage.getItem('notifyConsentAnswered');
     if (answered === 'true') setHideNotify(true);
-  }, []);
+
+     const unsubscribe = auth.onAuthStateChanged((user) => {
+    if (user) {
+      window.location.href = '/';
+    }
+  });
+  return () => unsubscribe();
+}, []);
+
 
   const handleGoogleLogin = async () => {
     setMessage({ text: '', type: '' });
     setGoogleLoading(true);
+
+    
     try {
       const userCredential = await signInWithPopup(auth, googleProvider);
       const uid = userCredential.user.uid;
