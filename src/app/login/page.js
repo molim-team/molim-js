@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { auth, db } from '../../lib/firebase';
 import { doc, updateDoc, setDoc } from 'firebase/firestore';
@@ -24,18 +24,19 @@ export default function Login() {
   const [hideNotify, setHideNotify] = useState(false);
   const [showResend, setShowResend] = useState(false);
   const [googleUser, setGoogleUser] = useState(null);
+  const googleUserRef = useRef(false);
 
   useEffect(() => {
     const answered = localStorage.getItem('notifyConsentAnswered');
     if (answered === 'true') setHideNotify(true);
 
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user && !googleUser) {
+      if (user && !googleUserRef.current) {
         window.location.href = '/';
       }
     });
     return () => unsubscribe();
-  }, [googleUser]);
+  }, []);
 
   const handleGoogleLogin = async () => {
     setMessage({ text: '', type: '' });
@@ -61,6 +62,7 @@ export default function Login() {
         return;
       }
 
+      googleUserRef.current = true;
       setGoogleLoading(false);
       setGoogleUser({ uid });
 
