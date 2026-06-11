@@ -198,7 +198,7 @@ if (newEntry.open) {
     try {
       const updatedList = [...scholarships];
       const oldData = updatedList[editingIndex];
-      const wasOpen = oldDate?.open;
+      const wasOpen = oldData?.open;
 
       updatedList[editingIndex] = {
         ...oldData,
