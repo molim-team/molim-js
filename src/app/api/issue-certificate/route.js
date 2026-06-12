@@ -17,6 +17,7 @@ function resolveCertType(cert_type) {
   const val = (cert_type || '').toLowerCase();
   if (val.includes('مشاركة') || val.includes('participation')) return 'participation';
   if (val.includes('خبرة')   || val.includes('experience'))    return 'experience';
+  if (val.includes('متطوع الشهر') || val.includes('volunteer of the month')) return 'volunteer-of-month';
   return 'volunteer'; // تطوع أو أي قيمة أخرى
 }
 
@@ -27,6 +28,8 @@ function getTemplatePath(type) {
       return path.resolve(process.cwd(), 'public/templates/participation-bg.png');
     case 'experience':
       return path.resolve(process.cwd(), 'public/templates/experience-bg.png');
+    case 'volunteer-of-month':
+      return path.resolve(process.cwd(), 'public/templates/volunteer-of-month-bg.png');
     case 'volunteer':
     default:
       return path.resolve(process.cwd(), 'public/templates/volunteer-bg.png');
