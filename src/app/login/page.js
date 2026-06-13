@@ -41,6 +41,7 @@ export default function Login() {
   const handleGoogleLogin = async () => {
     setMessage({ text: '', type: '' });
     setGoogleLoading(true);
+    googleUserRef.current = true;
 
     try {
       const userCredential = await signInWithPopup(auth, googleProvider);
@@ -62,11 +63,11 @@ export default function Login() {
         return;
       }
 
-      googleUserRef.current = true;
       setGoogleLoading(false);
       setGoogleUser({ uid });
 
     } catch (error) {
+      googleUserRef.current = false;
       setGoogleLoading(false);
       if (
         error.code === 'auth/popup-closed-by-user' ||

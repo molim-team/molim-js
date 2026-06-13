@@ -42,6 +42,7 @@ export default function Register() {
   const handleGoogleRegister = async () => {
     setMessage({ text: '', type: '' });
     setGoogleLoading(true);
+    googleUserRef.current = true;
     try {
       const userCredential = await signInWithPopup(auth, googleProvider);
       const uid = userCredential.user.uid;
@@ -65,11 +66,11 @@ export default function Register() {
         return;
       }
 
-      googleUserRef.current = true;
       setGoogleLoading(false);
       setGoogleUser({ uid });
 
     } catch (error) {
+      googleUserRef.current = false;
       setGoogleLoading(false);
       if (
         error.code === 'auth/popup-closed-by-user' ||

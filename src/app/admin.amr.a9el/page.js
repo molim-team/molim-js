@@ -132,7 +132,10 @@ function Admin() {
 if (newEntry.open) {
   fetch('/api/notify-scholarship', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      'x-notify-secret': process.env.NEXT_PUBLIC_NOTIFY_SECRET,
+    },
     body: JSON.stringify({ scholarship: newEntry }),
   }).catch(console.error);
 }
