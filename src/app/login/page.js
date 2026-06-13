@@ -72,8 +72,11 @@ export default function Login() {
         return;
       }
 
-      try {
-        const userDocSnap = await getDoc(userDocRef);
+      // Optimistically show the modal in a checking state
+      setGoogleLoading(false);
+      setGoogleUser({ uid, checking: true });
+
+      getDoc(userDocRef).then((userDocSnap) => {
         let wantsNotify = false;
         let answered = false;
 
@@ -85,16 +88,14 @@ export default function Login() {
 
         if (answered || wantsNotify) {
           localStorage.setItem(`notifyConsent_${uid}`, 'true');
-          setMessage({ text: '✅ تم تسجيل الدخول بنجاح! جاري التحويل...', type: 'success' });
           router.push('/');
-          return;
+        } else {
+          setGoogleUser({ uid });
         }
-      } catch (firestoreError) {
+      }).catch((firestoreError) => {
         console.error('Firestore error:', firestoreError);
-      }
-
-      setGoogleLoading(false);
-      setGoogleUser({ uid });
+        setGoogleUser({ uid });
+      });
 
     } catch (error) {
       googleUserRef.current = false;
@@ -225,28 +226,37 @@ export default function Login() {
       <div className="auth-container">
         <div className="auth-card" style={{ textAlign: 'center', direction: 'rtl' }}>
           <h2 style={{ marginBottom: '12px' }}>🔔 إشعارات المنح</h2>
-          <p style={{ color: '#555', marginBottom: '28px', fontSize: '15px' }}>
-            هل تريد تلقّي إشعار بالبريد الإلكتروني عند فتح منحة دراسية جديدة؟
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <button
-              className="btn-auth"
-              onClick={() => handleGoogleNotifyAnswer(true)}
-              disabled={googleLoading}
-              style={{ cursor: googleLoading ? 'not-allowed' : 'pointer' }}
-            >
-              {googleLoading ? 'جاري التحويل...' : 'نعم، أريد الإشعارات'}
-            </button>
-            <button
-              type="button"
-              className="btn-link"
-              onClick={() => handleGoogleNotifyAnswer(false)}
-              disabled={googleLoading}
-              style={{ fontSize: '14px', color: '#888', cursor: googleLoading ? 'not-allowed' : 'pointer' }}
-            >
-              {googleLoading ? 'انتظر...' : 'لا، شكراً'}
-            </button>
-          </div>
+          
+          {googleUser.checking ? (
+            <div style={{ padding: '20px', color: '#888', fontSize: '15px' }}>
+              جاري التحقق من الإعدادات...
+            </div>
+          ) : (
+            <>
+              <p style={{ color: '#555', marginBottom: '28px', fontSize: '15px' }}>
+                هل تريد تلقّي إشعار بالبريد الإلكتروني عند فتح منحة دراسية جديدة؟
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <button
+                  className="btn-auth"
+                  onClick={() => handleGoogleNotifyAnswer(true)}
+                  disabled={googleLoading}
+                  style={{ cursor: googleLoading ? 'not-allowed' : 'pointer' }}
+                >
+                  {googleLoading ? 'جاري التحويل...' : 'نعم، أريد الإشعارات'}
+                </button>
+                <button
+                  type="button"
+                  className="btn-link"
+                  onClick={() => handleGoogleNotifyAnswer(false)}
+                  disabled={googleLoading}
+                  style={{ fontSize: '14px', color: '#888', cursor: googleLoading ? 'not-allowed' : 'pointer' }}
+                >
+                  {googleLoading ? 'انتظر...' : 'لا، شكراً'}
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     );
