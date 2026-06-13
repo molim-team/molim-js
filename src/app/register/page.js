@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { auth, db } from '../../lib/firebase';
-import { doc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import {
   createUserWithEmailAndPassword,
   updateProfile,
@@ -46,22 +46,34 @@ export default function Register() {
     try {
       const userCredential = await signInWithPopup(auth, googleProvider);
       const uid = userCredential.user.uid;
+      const userDocRef = doc(db, 'users', uid);
+
+      let wantsNotify = false;
+      let answered = false;
 
       try {
-        await setDoc(doc(db, 'users', uid), {
-          fullname: userCredential.user.displayName,
-          email: userCredential.user.email,
-          role: 'student',
-          registrationDate: new Date().toISOString(),
-          createdAt: new Date().toISOString(),
-          notifyOnNewScholarship: false,
-          notifyConsentAnswered: false,
-        }, { merge: true });
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          const data = userDocSnap.data();
+          wantsNotify = data.notifyOnNewScholarship === true;
+          answered = data.notifyConsentAnswered === true;
+        } else {
+          await setDoc(userDocRef, {
+            fullname: userCredential.user.displayName,
+            email: userCredential.user.email,
+            role: 'student',
+            registrationDate: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
+            notifyOnNewScholarship: false,
+            notifyConsentAnswered: false,
+          });
+        }
       } catch (e) {
         console.error('Firestore error:', e);
       }
 
-      if (localStorage.getItem('notifyConsentAnswered') === 'true') {
+      if (answered || wantsNotify || localStorage.getItem('notifyConsentAnswered') === 'true') {
+        setGoogleLoading(false);
         window.location.href = '/';
         return;
       }

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { auth, db } from '../../lib/firebase';
-import { doc, updateDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
 import {
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
@@ -46,19 +46,31 @@ export default function Login() {
     try {
       const userCredential = await signInWithPopup(auth, googleProvider);
       const uid = userCredential.user.uid;
+      const userDocRef = doc(db, 'users', uid);
+
+      let wantsNotify = false;
+      let answered = false;
 
       try {
-        await setDoc(doc(db, 'users', uid), {
-          email: userCredential.user.email,
-          name: userCredential.user.displayName,
-          notifyOnNewScholarship: false,
-          notifyConsentAnswered: false,
-        }, { merge: true });
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          const data = userDocSnap.data();
+          wantsNotify = data.notifyOnNewScholarship === true;
+          answered = data.notifyConsentAnswered === true;
+        } else {
+          await setDoc(userDocRef, {
+            email: userCredential.user.email,
+            name: userCredential.user.displayName,
+            notifyOnNewScholarship: false,
+            notifyConsentAnswered: false,
+          });
+        }
       } catch (firestoreError) {
         console.error('Firestore error:', firestoreError);
       }
 
-      if (localStorage.getItem('notifyConsentAnswered') === 'true') {
+      if (answered || wantsNotify || localStorage.getItem('notifyConsentAnswered') === 'true') {
+        setGoogleLoading(false);
         window.location.href = '/';
         return;
       }
