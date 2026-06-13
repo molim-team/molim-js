@@ -3,6 +3,7 @@ import ShareButton from './ShareButton';
 import { notFound } from 'next/navigation';
 import { readFile } from 'fs/promises';
 import path from 'path';
+import { getIsOpen } from '@/lib/scholarshipUtils';
 
 // تولد كل صفحات المنح وقت البناء
 export async function generateStaticParams() {
@@ -28,6 +29,8 @@ export default async function ScholarshipDetails({ params }) {
 
   const s = scholarship;
 
+  const isOpen = getIsOpen(s);
+
   return (
     <div id="scholarship-details" className="details-container">
       <div className="details-hero-container">
@@ -36,8 +39,8 @@ export default async function ScholarshipDetails({ params }) {
         )}
         <h1>{s.name}</h1>
         <p>{s.name_en || ''}</p>
-        <span className={`status ${s.open ? 'open' : 'closed'}`}>
-          {s.open ? '✅ التقديم مفتوح' : '🔴 التقديم مغلق'}
+        <span className={`status ${isOpen ? 'open' : 'closed'}`}>
+          {isOpen ? '✅ التقديم مفتوح' : '🔴 التقديم مغلق'}
         </span>
       </div>
 

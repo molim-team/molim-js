@@ -9,7 +9,7 @@ async function getScholarships() {
   const filePath = path.join(process.cwd(), 'public', 'scholarships.json');
   const data = JSON.parse(readFileSync(filePath, 'utf-8'));
   const open = data.filter(s => getIsOpen(s));
-  return open.length > 0 ? open : data;
+  return open;
 }
 
 export const metadata = {
