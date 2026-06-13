@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { auth, db } from '../../lib/firebase';
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import {
@@ -16,6 +17,7 @@ import {
 const googleProvider = new GoogleAuthProvider();
 
 export default function Register() {
+  const router = useRouter();
   const [fullname, setFullname] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -33,7 +35,7 @@ export default function Register() {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user && !googleUserRef.current) {
-        window.location.href = '/';
+        router.push('/');
       }
     });
     return () => unsubscribe();
@@ -74,7 +76,7 @@ export default function Register() {
 
       if (answered || wantsNotify || localStorage.getItem('notifyConsentAnswered') === 'true') {
         setGoogleLoading(false);
-        window.location.href = '/';
+        router.push('/');
         return;
       }
 
@@ -96,16 +98,21 @@ export default function Register() {
   };
 
   const handleGoogleNotifyAnswer = async (wantsNotify) => {
+    const uid = googleUser?.uid;
+    setGoogleUser(null);
+    router.push('/');
+
+    if (!uid) return;
+
     try {
-      await updateDoc(doc(db, 'users', googleUser.uid), {
+      if (wantsNotify) localStorage.setItem('notifyConsentAnswered', 'true');
+      await updateDoc(doc(db, 'users', uid), {
         notifyOnNewScholarship: wantsNotify,
         notifyConsentAnswered: true,
       });
-      if (wantsNotify) localStorage.setItem('notifyConsentAnswered', 'true');
     } catch (e) {
       console.error('Firestore notify update error:', e);
     }
-    window.location.href = '/';
   };
 
   const handleRegister = async (e) => {
@@ -157,7 +164,7 @@ export default function Register() {
       });
 
       setTimeout(() => {
-        window.location.href = '/login';
+        router.push('/login');
       }, 3000);
 
     } catch (error) {

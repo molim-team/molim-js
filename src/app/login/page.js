@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { auth, db } from '../../lib/firebase';
 import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
 import {
@@ -15,6 +16,7 @@ import {
 const googleProvider = new GoogleAuthProvider();
 
 export default function Login() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState({ text: '', type: '' });
@@ -32,7 +34,7 @@ export default function Login() {
 
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user && !googleUserRef.current) {
-        window.location.href = '/';
+        router.push('/');
       }
     });
     return () => unsubscribe();
@@ -71,7 +73,7 @@ export default function Login() {
 
       if (answered || wantsNotify || localStorage.getItem('notifyConsentAnswered') === 'true') {
         setGoogleLoading(false);
-        window.location.href = '/';
+        router.push('/');
         return;
       }
 
@@ -93,16 +95,21 @@ export default function Login() {
   };
 
   const handleGoogleNotifyAnswer = async (wantsNotify) => {
+    const uid = googleUser?.uid;
+    setGoogleUser(null);
+    router.push('/');
+
+    if (!uid) return;
+
     try {
-      await updateDoc(doc(db, 'users', googleUser.uid), {
+      if (wantsNotify) localStorage.setItem('notifyConsentAnswered', 'true');
+      await updateDoc(doc(db, 'users', uid), {
         notifyOnNewScholarship: wantsNotify,
         notifyConsentAnswered: true,
       });
-      if (wantsNotify) localStorage.setItem('notifyConsentAnswered', 'true');
     } catch (e) {
       console.error('Firestore notify update error:', e);
     }
-    window.location.href = '/';
   };
 
   const handleLogin = async (e) => {
@@ -144,7 +151,7 @@ export default function Login() {
       }
 
       setMessage({ text: '✅ تم تسجيل الدخول بنجاح! جاري التحويل...', type: 'success' });
-      setTimeout(() => { window.location.href = '/'; }, 800);
+      setTimeout(() => { router.push('/'); }, 800);
 
     } catch (error) {
       setLoading(false);
