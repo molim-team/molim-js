@@ -11,6 +11,7 @@ import {
   sendEmailVerification,
   signInWithPopup,
   GoogleAuthProvider,
+  getAdditionalUserInfo,
 } from 'firebase/auth';
 
 const googleProvider = new GoogleAuthProvider();
@@ -48,33 +49,48 @@ export default function Login() {
     try {
       const userCredential = await signInWithPopup(auth, googleProvider);
       const uid = userCredential.user.uid;
+
+      if (localStorage.getItem('notifyConsentAnswered') === 'true') {
+        setMessage({ text: '✅ تم تسجيل الدخول بنجاح! جاري التحويل...', type: 'success' });
+        router.push('/');
+        return;
+      }
+
+      const additionalInfo = getAdditionalUserInfo(userCredential);
       const userDocRef = doc(db, 'users', uid);
 
-      let wantsNotify = false;
-      let answered = false;
+      if (additionalInfo?.isNewUser) {
+        setDoc(userDocRef, {
+          email: userCredential.user.email,
+          name: userCredential.user.displayName,
+          notifyOnNewScholarship: false,
+          notifyConsentAnswered: false,
+        }).catch(e => console.error(e));
+
+        setGoogleLoading(false);
+        setGoogleUser({ uid });
+        return;
+      }
 
       try {
         const userDocSnap = await getDoc(userDocRef);
+        let wantsNotify = false;
+        let answered = false;
+
         if (userDocSnap.exists()) {
           const data = userDocSnap.data();
           wantsNotify = data.notifyOnNewScholarship === true;
           answered = data.notifyConsentAnswered === true;
-        } else {
-          await setDoc(userDocRef, {
-            email: userCredential.user.email,
-            name: userCredential.user.displayName,
-            notifyOnNewScholarship: false,
-            notifyConsentAnswered: false,
-          });
+        }
+
+        if (answered || wantsNotify) {
+          localStorage.setItem('notifyConsentAnswered', 'true');
+          setMessage({ text: '✅ تم تسجيل الدخول بنجاح! جاري التحويل...', type: 'success' });
+          router.push('/');
+          return;
         }
       } catch (firestoreError) {
         console.error('Firestore error:', firestoreError);
-      }
-
-      if (answered || wantsNotify || localStorage.getItem('notifyConsentAnswered') === 'true') {
-        setGoogleLoading(false);
-        router.push('/');
-        return;
       }
 
       setGoogleLoading(false);
@@ -96,20 +112,21 @@ export default function Login() {
 
   const handleGoogleNotifyAnswer = async (wantsNotify) => {
     const uid = googleUser?.uid;
-    setGoogleUser(null);
-    router.push('/');
-
     if (!uid) return;
+
+    setGoogleLoading(true);
 
     try {
       if (wantsNotify) localStorage.setItem('notifyConsentAnswered', 'true');
-      await updateDoc(doc(db, 'users', uid), {
+      updateDoc(doc(db, 'users', uid), {
         notifyOnNewScholarship: wantsNotify,
         notifyConsentAnswered: true,
-      });
+      }).catch(e => console.error(e));
     } catch (e) {
-      console.error('Firestore notify update error:', e);
+      console.error(e);
     }
+
+    router.push('/');
   };
 
   const handleLogin = async (e) => {
@@ -215,16 +232,19 @@ export default function Login() {
             <button
               className="btn-auth"
               onClick={() => handleGoogleNotifyAnswer(true)}
+              disabled={googleLoading}
+              style={{ cursor: googleLoading ? 'not-allowed' : 'pointer' }}
             >
-              نعم، أريد الإشعارات
+              {googleLoading ? 'جاري التحويل...' : 'نعم، أريد الإشعارات'}
             </button>
             <button
               type="button"
               className="btn-link"
               onClick={() => handleGoogleNotifyAnswer(false)}
-              style={{ fontSize: '14px', color: '#888' }}
+              disabled={googleLoading}
+              style={{ fontSize: '14px', color: '#888', cursor: googleLoading ? 'not-allowed' : 'pointer' }}
             >
-              لا، شكراً
+              {googleLoading ? 'انتظر...' : 'لا، شكراً'}
             </button>
           </div>
         </div>
