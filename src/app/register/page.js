@@ -50,7 +50,7 @@ export default function Register() {
       const userCredential = await signInWithPopup(auth, googleProvider);
       const uid = userCredential.user.uid;
 
-      if (localStorage.getItem('notifyConsentAnswered') === 'true') {
+      if (localStorage.getItem(`notifyConsent_${uid}`) === 'true') {
         setMessage({ text: '✅ تم تسجيل الدخول بنجاح! جاري التحويل...', type: 'success' });
         router.push('/');
         return;
@@ -87,7 +87,7 @@ export default function Register() {
         }
 
         if (answered || wantsNotify) {
-          localStorage.setItem('notifyConsentAnswered', 'true');
+          localStorage.setItem(`notifyConsent_${uid}`, 'true');
           setMessage({ text: '✅ تم تسجيل الدخول بنجاح! جاري التحويل...', type: 'success' });
           router.push('/');
           return;
@@ -120,7 +120,7 @@ export default function Register() {
     setGoogleLoading(true);
 
     try {
-      if (wantsNotify) localStorage.setItem('notifyConsentAnswered', 'true');
+      localStorage.setItem(`notifyConsent_${uid}`, 'true');
       updateDoc(doc(db, 'users', uid), {
         notifyOnNewScholarship: wantsNotify,
         notifyConsentAnswered: true,
