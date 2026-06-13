@@ -13,7 +13,7 @@ function getCountdown(deadline) {
   const diff = Math.ceil((end - today) / (1000 * 60 * 60 * 24));
   if (diff < 0) return null;
   if (diff === 0) return { text: '⚠️ آخر يوم للتقديم!', urgent: true };
-  if (diff <= 7) return { text: `⚠️ باقي ${diff} أيام فقط!`, urgent: true };
+  if (diff <= 7) return { text: `⚠️ باقي ${diff} يوم فقط!`, urgent: true };
   return { text: `📅 باقي ${diff} يوم على إغلاق التقديم`, urgent: false };
 }
 
