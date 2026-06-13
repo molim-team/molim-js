@@ -81,15 +81,13 @@ export default function Register() {
 
       getDoc(userDocRef).then((userDocSnap) => {
         let wantsNotify = false;
-        let answered = false;
 
         if (userDocSnap.exists()) {
           const data = userDocSnap.data();
           wantsNotify = data.notifyOnNewScholarship === true;
-          answered = data.notifyConsentAnswered === true;
         }
 
-        if (answered || wantsNotify) {
+        if (wantsNotify) {
           localStorage.setItem(`notifyConsent_${uid}`, 'true');
           router.push('/');
         } else {
@@ -121,10 +119,15 @@ export default function Register() {
     setGoogleLoading(true);
 
     try {
-      localStorage.setItem(`notifyConsent_${uid}`, 'true');
+      if (wantsNotify) {
+        localStorage.setItem(`notifyConsent_${uid}`, 'true');
+      } else {
+        localStorage.removeItem(`notifyConsent_${uid}`);
+      }
+      
       updateDoc(doc(db, 'users', uid), {
         notifyOnNewScholarship: wantsNotify,
-        notifyConsentAnswered: true,
+        notifyConsentAnswered: wantsNotify,
       }).catch(e => console.error(e));
     } catch (e) {
       console.error(e);
@@ -158,14 +161,14 @@ export default function Register() {
 
       await updateProfile(user, { displayName: fullname.trim() });
 
-      setDoc(doc(db, 'users', user.uid), {
+      await setDoc(doc(db, 'users', user.uid), {
         fullname: fullname.trim(),
         email: email.trim(),
         role: 'student',
         registrationDate: new Date().toISOString(),
         createdAt: new Date().toISOString(),
         notifyOnNewScholarship: notifyConsent,
-        notifyConsentAnswered: true,
+        notifyConsentAnswered: notifyConsent,
       });
 
       sendEmailVerification(user).catch((err) => {

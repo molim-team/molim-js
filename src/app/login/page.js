@@ -78,15 +78,13 @@ export default function Login() {
 
       getDoc(userDocRef).then((userDocSnap) => {
         let wantsNotify = false;
-        let answered = false;
 
         if (userDocSnap.exists()) {
           const data = userDocSnap.data();
           wantsNotify = data.notifyOnNewScholarship === true;
-          answered = data.notifyConsentAnswered === true;
         }
 
-        if (answered || wantsNotify) {
+        if (wantsNotify) {
           localStorage.setItem(`notifyConsent_${uid}`, 'true');
           router.push('/');
         } else {
@@ -118,10 +116,15 @@ export default function Login() {
     setGoogleLoading(true);
 
     try {
-      localStorage.setItem(`notifyConsent_${uid}`, 'true');
+      if (wantsNotify) {
+        localStorage.setItem(`notifyConsent_${uid}`, 'true');
+      } else {
+        localStorage.removeItem(`notifyConsent_${uid}`);
+      }
+      
       updateDoc(doc(db, 'users', uid), {
         notifyOnNewScholarship: wantsNotify,
-        notifyConsentAnswered: true,
+        notifyConsentAnswered: wantsNotify,
       }).catch(e => console.error(e));
     } catch (e) {
       console.error(e);
@@ -161,7 +164,7 @@ export default function Login() {
       try {
         updateDoc(doc(db, 'users', uid), {
           notifyOnNewScholarship: notifyConsent,
-          notifyConsentAnswered: true,
+          notifyConsentAnswered: notifyConsent,
         });
         if (notifyConsent) localStorage.setItem('notifyConsentAnswered', 'true');
       } catch (firestoreError) {
