@@ -11,15 +11,15 @@ export default function HeroSection() {
       <Link href="/scholarships" className="btn-main">استعرض المنح</Link>
       <section className="stats-section">
         <div className="stat-item">
-          <span className="stat-number">+1000</span>
+          <span className="stat-number">+2000</span>
           <span className="stat-label">🎓 مستفيد</span>
         </div>
         <div className="stat-item">
-          <span className="stat-number">+50</span>
+          <span className="stat-number">+70</span>
           <span className="stat-label">📚 منحة</span>
         </div>
         <div className="stat-item">
-          <span className="stat-number">+30</span>
+          <span className="stat-number">+40</span>
           <span className="stat-label">🌍 دولة</span>
         </div>
       </section>
