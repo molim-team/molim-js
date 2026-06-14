@@ -76,10 +76,10 @@ function StarRating({ value, onChange }) {
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
-                fill={active ? "#f97316" : "none"}
-                stroke={active ? "#f97316" : "currentColor"}
+                fill={active ? "#ff4500" : "none"}
+                stroke={active ? "#ff4500" : "currentColor"}
                 strokeWidth="1.5"
-                style={{ color: active ? "#f97316" : undefined }}
+                style={{ color: active ? "#ff4500" : undefined }}
               >
                 <path
                   strokeLinecap="round"
@@ -146,6 +146,7 @@ export default function SupportFeedbackPage() {
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="none"
+                stroke="white"
                 strokeWidth="2"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
