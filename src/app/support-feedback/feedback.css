@@ -1,0 +1,271 @@
+.feedback-page {
+  direction: rtl;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9fafb;
+  padding: 3rem 1rem;
+  font-family: "Tajawal", "Cairo", sans-serif;
+}
+
+.feedback-card {
+  width: 100%;
+  max-width: 36rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  padding: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .feedback-card {
+    padding: 2.5rem;
+  }
+}
+
+.feedback-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.8;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .feedback-title {
+    font-size: 1.5rem;
+  }
+}
+
+.feedback-subtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 2rem;
+}
+
+/* Question groups */
+.feedback-group {
+  margin-bottom: 1.5rem;
+}
+
+.feedback-legend {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.75rem;
+}
+
+.feedback-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .feedback-options {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+}
+
+.feedback-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  color: #374151;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.feedback-option:hover {
+  border-color: #fdba74;
+}
+
+.feedback-option.selected {
+  border-color: #f97316;
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.feedback-option input[type="radio"] {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #f97316;
+}
+
+/* Star rating */
+.feedback-stars {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .feedback-stars {
+    justify-content: flex-start;
+  }
+}
+
+.feedback-star-btn {
+  padding: 0.25rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.feedback-star-btn:hover {
+  transform: scale(1.1);
+}
+
+.feedback-star-btn svg {
+  width: 2rem;
+  height: 2rem;
+  color: #d1d5db;
+  transition: color 0.15s ease;
+}
+
+@media (min-width: 640px) {
+  .feedback-star-btn svg {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+}
+
+.feedback-star-label {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+@media (min-width: 640px) {
+  .feedback-star-label {
+    text-align: right;
+  }
+}
+
+/* Textarea */
+.feedback-textarea {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  color: #1f2937;
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+  transition: border-color 0.15s ease;
+}
+
+.feedback-textarea:focus {
+  border-color: #fb923c;
+}
+
+/* Error */
+.feedback-error {
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+  background: #fef2f2;
+  color: #dc2626;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+/* Submit button */
+.feedback-submit {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  border: none;
+  background: #f97316;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.feedback-submit:hover:not(:disabled) {
+  background: #ea580c;
+}
+
+.feedback-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.feedback-spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  animation: feedback-spin 1s linear infinite;
+}
+
+@keyframes feedback-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Thank you screen */
+.feedback-thanks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 0;
+  text-align: center;
+}
+
+.feedback-thanks-icon {
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  background: #dcfce7;
+}
+
+.feedback-thanks-icon svg {
+  width: 2rem;
+  height: 2rem;
+  color: #16a34a;
+}
+
+.feedback-thanks-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .feedback-thanks-title {
+    font-size: 1.5rem;
+  }
+}
+
+.feedback-thanks-text {
+  color: #4b5563;
+}
