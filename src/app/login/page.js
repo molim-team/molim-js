@@ -72,28 +72,9 @@ export default function Login() {
         return;
       }
 
-      // Optimistically show the modal in a checking state
+      // Optimistically show the modal instantly if not cached
       setGoogleLoading(false);
-      setGoogleUser({ uid, checking: true });
-
-      getDoc(userDocRef).then((userDocSnap) => {
-        let wantsNotify = false;
-
-        if (userDocSnap.exists()) {
-          const data = userDocSnap.data();
-          wantsNotify = data.notifyOnNewScholarship === true;
-        }
-
-        if (wantsNotify) {
-          localStorage.setItem(`notifyConsent_${uid}`, 'true');
-          router.push('/');
-        } else {
-          setGoogleUser({ uid });
-        }
-      }).catch((firestoreError) => {
-        console.error('Firestore error:', firestoreError);
-        setGoogleUser({ uid });
-      });
+      setGoogleUser({ uid });
 
     } catch (error) {
       googleUserRef.current = false;
@@ -122,10 +103,10 @@ export default function Login() {
         localStorage.removeItem(`notifyConsent_${uid}`);
       }
       
-      updateDoc(doc(db, 'users', uid), {
+      setDoc(doc(db, 'users', uid), {
         notifyOnNewScholarship: wantsNotify,
         notifyConsentAnswered: wantsNotify,
-      }).catch(e => console.error(e));
+      }, { merge: true }).catch(e => console.error(e));
     } catch (e) {
       console.error(e);
     }
@@ -229,37 +210,28 @@ export default function Login() {
       <div className="auth-container">
         <div className="auth-card" style={{ textAlign: 'center', direction: 'rtl' }}>
           <h2 style={{ marginBottom: '12px' }}>🔔 إشعارات المنح</h2>
-          
-          {googleUser.checking ? (
-            <div style={{ padding: '20px', color: '#888', fontSize: '15px' }}>
-              جاري التحقق من الإعدادات...
-            </div>
-          ) : (
-            <>
-              <p style={{ color: '#555', marginBottom: '28px', fontSize: '15px' }}>
-                هل تريد تلقّي إشعار بالبريد الإلكتروني عند فتح منحة دراسية جديدة؟
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <button
-                  className="btn-auth"
-                  onClick={() => handleGoogleNotifyAnswer(true)}
-                  disabled={googleLoading}
-                  style={{ cursor: googleLoading ? 'not-allowed' : 'pointer' }}
-                >
-                  {googleLoading ? 'جاري التحويل...' : 'نعم، أريد الإشعارات'}
-                </button>
-                <button
-                  type="button"
-                  className="btn-link"
-                  onClick={() => handleGoogleNotifyAnswer(false)}
-                  disabled={googleLoading}
-                  style={{ fontSize: '14px', color: '#888', cursor: googleLoading ? 'not-allowed' : 'pointer' }}
-                >
-                  {googleLoading ? 'انتظر...' : 'لا، شكراً'}
-                </button>
-              </div>
-            </>
-          )}
+          <p style={{ color: '#555', marginBottom: '28px', fontSize: '15px' }}>
+            هل تريد تلقّي إشعار بالبريد الإلكتروني عند فتح منحة دراسية جديدة؟
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <button
+              className="btn-auth"
+              onClick={() => handleGoogleNotifyAnswer(true)}
+              disabled={googleLoading}
+              style={{ cursor: googleLoading ? 'not-allowed' : 'pointer' }}
+            >
+              {googleLoading ? 'جاري التحويل...' : 'نعم، أريد الإشعارات'}
+            </button>
+            <button
+              type="button"
+              className="btn-link"
+              onClick={() => handleGoogleNotifyAnswer(false)}
+              disabled={googleLoading}
+              style={{ fontSize: '14px', color: '#888', cursor: googleLoading ? 'not-allowed' : 'pointer' }}
+            >
+              {googleLoading ? 'انتظر...' : 'لا، شكراً'}
+            </button>
+          </div>
         </div>
       </div>
     );
