@@ -3246,5 +3246,52 @@
     "notes": "📌 ملاحظات :\n✦ البرنامج يمنح درجة ماجستير في الشؤون العالمية، ويستقبل خريجي جميع التخصصات.  \n✦ البرنامج من أقوى برامج القيادة العالمية وأكثرها تنافسية.\n✦ الدراسة تتم في جامعة تسينغهوا، إحدى أفضل الجامعات في آسيا والعالم.\n✦ لا يشترط تخصص جامعي محدد للتقديم.\n✦ تبدأ الدراسة في أغسطس 2027.",
     "groupLink": "https://t.me/Molim_Grants",
     "discussionLink": "https://t.me/Molim_Scholarships"
+  },
+  {
+    "id": "siena-international-excellence-scholarships",
+    "name": "منحة سيينا الدولية للتميز الأكاديمي",
+    "name_en": "Siena International Excellence Scholarships",
+    "country": "ايطاليا",
+    "flag": "https://flagcdn.com/w40/it.png",
+    "degree": "الماجستير",
+    "language": "الإنجليزية",
+    "description": "منحة تقدّمها جامعة سيينا للطلاب الدوليين المتفوقين الراغبين بالالتحاق ببرامج الماجستير المُدرّسة باللغة الإنجليزية",
+    "benefits": [
+      "✦ • 6,000€ سنوياً",
+      "✦ • إمكانية التجديد لعام ثانٍ",
+      "✦ • قيمة إجمالية تصل إلى 12,000€ خلال عامين",
+      "✦ • عدد المنح المتاحة: 5 منح فقط",
+      "✦ • مخصصة للطلاب الدوليين المتفوقين"
+    ],
+    "requirements": [
+      "✦ • عدم امتلاك الجنسية الإيطالية",
+      "✦ • الحصول على درجة البكالوريوس من مؤسسة تعليمية خارج إيطاليا",
+      "✦ • عدم الإقامة في إيطاليا وفق تعريف الجامعة للمقيمين",
+      "✦ • التقديم مسبقاً على أحد برامج الماجستير المؤهلة",
+      "✦ • يمكن التقديم على برنامجين كحد أقصى",
+      "✦ • تقديم فيديو تحفيزي لا تتجاوز مدته دقيقة واحدة",
+      "✦ • دفع رسوم تقديم غير قابلة للاسترداد بقيمة 10€",
+      "✦ • استخدام نفس الحساب المستخدم في طلب القبول الأكاديمي",
+      "✦ • استكمال جميع الوثائق المطلوبة"
+    ],
+    "majors": [
+      "🔷️ الاقتصاد والقانون (منحة واحدة):  - Economics - Finance - International Accounting and Management  🔷️ العلوم السياسية والاجتماعية والمعرفية (منحة واحدة):  - Language and Mind: Linguistics and Cognitive Studies - Public and Cultural Diplomacy - Scienze Internazionali (European Studies)  🔷️ العلوم الطبية والبيولوجية (منحة واحدة):  - Biotechnologies of Human Reproduction - Medical Biotechnologies  🔷️ الرياضيات والعلوم التجريبية (منحتان):  - Applied Mathematics - Artificial Intelligence and Automation Engineering - Biodiversity",
+      "Conservation and Environmental Quality - Chemistry - Electronics and Communications Engineering - Engineering Management - Sustainable Industrial Pharmaceutical Biotechnology"
+    ],
+    "open_date": "2026-03-01",
+    "deadline": "2026-05-26",
+    "documents": {
+      "required": [
+        "✦ • فيديو تحفيزي (مدة لا تتجاوز دقيقة واحدة)",
+        "✦ • تحديد برنامج أو برامج الماجستير المتقدم إليها",
+        "✦ • جميع وثائق القبول الأكاديمي المطلوبة والمرفوعة مسبقاً على المنصة"
+      ],
+      "optional": []
+    },
+    "link": "https://apply.unisi.it/courses/course/112-sch-siena-international-excellence-scholarships?search=620281",
+    "open": false,
+    "notes": "📌 ملاحظات :\n- المنحة مخصصة للطلاب الدوليين غير الإيطاليين فقط.\n- يجب التقديم على أحد البرامج المؤهلة قبل التقديم على المنحة.\n- الطلبات غير المكتملة يتم رفضها.\n- عدد المنح المتاحة محدود جداً (5 منح فقط).\n- المنحة تغطي عاماً دراسياً واحداً مع إمكانية التجديد لعام ثانٍ وفق شروط الجامعة.\n- رسوم التقديم على المنحة تبلغ 10€ وغير قابلة للاسترداد.",
+    "groupLink": "https://t.me/Molim_Grants",
+    "discussionLink": "https://t.me/Molim_Europe"
   }
 ]
