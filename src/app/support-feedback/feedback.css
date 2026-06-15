@@ -47,6 +47,16 @@
 
 .feedback-group {
   margin-bottom: 1.5rem;
+  border: none;
+  padding: 0;
+  margin-inline: 0;
+}
+
+/* إزالة الحدود الافتراضية للـ fieldset */
+fieldset.feedback-group {
+  border: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
 }
 
 .feedback-legend {
@@ -71,35 +81,37 @@
   }
 }
 
+/* كل الخيارات برتقالي بشفافية 60% */
 .feedback-option {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  border: 1px solid #bfdbfe;
+  border: none;
   border-radius: 0.75rem;
-  background: #ff4500;
+  background: rgba(255, 69, 0, 0.6);
   color: #ffffff;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+  transition: background 0.15s ease;
 }
 
 .feedback-option:hover {
-  border-color: #fdba74;
+  background: rgba(255, 69, 0, 0.7);
 }
 
+/* المحدد - نفس الشفافية مع outline خفيف للتمييز */
 .feedback-option.selected {
-  border-color: #ff4500;
-  background: #ff4500;
+  background: rgba(255, 69, 0, 0.6);
+  outline: 2px solid #ff4500;
   color: #ffffff;
 }
 
 .feedback-option input[type="radio"] {
   width: 1rem;
   height: 1rem;
-  accent-color: #1a3a6e;
+  accent-color: #ffffff;
 }
 
 .feedback-stars {
@@ -157,7 +169,7 @@
 
 .feedback-textarea {
   width: 100%;
-  border: 1px solid #bfdbfe;
+  border: none;
   border-radius: 0.75rem;
   padding: 0.75rem;
   font-size: 0.875rem;
@@ -165,11 +177,12 @@
   outline: none;
   resize: vertical;
   font-family: inherit;
-  transition: border-color 0.15s ease;
+  background: rgba(255, 69, 0, 0.08);
+  transition: background 0.15s ease;
 }
 
 .feedback-textarea:focus {
-  border-color: #ff4500;
+  background: rgba(255, 69, 0, 0.15);
 }
 
 .feedback-error {
@@ -199,7 +212,7 @@
 }
 
 .feedback-submit:hover:not(:disabled) {
-  background: #ff4500;
+  background: #e03d00;
 }
 
 .feedback-submit:disabled {
@@ -214,12 +227,8 @@
 }
 
 @keyframes feedback-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .feedback-thanks {
