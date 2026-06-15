@@ -4,6 +4,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import LlamamBot from '../components/LlamamBot';
 import ScrollToTop from '../components/ScrollToTop';
+import Script from 'next/script';
 import './globals.css';
 
 const cairo = Cairo({
@@ -38,7 +39,22 @@ export default function RootLayout({ children }) {
           <Footer />
         </FavoritesProvider>
         <ScrollToTop />
+
+        {/* ويدجت الدعم الفني Tawk.to - يعمل في الخلفية بعد تحميل الصفحة كاملة */}
+        <Script id="tawk-to-chat" strategy="lazyOnload">
+          {`
+            var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+            (function(){
+            var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+            s1.async=true;
+            s1.src='https://embed.tawk.to/6a2f44029e8aac1f4526f6a1/1jr4a3aq0';
+            s1.charset='UTF-8';
+            s1.setAttribute('crossorigin','*');
+            s0.parentNode.insertBefore(s1,s0);
+            })();
+          `}
+        </Script>
       </body>
     </html>
   );
-}
+}Header
