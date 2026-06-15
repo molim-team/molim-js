@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { submitSupportFeedback } from "@/lib/supportFeedback";
+import { submitFeedbackServer } from "@/app/actions/feedbackAction"; 
 import "./feedback.css";
 
 const speedOptions = ["ممتاز", "مقبول", "بطيئ"];
@@ -120,17 +120,23 @@ export default function SupportFeedbackPage() {
     setSubmitting(true);
 
     try {
-      await submitSupportFeedback({
+      // التعديل هنا: إرسال البيانات للباكند والتحقق من النتيجة
+      const result = await submitFeedbackServer({
         speedRating,
         clarityRating,
         behaviorRating,
         overallStars,
         suggestions,
       });
-      setSubmitted(true);
+
+      if (result.success) {
+        setSubmitted(true);
+      } else {
+        setError(result.error || "حدث خطأ أثناء إرسال تقييمك. حاول مرة أخرى.");
+      }
     } catch (err) {
       console.error("Error submitting support feedback:", err);
-      setError("حدث خطأ أثناء إرسال تقييمك. حاول مرة أخرى.");
+      setError("حدث خطأ غير متوقع أثناء إرسال تقييمك. حاول مرة أخرى.");
     } finally {
       setSubmitting(false);
     }
