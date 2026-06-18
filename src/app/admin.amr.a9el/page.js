@@ -30,15 +30,18 @@ function Admin() {
   const [addForm, setAddForm] = useState(initialFormState);
   const [editForm, setEditForm] = useState(initialFormState);
 
-  // استرجاع المسوده
   useEffect(() => {
     const saved = localStorage.getItem('draft_scholarship');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        //  يشوف اذا المسوده فيها نصوص 
         if (parsed.title || parsed.country || parsed.desc) {
-          setAddForm(parsed);
+          const confirmLoad = window.confirm('📝 لديك مسودة محفوظة , هل تريد إكمالها؟');
+          if (confirmLoad) {
+            setAddForm(parsed);
+          } else {
+            localStorage.removeItem('draft_scholarship');
+          }
         }
       } catch (e) {
         console.error("فشل قراءة المسودة المحفوظة:", e);
@@ -46,7 +49,6 @@ function Admin() {
     }
   }, []);
 
-  // حفظ المسوده بعد ثانيتين 
   useEffect(() => {
     const isEmpty = !addForm.title?.trim() && !addForm.country?.trim() && !addForm.desc?.trim();
     if (isEmpty) return;
@@ -59,7 +61,6 @@ function Admin() {
     return () => clearTimeout(saveTimer);
   }, [addForm]);
 
-  
   useEffect(() => {
     if (!draftSaved) return;
 
@@ -181,7 +182,7 @@ function Admin() {
         }).catch(console.error);
       }
       setAddForm(initialFormState);
-      localStorage.removeItem('draft_scholarship'); // يمسح المسوده اذا ارسل المنحه
+      localStorage.removeItem('draft_scholarship'); 
     } catch (e) {
       setMessage({ text: `❌ حدث خطأ: ${e.message}`, type: 'error' });
     }
@@ -324,30 +325,27 @@ function Admin() {
     <div className="admin-container">
       <h1>🎛️ لوحة تحكم مُلم</h1>
 
-    <h1>🎛️ لوحة تحكم مُلم</h1>
-
-{/* اشعار المسوده */}
-{draftSaved && (
-  <div style={{
-    position: 'fixed',
-    top: '20px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    backgroundColor: '#e8f5e9',
-    color: '#2e7d32',
-    padding: '10px 20px',
-    borderRadius: '8px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-    zIndex: 9999,
-    fontSize: '14px',
-    fontWeight: 'bold',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px'
-  }}>
-    💾 تم حفظ المسودة تلقائياً
-  </div>
-)}
+      {draftSaved && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: '#e8f5e9',
+          color: '#2e7d32',
+          padding: '10px 20px',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          zIndex: 9999,
+          fontSize: '14px',
+          fontWeight: 'bold',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          💾 تم حفظ المسودة تلقائياً
+        </div>
+      )}
 
       <div className="token-bar">
         <label>🔑 التوكن الخاص (مطلوب للتحقق)</label>
@@ -577,7 +575,7 @@ function Admin() {
               <input type="text" value={editForm.language} onChange={e => setEditForm({...editForm, language: e.target.value})} />
             </div>
             <div className="form-group">
-              <label>حالة التتقديم</label>
+              <label>حالة التقديم</label>
               <select value={editForm.status} onChange={e => setEditForm({...editForm, status: e.target.value})}>
                 <option value="open">مفتوح</option>
                 <option value="closed">مغلق</option>
