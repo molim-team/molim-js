@@ -6,20 +6,23 @@ function Admin() {
   const OWNER = 'molim-team';
   const REPO = 'molim-js';
   const FILE = 'public/scholarships.json';
-// استدعاء اسم الدوله من الرمز
-  const ISO_TO_ARABIC = {
-    "sa": "السعودية", "hu": "المجر", "tr": "تركيا", "de": "ألمانيا", "gb": "بريطانيا",
-    "us": "أمريكا", "ca": "كندا", "ru": "روسيا", "cn": "الصين", "jp": "اليابان",
-    "fr": "فرنسا", "it": "إيطاليا", "es": "إسبانيا", "my": "ماليزيا", "qa": "قطر",
-    "ae": "الإمارات", "eg": "مصر", "jo": "الأردن", "kw": "الكويت", "bh": "البحرين",
-    "om": "عمان", "ye": "اليمن", "iq": "العراق", "sy": "سوريا", "lb": "لبنان",
-    "ps": "فلسطين", "tn": "تونس", "dz": "الجزائر", "ma": "المغرب", "kr": "كوريا الجنوبية",
-    "au": "أستراليا", "nz": "نيوزيلندا", "nl": "هولندا", "be": "بلجيكا", "ch": "سويسرا",
-    "at": "النمسا", "se": "السويد", "no": "النرويج", "dk": "الدنمارك", "fi": "فنلندا",
-    "id": "إندونيسيا", "in": "الهند", "pk": "باكستان", "bn": "بروناي", "az": "أذربيجان",
-    "ro": "رومانيا", "pl": "بولندا", "cy": "قبرص", "gr": "اليونان", "ie": "أيرلندا",
-    "sg": "سنغافورة", "hk": "هونغ كونغ", "tw": "تايوان", "pt": "البرتغال", "br": "البرازيل",
-    "za": "جنوب أفريقيا", "mx": "المكسيك", "ua": "أوكرانيا", "kz": "كازاخستان"
+
+  const ISO_TO_ARABIC_MAP = {
+    ad: "أندورا", ae: "الإمارات", af: "أفغانستان", ag: "أنتيغوا وبربودا", ai: "أنغويلا", al: "ألبانيا", am: "أرمينيا", ao: "أنغولا", aq: "أنتاركتيكا", ar: "الأرجنتين", as: "ساموا الأمريكية", at: "النمسا", au: "أستراليا", aw: "أروبا", ax: "جزر أولاند", az: "أذربيجان",
+    ba: "البوسنة والهرسك", bb: "باربادوس", bd: "بنجلاديش", be: "بلجيكا", bf: "بوركينا فاسو", bg: "بلغاريا", bh: "البحرين", bi: "بوروندي", bj: "بنين", bl: "سان بارتليمي", bm: "برمودا", bn: "بروناي", bo: "بوليفيا", bq: "بونير", br: "البرازيل", bs: "جزر البهاما", bt: "بوتان", bv: "جزيرة بوفيه", bw: "بوتسوانا", by: "بيلاروسيا", bz: "بليز",
+    ca: "كندا", cc: "جزر كوكوس", cd: "جمهورية الكونغو الديمقراطية", cf: "جمهورية أفريقيا الوسطى", cg: "الكونغو", ch: "سويسرا", ci: "ساحل العاج", ck: "جزر كوك", cl: "تشيلي", cm: "الكاميرون", cn: "الصين", co: "كولومبيا", cr: "كوستاريكا", cu: "كوبا", cv: "الرأس الأخضر", cw: "كوراساو", cx: "جزيرة عيد الميلاد", cy: "قبرص", cz: "التشيك",
+    de: "ألمانيا", dj: "جيبوتي", dk: "الدنمارك", dm: "دومينيكا", do: "جمهورية الدومينيكان", dz: "الجزائر",
+    ec: "الإكوادور", ee: "إستونيا", eg: "مصر", eh: "الصحراء الغربية", er: "إريتريا", es: "إسبانيا", et: "إثيوبيا", fi: "فنلندا", fj: "فيجي", fk: "جزر فوكلاند", fm: "ميكرونيزيا", fo: "جزر فارو", fr: "فرنسا",
+    ga: "الغابون", gb: "بريطانيا", gd: "غرينادا", ge: "جورجيا", gf: "غويانا الفرنسية", gg: "غيرنزي", gh: "غانا", gi: "جبل طارق", gl: "جرينلاند", gm: "غامبيا", gn: "غينيا", gp: "غوادلوب", gq: "غينيا الاستوائية", gr: "اليونان", gs: "جورجيا الجنوبية", gt: "غواتيمالا", gu: "غوام", gw: "غينيا بيساو", gy: "غويانا",
+    hk: "هونغ كونغ", hm: "جزيرة هيرد", hn: "هندوراس", hr: "كرواتيا", ht: "هايتي", hu: "المجر", id: "إندونيسيا", ie: "إيرلندا", il: "فلسطين المحتلة", im: "جزيرة مان", in: "الهند", io: "إقليم المحيط الهندي البريطاني", iq: "العراق", ir: "إيران", is: "آيسلندا", it: "إيطاليا", je: "جيرزي", jm: "جامايكا", jo: "الأردن", jp: "اليابان",
+    ke: "كينيا", kg: "قرغيزستان", kh: "كمبوديا", ki: "كيريباتي", km: "جزر القمر", kn: "سانت كيتس ونيفيس", kp: "كوريا الشمالية", kr: "كوريا الجنوبية", kw: "الكويت", ky: "جزر كايمان", kz: "كازاخستان", la: "لاوس", lb: "لبنان", lc: "سانت لوسيا", li: "ليختنشتاين", lk: "سريلانكا", lr: "ليبيريا", ls: "ليسوتو", lt: "ليتوانيا", lu: "لوكسمبورغ", lv: "لاتفيا", ly: "ليبيا",
+    ma: "المغرب", mc: "موناكو", md: "مولدوفا", me: "الجبل الأسود", mf: "سانت مارتن الفرنسية", mg: "مدغشقر", mh: "جزر مارشال", mk: "مقدونيا الشمالية", ml: "مالي", mm: "ميانمار", mn: "منغوليا", mo: "ماكاو", mp: "جزر ماريانا الشمالية", mq: "مارتينيك", mr: "موريتانيا", ms: "مونتيسرات", mt: "مالطا", mu: "موريشيوس", mv: "جزر المالديف", mw: "ملاوي", mx: "المكسيك", my: "ماليزيا", mz: "موزمبيق",
+    na: "ناميبيا", nc: "كاليدونيا الجديدة", ne: "النيجر", nf: "جزيرة نورفولك", ng: "نيجيريا", ni: "نيكاراغوا", nl: "هولندا", no: "النرويج", np: "نيبال", nr: "ناورو", nu: "نيوي", nz: "نيوزيلندا", om: "عمان",
+    pa: "بنما", pe: "بيرو", pf: "بولينزيا الفرنسية", pg: "بابوا غينيا الجديدة", ph: "الفلبين", pk: "باكستان", pl: "بولندا", pm: "سان بيير وميكلون", pn: "جزر بيتكيرن", pr: "bورتوريكو", ps: "فلسطين", pt: "البرتغال", pw: "بالاو", py: "باراغواي", qa: "قطر", re: "ريونيون", ro: "رومانيا", rs: "صربيا", ru: "روسيا", rw: "رواندا",
+    sa: "السعودية", sb: "جزر سليمان", sc: "سيشل", sd: "السودان", se: "السويد", sg: "سنغافورة", sh: "سانت هيلانة", si: "سلوفينيا", sj: "سفالبارد", sk: "سلوفاكيا", sl: "سيراليون", sm: "سان مارينو", sn: "السنغال", so: "الصومال", sr: "سورينام", ss: "جنوب السودان", st: "ساو تومي وبرينسيب", sv: "السلفادور", sx: "سينت مارتن الهولندية", sy: "سوريا", sz: "إسواتيني",
+    tc: "جزر تركس وكايكوس", td: "تشاد", tf: "الأراضي الفرنسية الجنوبية", tg: "توغو", th: "تايلاند", tj: "طاجيكستان", tk: "توكيلاو", tl: "تيمور الشرقية", tm: "تركمانستان", tn: "تونس", to: "تونغا", tr: "تركيا", tt: "ترينيداد وتوباغو", tv: "توفالو", tw: "تايوان", tz: "تنزانيا",
+    ua: "أوكرانيا", ug: "أوغندا", um: "جزر الولايات المتحدة الصغيرة النائية", us: "أمريكا", uy: "أوروغواي", uz: "أوزبكستان", va: "الفاتيكان", vc: "سانت فينسنت والغرينادين", ve: "فنزويلا", vg: "جزر العذراء البريطانية", vi: "جزر العذراء الأمريكية", vn: "فيتنام", vu: "فانواتو", wf: "واليس وفوتونا", ws: "ساموا",
+    ye: "اليمن", yt: "مايوت", za: "جنوب أفريقيا", zm: "زامبيا", zw: "زيمبابوي"
   };
 
   const getFlagEmoji = (countryCode) => {
@@ -30,8 +33,6 @@ function Admin() {
       .map(char => 127397 + char.charCodeAt(0));
     return String.fromCodePoint(...codePoints);
   };
-
-  // قائمه الدولمع الرمز
 
   const COUNTRIES_LIST = [
     { name: 'السعودية', code: 'sa' },
@@ -100,8 +101,8 @@ function Admin() {
 
   const [isCustomCountryAdd, setIsCustomCountryAdd] = useState(false);
   const [isCustomCountryEdit, setIsCustomCountryEdit] = useState(false);
-  const [customCodeAdd, setCustomCodeAdd] = useState('');
-  const [customCodeEdit, setCustomCodeEdit] = useState('');
+  const [manualCountryCodeAdd, setManualCountryCodeAdd] = useState('');
+  const [manualCountryCodeEdit, setManualCountryCodeEdit] = useState('');
 
   const initialFormState = {
     title: '', enTitle: '', country: '', flag: '', degree: '', language: '',
@@ -114,7 +115,6 @@ function Admin() {
   const [addForm, setAddForm] = useState(initialFormState);
   const [editForm, setEditForm] = useState(initialFormState);
 
-  // استرجع المسودة عند فتح الصفحة
   useEffect(() => {
     const saved = localStorage.getItem('draft_scholarship');
     if (saved) {
@@ -126,10 +126,10 @@ function Admin() {
           if (confirmLoad) {
             setAddForm(parsed);
             const exists = COUNTRIES_LIST.some(c => c.name === parsed.country);
-            if (!exists && parsed.country) {
+            if (!exists && parsed.country && parsed.flag) {
               setIsCustomCountryAdd(true);
-              const foundPair = Object.entries(ISO_TO_ARABIC).find(([_, val]) => val === parsed.country);
-              if (foundPair) setCustomCodeAdd(foundPair[0]);
+              const match = parsed.flag.match(/\/w40\/([a-z]{2})\.png/);
+              if (match) setManualCountryCodeAdd(match[1]);
             }
           } else {
             localStorage.removeItem('draft_scholarship');
@@ -142,7 +142,6 @@ function Admin() {
     }
   }, []);
 
-  // 
   useEffect(() => {
     const isEmpty = !addForm.title?.trim() && !addForm.country?.trim() && !addForm.desc?.trim();
     if (isEmpty) return;
@@ -168,7 +167,7 @@ function Admin() {
       localStorage.removeItem('draft_scholarship');
       setAddForm(initialFormState);
       setIsCustomCountryAdd(false);
-      setCustomCodeAdd('');
+      setManualCountryCodeAdd('');
       setHasStoredDraft(false);
       setMessage({ text: '🗑️ تم حذف المسودة وإفراغ الفورم بنجاح.', type: 'info' });
     }
@@ -191,11 +190,11 @@ function Admin() {
     if (selectedValue === 'custom') {
       if (formType === 'add') {
         setIsCustomCountryAdd(true);
-        setCustomCodeAdd('');
+        setManualCountryCodeAdd('');
         setAddForm({ ...addForm, country: '', flag: '' });
       } else {
         setIsCustomCountryEdit(true);
-        setCustomCodeEdit('');
+        setManualCountryCodeEdit('');
         setEditForm({ ...editForm, country: '', flag: '' });
       }
     } else {
@@ -204,34 +203,38 @@ function Admin() {
       
       if (formType === 'add') {
         setIsCustomCountryAdd(false);
-        setCustomCodeAdd('');
+        setManualCountryCodeAdd('');
         setAddForm({ ...addForm, country: selectedValue, flag: flagUrl });
       } else {
         setIsCustomCountryEdit(false);
-        setCustomCodeEdit('');
+        setManualCountryCodeEdit('');
         setEditForm({ ...editForm, country: selectedValue, flag: flagUrl });
       }
     }
   };
 
-  const handleCustomCodeChange = (formType, rawCode) => {
-    const cleanCode = rawCode.toLowerCase().trim().slice(0, 2);
-    const resolvedName = ISO_TO_ARABIC[cleanCode] || cleanCode.toUpperCase();
-    const flagUrl = cleanCode ? `https://flagcdn.com/w40/${cleanCode}.png` : '';
+  const handleManualCountryCodeChange = (formType, code) => {
+    const cleanCode = code.toLowerCase().trim().slice(0, 2);
+    const isAdd = formType === 'add';
+    const setManualCode = isAdd ? setManualCountryCodeAdd : setManualCountryCodeEdit;
+    const form = isAdd ? addForm : editForm;
+    const setForm = isAdd ? setAddForm : setEditForm;
 
-    if (formType === 'add') {
-      setCustomCodeAdd(cleanCode);
-      setAddForm({
-        ...addForm,
-        country: resolvedName,
+    setManualCode(cleanCode);
+
+    if (cleanCode.length === 2) {
+      const countryName = ISO_TO_ARABIC_MAP[cleanCode] || cleanCode.toUpperCase();
+      const flagUrl = `https://flagcdn.com/w40/${cleanCode}.png`;
+      setForm({
+        ...form,
+        country: countryName,
         flag: flagUrl
       });
     } else {
-      setCustomCodeEdit(cleanCode);
-      setEditForm({
-        ...editForm,
-        country: resolvedName,
-        flag: flagUrl
+      setForm({
+        ...form,
+        country: '',
+        flag: ''
       });
     }
   };
@@ -335,7 +338,7 @@ function Admin() {
       }
       setAddForm(initialFormState);
       setIsCustomCountryAdd(false);
-      setCustomCodeAdd('');
+      setManualCountryCodeAdd('');
       localStorage.removeItem('draft_scholarship'); 
       setHasStoredDraft(false);
     } catch (e) {
@@ -367,10 +370,10 @@ function Admin() {
     setIsCustomCountryEdit(isCustom);
 
     if (isCustom && s.flag) {
-      const extractedCode = s.flag.split('/').pop()?.split('.')[0] || '';
-      setCustomCodeEdit(extractedCode);
+      const match = s.flag.match(/\/w40\/([a-z]{2})\.png/);
+      if (match) setManualCountryCodeEdit(match[1]);
     } else {
-      setCustomCodeEdit('');
+      setManualCountryCodeEdit('');
     }
 
     setEditForm({
@@ -482,10 +485,6 @@ function Admin() {
     }
   };
 
-  const handleCancelDelete = () => {
-    setDeleteConfirm({ open: false, index: -1, name: '' });
-  };
-
   return (
     <div className="admin-container">
       <h1>🎛️ لوحة تحكم مُلم</h1>
@@ -547,29 +546,26 @@ function Admin() {
 
           {isCustomCountryAdd && (
             <div style={{ backgroundColor: '#f9f9f9', padding: '15px', borderRadius: '6px', border: '1px dashed #ccc', marginBottom: '15px' }}>
-              <div className="form-group">
-                <label>أدخل رمز الدولة المكون من حرفين فقط *</label>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label>أدخل رمز الدولة المكون من حرفين فقط (مثال: my, ie, ca)</label>
                 <input 
                   type="text" 
+                  placeholder="مثال: ie" 
                   maxLength={2}
-                  placeholder="مثال : sa السعودية , ye اليمن ..." 
-                  value={customCodeAdd} 
-                  onChange={e => handleCustomCodeChange('add', e.target.value)} 
+                  value={manualCountryCodeAdd} 
+                  onChange={e => handleManualCountryCodeChange('add', e.target.value)} 
+                  style={{ textTransform: 'lowercase', fontWeight: 'bold', letterSpacing: '2px' }}
                 />
               </div>
-              {addForm.country && (
-                <div style={{ fontSize: '13px', color: '#555', marginTop: '5px' }}>
-                  الدولة المحددة تلقائياً: <strong>{addForm.country}</strong>
-                </div>
-              )}
             </div>
           )}
 
-          {addForm.flag && (
-            <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <label>معاينة العلم المولد:</label>
-              <img src={addForm.flag} alt="Flag Preview" style={{ height: '24px', border: '1px solid #ccc', borderRadius: '3px' }} />
-              <span style={{ fontSize: '12px', color: '#666' }}>{addForm.flag}</span>
+          {addForm.country && addForm.flag && (
+            <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: '#f5f5f5', padding: '10px', borderRadius: '6px' }}>
+              <label style={{ margin: 0 }}>البلد المحدد حالياً:</label>
+              <img src={addForm.flag} alt="Flag" style={{ height: '22px', border: '1px solid #ddd', borderRadius: '3px' }} />
+              <strong style={{ color: '#2e7d32' }}>{addForm.country}</strong>
+              <span style={{ fontSize: '11px', color: '#888', marginRight: 'auto' }}>{addForm.flag}</span>
             </div>
           )}
 
@@ -695,7 +691,7 @@ function Admin() {
                 <div key={s.id || index} className="scholarship-item">
                   <div>
                     <h3>{s.flag && <img src={s.flag} alt="" style={{ height: '16px', marginLeft: '5px', verticalAlign: 'middle' }} />} {s.name || s.title}</h3>
-                    <p>{s.country} — {s.degree || s.degrees}</p>
+                    <p>{s.country} — {s.degree}</p>
                   </div>
                   <div className="item-btns">
                     <button className="btn-edit" onClick={() => handleOpenEditModal(index)}>✏️ تعديل</button>
@@ -751,28 +747,25 @@ function Admin() {
 
             {isCustomCountryEdit && (
               <div style={{ backgroundColor: '#f9f9f9', padding: '15px', borderRadius: '6px', border: '1px dashed #ccc', marginBottom: '15px' }}>
-                <div className="form-group">
-                  <label>أدخل رمز الدولة المكون من حرفين فقط *</label>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label>أدخل رمز الدولة المكون من حرفين فقط (مثال: my, ie, ca)</label>
                   <input 
                     type="text" 
                     maxLength={2}
                     value={customCodeEdit} 
-                    onChange={e => handleCustomCodeChange('edit', e.target.value)} 
+                    onChange={e => handleManualCountryCodeChange('edit', e.target.value)} 
+                    style={{ textTransform: 'lowercase', fontWeight: 'bold', letterSpacing: '2px' }}
                   />
                 </div>
-                {editForm.country && (
-                  <div style={{ fontSize: '13px', color: '#555', marginTop: '5px' }}>
-                    الدولة المحددة تلقائياً: <strong>{editForm.country}</strong>
-                  </div>
-                )}
               </div>
             )}
 
-            {!isCustomCountryEdit && editForm.flag && (
-              <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <label>رابط العلم:</label>
-                <img src={editForm.flag} alt="Preview" style={{ height: '24px', border: '1px solid #ccc', borderRadius: '3px' }} />
-                <span style={{ fontSize: '12px', color: '#666' }}>{editForm.flag}</span>
+            {editForm.country && editForm.flag && (
+              <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: '#f5f5f5', padding: '10px', borderRadius: '6px' }}>
+                <label style={{ margin: 0 }}>البلد المحدد حالياً:</label>
+                <img src={editForm.flag} alt="Flag" style={{ height: '22px', border: '1px solid #ddd', borderRadius: '3px' }} />
+                <strong style={{ color: '#2e7d32' }}>{editForm.country}</strong>
+                <span style={{ fontSize: '11px', color: '#888', marginRight: 'auto' }}>{editForm.flag}</span>
               </div>
             )}
 
