@@ -56,7 +56,7 @@ function Admin() {
     const saveTimer = setTimeout(() => {
       localStorage.setItem('draft_scholarship', JSON.stringify(addForm));
       setDraftSaved(true);
-    }, 2500);
+    }, 5000);
 
     return () => clearTimeout(saveTimer);
   }, [addForm]);
