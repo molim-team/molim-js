@@ -6,8 +6,22 @@ function Admin() {
   const OWNER = 'molim-team';
   const REPO = 'molim-js';
   const FILE = 'public/scholarships.json';
+// استدعاء اسم الدوله من الرمز
+  const ISO_TO_ARABIC = {
+    "sa": "السعودية", "hu": "المجر", "tr": "تركيا", "de": "ألمانيا", "gb": "بريطانيا",
+    "us": "أمريكا", "ca": "كندا", "ru": "روسيا", "cn": "الصين", "jp": "اليابان",
+    "fr": "فرنسا", "it": "إيطاليا", "es": "إسبانيا", "my": "ماليزيا", "qa": "قطر",
+    "ae": "الإمارات", "eg": "مصر", "jo": "الأردن", "kw": "الكويت", "bh": "البحرين",
+    "om": "عمان", "ye": "اليمن", "iq": "العراق", "sy": "سوريا", "lb": "لبنان",
+    "ps": "فلسطين", "tn": "تونس", "dz": "الجزائر", "ma": "المغرب", "kr": "كوريا الجنوبية",
+    "au": "أستراليا", "nz": "نيوزيلندا", "nl": "هولندا", "be": "بلجيكا", "ch": "سويسرا",
+    "at": "النمسا", "se": "السويد", "no": "النرويج", "dk": "الدنمارك", "fi": "فنلندا",
+    "id": "إندونيسيا", "in": "الهند", "pk": "باكستان", "bn": "بروناي", "az": "أذربيجان",
+    "ro": "رومانيا", "pl": "بولندا", "cy": "قبرص", "gr": "اليونان", "ie": "أيرلندا",
+    "sg": "سنغافورة", "hk": "هونغ كونغ", "tw": "تايوان", "pt": "البرتغال", "br": "البرازيل",
+    "za": "جنوب أفريقيا", "mx": "المكسيك", "ua": "أوكرانيا", "kz": "كازاخستان"
+  };
 
-  
   const getFlagEmoji = (countryCode) => {
     if (!countryCode) return '🌍';
     const codePoints = countryCode
@@ -17,7 +31,8 @@ function Admin() {
     return String.fromCodePoint(...codePoints);
   };
 
-  
+  // قائمه الدولمع الرمز
+
   const COUNTRIES_LIST = [
     { name: 'السعودية', code: 'sa' },
     { name: 'المجر', code: 'hu' },
@@ -83,9 +98,10 @@ function Admin() {
   const [draftSaved, setDraftSaved] = useState(false); 
   const [hasStoredDraft, setHasStoredDraft] = useState(false);
 
-  
   const [isCustomCountryAdd, setIsCustomCountryAdd] = useState(false);
   const [isCustomCountryEdit, setIsCustomCountryEdit] = useState(false);
+  const [customCodeAdd, setCustomCodeAdd] = useState('');
+  const [customCodeEdit, setCustomCodeEdit] = useState('');
 
   const initialFormState = {
     title: '', enTitle: '', country: '', flag: '', degree: '', language: '',
@@ -98,6 +114,7 @@ function Admin() {
   const [addForm, setAddForm] = useState(initialFormState);
   const [editForm, setEditForm] = useState(initialFormState);
 
+  // استرجع المسودة عند فتح الصفحة
   useEffect(() => {
     const saved = localStorage.getItem('draft_scholarship');
     if (saved) {
@@ -108,9 +125,12 @@ function Admin() {
           const confirmLoad = window.confirm('📝 لديك مسودة محفوظة , هل تريد إكمالها؟');
           if (confirmLoad) {
             setAddForm(parsed);
-            
             const exists = COUNTRIES_LIST.some(c => c.name === parsed.country);
-            if (!exists && parsed.country) setIsCustomCountryAdd(true);
+            if (!exists && parsed.country) {
+              setIsCustomCountryAdd(true);
+              const foundPair = Object.entries(ISO_TO_ARABIC).find(([_, val]) => val === parsed.country);
+              if (foundPair) setCustomCodeAdd(foundPair[0]);
+            }
           } else {
             localStorage.removeItem('draft_scholarship');
             setHasStoredDraft(false);
@@ -122,6 +142,7 @@ function Admin() {
     }
   }, []);
 
+  // 
   useEffect(() => {
     const isEmpty = !addForm.title?.trim() && !addForm.country?.trim() && !addForm.desc?.trim();
     if (isEmpty) return;
@@ -147,6 +168,7 @@ function Admin() {
       localStorage.removeItem('draft_scholarship');
       setAddForm(initialFormState);
       setIsCustomCountryAdd(false);
+      setCustomCodeAdd('');
       setHasStoredDraft(false);
       setMessage({ text: '🗑️ تم حذف المسودة وإفراغ الفورم بنجاح.', type: 'info' });
     }
@@ -165,14 +187,15 @@ function Admin() {
     return JSON.parse(new TextDecoder('utf-8').decode(bytes));
   };
 
- 
   const handleCountryDropdownChange = (formType, selectedValue) => {
     if (selectedValue === 'custom') {
       if (formType === 'add') {
         setIsCustomCountryAdd(true);
+        setCustomCodeAdd('');
         setAddForm({ ...addForm, country: '', flag: '' });
       } else {
         setIsCustomCountryEdit(true);
+        setCustomCodeEdit('');
         setEditForm({ ...editForm, country: '', flag: '' });
       }
     } else {
@@ -181,11 +204,35 @@ function Admin() {
       
       if (formType === 'add') {
         setIsCustomCountryAdd(false);
+        setCustomCodeAdd('');
         setAddForm({ ...addForm, country: selectedValue, flag: flagUrl });
       } else {
         setIsCustomCountryEdit(false);
+        setCustomCodeEdit('');
         setEditForm({ ...editForm, country: selectedValue, flag: flagUrl });
       }
+    }
+  };
+
+  const handleCustomCodeChange = (formType, rawCode) => {
+    const cleanCode = rawCode.toLowerCase().trim().slice(0, 2);
+    const resolvedName = ISO_TO_ARABIC[cleanCode] || cleanCode.toUpperCase();
+    const flagUrl = cleanCode ? `https://flagcdn.com/w40/${cleanCode}.png` : '';
+
+    if (formType === 'add') {
+      setCustomCodeAdd(cleanCode);
+      setAddForm({
+        ...addForm,
+        country: resolvedName,
+        flag: flagUrl
+      });
+    } else {
+      setCustomCodeEdit(cleanCode);
+      setEditForm({
+        ...editForm,
+        country: resolvedName,
+        flag: flagUrl
+      });
     }
   };
 
@@ -288,6 +335,7 @@ function Admin() {
       }
       setAddForm(initialFormState);
       setIsCustomCountryAdd(false);
+      setCustomCodeAdd('');
       localStorage.removeItem('draft_scholarship'); 
       setHasStoredDraft(false);
     } catch (e) {
@@ -317,6 +365,13 @@ function Admin() {
 
     const isCustom = !COUNTRIES_LIST.some(c => c.name === s.country);
     setIsCustomCountryEdit(isCustom);
+
+    if (isCustom && s.flag) {
+      const extractedCode = s.flag.split('/').pop()?.split('.')[0] || '';
+      setCustomCodeEdit(extractedCode);
+    } else {
+      setCustomCodeEdit('');
+    }
 
     setEditForm({
       title: s.name || s.title || '',
@@ -427,6 +482,10 @@ function Admin() {
     }
   };
 
+  const handleCancelDelete = () => {
+    setDeleteConfirm({ open: false, index: -1, name: '' });
+  };
+
   return (
     <div className="admin-container">
       <h1>🎛️ لوحة تحكم مُلم</h1>
@@ -482,27 +541,33 @@ function Admin() {
                   {getFlagEmoji(c.code)} {c.name}
                 </option>
               ))}
-              <option value="custom">⚙️ الخيار 50: إضافة دولة وعلم يدوياً (احتياطي)</option>
+              <option value="custom"> إضافة كود يدوي </option>
             </select>
           </div>
 
-         
           {isCustomCountryAdd && (
             <div style={{ backgroundColor: '#f9f9f9', padding: '15px', borderRadius: '6px', border: '1px dashed #ccc', marginBottom: '15px' }}>
               <div className="form-group">
-                <label>اسم الدولة اليدوي *</label>
-                <input type="text" placeholder="اكتب اسم الدولة هنا..." value={addForm.country} onChange={e => setAddForm({...addForm, country: e.target.value})} />
+                <label>أدخل رمز الدولة المكون من حرفين فقط *</label>
+                <input 
+                  type="text" 
+                  maxLength={2}
+                  placeholder="مثال : sa السعودية , ye اليمن ..." 
+                  value={customCodeAdd} 
+                  onChange={e => handleCustomCodeChange('add', e.target.value)} 
+                />
               </div>
-              <div className="form-group">
-                <label>رابط علم الدولة اليدوي (PNG)</label>
-                <input type="url" placeholder="https://example.com/flag.png" value={addForm.flag} onChange={e => setAddForm({...addForm, flag: e.target.value})} />
-              </div>
+              {addForm.country && (
+                <div style={{ fontSize: '13px', color: '#555', marginTop: '5px' }}>
+                  الدولة المحددة تلقائياً: <strong>{addForm.country}</strong>
+                </div>
+              )}
             </div>
           )}
 
-          {!isCustomCountryAdd && addForm.flag && (
+          {addForm.flag && (
             <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <label>معاينة العلم التلقائي:</label>
+              <label>معاينة العلم المولد:</label>
               <img src={addForm.flag} alt="Flag Preview" style={{ height: '24px', border: '1px solid #ccc', borderRadius: '3px' }} />
               <span style={{ fontSize: '12px', color: '#666' }}>{addForm.flag}</span>
             </div>
@@ -517,7 +582,7 @@ function Admin() {
             <input type="text" placeholder="مثال: الإنجليزية، التركية" value={addForm.language} onChange={e => setAddForm({...addForm, language: e.target.value})} />
           </div>
           <div className="form-group">
-            <label>حالة التتقديم</label>
+            <label>حالة التقديم</label>
             <select value={addForm.status} onChange={e => setAddForm({...addForm, status: e.target.value})}>
               <option value="open">مفتوح</option>
               <option value="closed">مغلق</option>
@@ -630,7 +695,7 @@ function Admin() {
                 <div key={s.id || index} className="scholarship-item">
                   <div>
                     <h3>{s.flag && <img src={s.flag} alt="" style={{ height: '16px', marginLeft: '5px', verticalAlign: 'middle' }} />} {s.name || s.title}</h3>
-                    <p>{s.country} — {s.degree}</p>
+                    <p>{s.country} — {s.degree || s.degrees}</p>
                   </div>
                   <div className="item-btns">
                     <button className="btn-edit" onClick={() => handleOpenEditModal(index)}>✏️ تعديل</button>
@@ -680,20 +745,26 @@ function Admin() {
                     {getFlagEmoji(c.code)} {c.name}
                   </option>
                 ))}
-                <option value="custom">⚙️ الخيار 50: إضافة دولة وعلم يدوياً (احتياطي)</option>
+                <option value="custom"> إضافة كود يدوي </option>
               </select>
             </div>
 
             {isCustomCountryEdit && (
               <div style={{ backgroundColor: '#f9f9f9', padding: '15px', borderRadius: '6px', border: '1px dashed #ccc', marginBottom: '15px' }}>
                 <div className="form-group">
-                  <label>اسم الدولة اليدوي *</label>
-                  <input type="text" value={editForm.country} onChange={e => setEditForm({...editForm, country: e.target.value})} />
+                  <label>أدخل رمز الدولة المكون من حرفين فقط *</label>
+                  <input 
+                    type="text" 
+                    maxLength={2}
+                    value={customCodeEdit} 
+                    onChange={e => handleCustomCodeChange('edit', e.target.value)} 
+                  />
                 </div>
-                <div className="form-group">
-                  <label>رابط علم الدولة اليدوي (PNG)</label>
-                  <input type="url" value={editForm.flag} onChange={e => setEditForm({...editForm, flag: e.target.value})} />
-                </div>
+                {editForm.country && (
+                  <div style={{ fontSize: '13px', color: '#555', marginTop: '5px' }}>
+                    الدولة المحددة تلقائياً: <strong>{editForm.country}</strong>
+                  </div>
+                )}
               </div>
             )}
 
@@ -705,7 +776,6 @@ function Admin() {
               </div>
             )}
 
-          
             <div className="form-group">
               <label>المراحل الدراسية</label>
               <input type="text" value={editForm.degree} onChange={e => setEditForm({...editForm, degree: e.target.value})} />
