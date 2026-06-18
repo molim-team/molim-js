@@ -324,6 +324,31 @@ function Admin() {
     <div className="admin-container">
       <h1>🎛️ لوحة تحكم مُلم</h1>
 
+    <h1>🎛️ لوحة تحكم مُلم</h1>
+
+{/* اشعار المسوده */}
+{draftSaved && (
+  <div style={{
+    position: 'fixed',
+    top: '20px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    backgroundColor: '#e8f5e9',
+    color: '#2e7d32',
+    padding: '10px 20px',
+    borderRadius: '8px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+    zIndex: 9999,
+    fontSize: '14px',
+    fontWeight: 'bold',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px'
+  }}>
+    💾 تم حفظ المسودة تلقائياً
+  </div>
+)}
+
       <div className="token-bar">
         <label>🔑 التوكن الخاص (مطلوب للتحقق)</label>
         <input
@@ -467,13 +492,6 @@ function Admin() {
             <label>📝 تفاصيل أو ملاحظات إضافية</label>
             <textarea placeholder="أي شروحات دقيقة تظهر بداخل صفحة التفاصيل المفردة..." value={addForm.notes} onChange={e => setAddForm({...addForm, notes: e.target.value})}></textarea>
           </div>
-
-          {/* اشعار بحفظ المسوده */}
-          {draftSaved && (
-            <p style={{ color: '#4caf50', fontSize: '13px', textAlign: 'center', marginBottom: '8px' }}>
-              💾 تم حفظ المسودة تلقائياً
-            </p>
-          )}
 
           <button className="btn-submit" onClick={handleAddScholarship}>✅ إضافة المنحة للمستودع</button>
         </div>
