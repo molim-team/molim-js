@@ -63,6 +63,7 @@ function Admin() {
   const [deleteConfirm, setDeleteConfirm] = useState({ open: false, index: -1, name: '' });
   const [draftSaved, setDraftSaved] = useState(false);
   const [hasStoredDraft, setHasStoredDraft] = useState(false);
+  const [searchFilter, setSearchFilter] = useState('');
 
   const [isCustomCountryAdd, setIsCustomCountryAdd] = useState(false);
   const [isCustomCountryEdit, setIsCustomCountryEdit] = useState(false);
@@ -294,6 +295,7 @@ function Admin() {
   const handleLoadScholarships = async () => {
     setLoadingList(true);
     setMessage({ text: '', type: '' });
+    setSearchFilter('');
     try {
       const fileData = await fetchGitHubFile();
       setCachedSha(fileData.sha);
@@ -415,6 +417,14 @@ function Admin() {
       setMessage({ text: `❌ فشل الحذف: ${e.message}`, type: 'error' });
     }
   };
+
+  const filteredScholarships = scholarships.filter(s => {
+    const q = searchFilter.trim().toLowerCase();
+    if (!q) return true;
+    const name = (s.name || s.title || '').toLowerCase();
+    const country = (s.country || '').toLowerCase();
+    return name.includes(q) || country.includes(q);
+  });
 
   return (
     <div className="admin-container">
@@ -582,24 +592,40 @@ function Admin() {
       {activeTab === 'manage' && (
         <div className="section-manage">
           <button className="btn-submit" style={{ marginBottom: '15px' }} onClick={handleLoadScholarships}>🔄 تحديث ومزامنة القائمة</button>
+          <input
+            type="text"
+            placeholder="🔍 ابحث بالاسم أو الدولة..."
+            value={searchFilter}
+            onChange={e => setSearchFilter(e.target.value)}
+            style={{
+              width: '100%', padding: '10px 14px', marginBottom: '15px',
+              border: '1px solid #ddd', borderRadius: '8px',
+              fontSize: '15px', direction: 'rtl', boxSizing: 'border-box'
+            }}
+          />
           {loadingList ? (
             <p style={{ textAlign: 'center', color: '#888' }}>⏳ جاري سحب المنح...</p>
           ) : scholarships.length === 0 ? (
             <p style={{ textAlign: 'center', color: '#aaa' }}>لا توجد منح دراسية مضافة</p>
+          ) : filteredScholarships.length === 0 ? (
+            <p style={{ textAlign: 'center', color: '#aaa' }}>لا توجد نتائج مطابقة للبحث</p>
           ) : (
             <div className="scholarships-list">
-              {scholarships.map((s, index) => (
-                <div key={s.id || index} className="scholarship-item">
-                  <div>
-                    <h3>{s.flag && <img src={s.flag} alt="" style={{ height: '16px', marginLeft: '5px', verticalAlign: 'middle' }} />}{s.name || s.title}</h3>
-                    <p>{s.country} — {s.degree || s.degrees}</p>
+              {filteredScholarships.map((s) => {
+                const originalIndex = scholarships.indexOf(s);
+                return (
+                  <div key={s.id || originalIndex} className="scholarship-item">
+                    <div>
+                      <h3>{s.flag && <img src={s.flag} alt="" style={{ height: '16px', marginLeft: '5px', verticalAlign: 'middle' }} />}{s.name || s.title}</h3>
+                      <p>{s.country} — {s.degree || s.degrees}</p>
+                    </div>
+                    <div className="item-btns">
+                      <button className="btn-edit" onClick={() => handleOpenEditModal(originalIndex)}>✏️ تعديل</button>
+                      <button className="btn-delete" onClick={() => handleDeleteClick(originalIndex)}>🗑️ حذف</button>
+                    </div>
                   </div>
-                  <div className="item-btns">
-                    <button className="btn-edit" onClick={() => handleOpenEditModal(index)}>✏️ تعديل</button>
-                    <button className="btn-delete" onClick={() => handleDeleteClick(index)}>🗑️ حذف</button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
