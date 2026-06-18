@@ -7,6 +7,69 @@ function Admin() {
   const REPO = 'molim-js';
   const FILE = 'public/scholarships.json';
 
+  
+  const getFlagEmoji = (countryCode) => {
+    if (!countryCode) return '🌍';
+    const codePoints = countryCode
+      .toUpperCase()
+      .split('')
+      .map(char => 127397 + char.charCodeAt(0));
+    return String.fromCodePoint(...codePoints);
+  };
+
+  
+  const COUNTRIES_LIST = [
+    { name: 'السعودية', code: 'sa' },
+    { name: 'المجر', code: 'hu' },
+    { name: 'تركيا', code: 'tr' },
+    { name: 'ألمانيا', code: 'de' },
+    { name: 'بريطانيا', code: 'gb' },
+    { name: 'أمريكا', code: 'us' },
+    { name: 'كندا', code: 'ca' },
+    { name: 'روسيا', code: 'ru' },
+    { name: 'الصين', code: 'cn' },
+    { name: 'اليابان', code: 'jp' },
+    { name: 'فرنسا', code: 'fr' },
+    { name: 'إيطاليا', code: 'it' },
+    { name: 'إسبانيا', code: 'es' },
+    { name: 'ماليزيا', code: 'my' },
+    { name: 'قطر', code: 'qa' },
+    { name: 'الإمارات', code: 'ae' },
+    { name: 'مصر', code: 'eg' },
+    { name: 'الأردن', code: 'jo' },
+    { name: 'الكويت', code: 'kw' },
+    { name: 'البحرين', code: 'bh' },
+    { name: 'عمان', code: 'om' },
+    { name: 'اليمن', code: 'ye' },
+    { name: 'العراق', code: 'iq' },
+    { name: 'سوريا', code: 'sy' },
+    { name: 'لبنان', code: 'lb' },
+    { name: 'فلسطين', code: 'ps' },
+    { name: 'تونس', code: 'tn' },
+    { name: 'الجزائر', code: 'dz' },
+    { name: 'المغرب', code: 'ma' },
+    { name: 'كوريا الجنوبية', code: 'kr' },
+    { name: 'أستراليا', code: 'au' },
+    { name: 'نيوزيلندا', code: 'nz' },
+    { name: 'هولندا', code: 'nl' },
+    { name: 'بلجيكا', code: 'be' },
+    { name: 'سويسرا', code: 'ch' },
+    { name: 'النمسا', code: 'at' },
+    { name: 'السويد', code: 'se' },
+    { name: 'النرويج', code: 'no' },
+    { name: 'الدنمارك', code: 'dk' },
+    { name: 'فنلندا', code: 'fi' },
+    { name: 'إندونيسيا', code: 'id' },
+    { name: 'الهند', code: 'in' },
+    { name: 'باكستان', code: 'pk' },
+    { name: 'بروناي', code: 'bn' },
+    { name: 'أذربيجان', code: 'az' },
+    { name: 'رومانيا', code: 'ro' },
+    { name: 'بولندا', code: 'pl' },
+    { name: 'قبرص', code: 'cy' },
+    { name: 'اليونان', code: 'gr' }
+  ].sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+
   const [token, setToken] = useState('');
   const [activeTab, setActiveTab] = useState('add');
   const [message, setMessage] = useState({ text: '', type: '' });
@@ -18,6 +81,11 @@ function Admin() {
   const [editingIndex, setEditingIndex] = useState(-1);
   const [deleteConfirm, setDeleteConfirm] = useState({ open: false, index: -1, name: '' });
   const [draftSaved, setDraftSaved] = useState(false); 
+  const [hasStoredDraft, setHasStoredDraft] = useState(false);
+
+  
+  const [isCustomCountryAdd, setIsCustomCountryAdd] = useState(false);
+  const [isCustomCountryEdit, setIsCustomCountryEdit] = useState(false);
 
   const initialFormState = {
     title: '', enTitle: '', country: '', flag: '', degree: '', language: '',
@@ -33,14 +101,19 @@ function Admin() {
   useEffect(() => {
     const saved = localStorage.getItem('draft_scholarship');
     if (saved) {
+      setHasStoredDraft(true);
       try {
         const parsed = JSON.parse(saved);
         if (parsed.title || parsed.country || parsed.desc) {
           const confirmLoad = window.confirm('📝 لديك مسودة محفوظة , هل تريد إكمالها؟');
           if (confirmLoad) {
             setAddForm(parsed);
+            
+            const exists = COUNTRIES_LIST.some(c => c.name === parsed.country);
+            if (!exists && parsed.country) setIsCustomCountryAdd(true);
           } else {
             localStorage.removeItem('draft_scholarship');
+            setHasStoredDraft(false);
           }
         }
       } catch (e) {
@@ -52,10 +125,11 @@ function Admin() {
   useEffect(() => {
     const isEmpty = !addForm.title?.trim() && !addForm.country?.trim() && !addForm.desc?.trim();
     if (isEmpty) return;
-// =============== متى تنفحظ المسودع بعد التوقف عن الكتابه للتعديل هنا =============//
+
     const saveTimer = setTimeout(() => {
       localStorage.setItem('draft_scholarship', JSON.stringify(addForm));
       setDraftSaved(true);
+      setHasStoredDraft(true);
     }, 5000);
 
     return () => clearTimeout(saveTimer);
@@ -63,13 +137,20 @@ function Admin() {
 
   useEffect(() => {
     if (!draftSaved) return;
-
-    const hideTimer = setTimeout(() => {
-      setDraftSaved(false);
-    }, 2000);
-
+    const hideTimer = setTimeout(() => { setDraftSaved(false); }, 2000);
     return () => clearTimeout(hideTimer);
   }, [draftSaved]);
+
+  const handleClearDraft = () => {
+    const confirmDelete = window.confirm('⚠️ هل أنت متأكد من رغبتك في حذف المسودة المحفوظة وإفراغ الحقول بالكامل؟');
+    if (confirmDelete) {
+      localStorage.removeItem('draft_scholarship');
+      setAddForm(initialFormState);
+      setIsCustomCountryAdd(false);
+      setHasStoredDraft(false);
+      setMessage({ text: '🗑️ تم حذف المسودة وإفراغ الفورم بنجاح.', type: 'info' });
+    }
+  };
 
   const toBase64 = (str) => {
     const bytes = new TextEncoder().encode(str);
@@ -82,6 +163,30 @@ function Admin() {
     const clean = content.replace(/\n/g, '');
     const bytes = Uint8Array.from(atob(clean), c => c.charCodeAt(0));
     return JSON.parse(new TextDecoder('utf-8').decode(bytes));
+  };
+
+ 
+  const handleCountryDropdownChange = (formType, selectedValue) => {
+    if (selectedValue === 'custom') {
+      if (formType === 'add') {
+        setIsCustomCountryAdd(true);
+        setAddForm({ ...addForm, country: '', flag: '' });
+      } else {
+        setIsCustomCountryEdit(true);
+        setEditForm({ ...editForm, country: '', flag: '' });
+      }
+    } else {
+      const selected = COUNTRIES_LIST.find(c => c.name === selectedValue);
+      const flagUrl = selected ? `https://flagcdn.com/w40/${selected.code}.png` : '';
+      
+      if (formType === 'add') {
+        setIsCustomCountryAdd(false);
+        setAddForm({ ...addForm, country: selectedValue, flag: flagUrl });
+      } else {
+        setIsCustomCountryEdit(false);
+        setEditForm({ ...editForm, country: selectedValue, flag: flagUrl });
+      }
+    }
   };
 
   const handleFileTypeChange = (formType, fileType, index, value) => {
@@ -182,7 +287,9 @@ function Admin() {
         }).catch(console.error);
       }
       setAddForm(initialFormState);
+      setIsCustomCountryAdd(false);
       localStorage.removeItem('draft_scholarship'); 
+      setHasStoredDraft(false);
     } catch (e) {
       setMessage({ text: `❌ حدث خطأ: ${e.message}`, type: 'error' });
     }
@@ -207,6 +314,9 @@ function Admin() {
     const s = scholarships[index];
     setEditingIndex(index);
     setEditMessage({ text: '', type: '' });
+
+    const isCustom = !COUNTRIES_LIST.some(c => c.name === s.country);
+    setIsCustomCountryEdit(isCustom);
 
     setEditForm({
       title: s.name || s.title || '',
@@ -317,31 +427,16 @@ function Admin() {
     }
   };
 
-  const handleCancelDelete = () => {
-    setDeleteConfirm({ open: false, index: -1, name: '' });
-  };
-
   return (
     <div className="admin-container">
       <h1>🎛️ لوحة تحكم مُلم</h1>
 
       {draftSaved && (
         <div style={{
-          position: 'fixed',
-          top: '20px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          backgroundColor: '#e8f5e9',
-          color: '#2e7d32',
-          padding: '10px 20px',
-          borderRadius: '8px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-          zIndex: 9999,
-          fontSize: '14px',
-          fontWeight: 'bold',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px'
+          position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)',
+          backgroundColor: '#e8f5e9', color: '#2e7d32', padding: '10px 20px',
+          borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', zIndex: 9999,
+          fontSize: '14px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px'
         }}>
           💾 تم حفظ المسودة تلقائياً
         </div>
@@ -358,23 +453,12 @@ function Admin() {
       </div>
 
       <div className="tabs">
-        <button
-          className={`tab-btn ${activeTab === 'add' ? 'active' : 'inactive'}`}
-          onClick={() => setActiveTab('add')}
-        >
-          ➕ إضافة منحة
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'manage' ? 'active' : 'inactive'}`}
-          onClick={() => { setActiveTab('manage'); handleLoadScholarships(); }}
-        >
-          📋 إدارة المنح
-        </button>
+        <button className={`tab-btn ${activeTab === 'add' ? 'active' : 'inactive'}`} onClick={() => setActiveTab('add')}>➕ إضافة منحة</button>
+        <button className={`tab-btn ${activeTab === 'manage' ? 'active' : 'inactive'}`} onClick={() => { setActiveTab('manage'); handleLoadScholarships(); }}>📋 إدارة المنح</button>
       </div>
 
       {message.text && <p className={`admin-msg ${message.type}`}>{message.text}</p>}
 
-      {/* ================= تبويب الإضافة ================= */}
       {activeTab === 'add' && (
         <div className="section-form">
           <div className="form-group">
@@ -385,14 +469,45 @@ function Admin() {
             <label>الاسم الإنجليزي للمنحة</label>
             <input type="text" placeholder="مثال: Turkey Government Scholarship" value={addForm.enTitle} onChange={e => setAddForm({...addForm, enTitle: e.target.value})} />
           </div>
+          
           <div className="form-group">
-            <label>الدولة *</label>
-            <input type="text" placeholder="مثال: تركيا" value={addForm.country} onChange={e => setAddForm({...addForm, country: e.target.value})} />
+            <label>🌍 اختر دولة المنحة *</label>
+            <select 
+              value={isCustomCountryAdd ? 'custom' : addForm.country} 
+              onChange={e => handleCountryDropdownChange('add', e.target.value)}
+            >
+              <option value="">-- اختر الدولة --</option>
+              {COUNTRIES_LIST.map((c, idx) => (
+                <option key={idx} value={c.name}>
+                  {getFlagEmoji(c.code)} {c.name}
+                </option>
+              ))}
+              <option value="custom">⚙️ الخيار 50: إضافة دولة وعلم يدوياً (احتياطي)</option>
+            </select>
           </div>
-          <div className="form-group">
-            <label>علم الدولة </label>
-            <input type="text" placeholder="مثال: https://flagcdn.com/w40/XX.png" value={addForm.flag} onChange={e => setAddForm({...addForm, flag: e.target.value})} />
-          </div>
+
+         
+          {isCustomCountryAdd && (
+            <div style={{ backgroundColor: '#f9f9f9', padding: '15px', borderRadius: '6px', border: '1px dashed #ccc', marginBottom: '15px' }}>
+              <div className="form-group">
+                <label>اسم الدولة اليدوي *</label>
+                <input type="text" placeholder="اكتب اسم الدولة هنا..." value={addForm.country} onChange={e => setAddForm({...addForm, country: e.target.value})} />
+              </div>
+              <div className="form-group">
+                <label>رابط علم الدولة اليدوي (PNG)</label>
+                <input type="url" placeholder="https://example.com/flag.png" value={addForm.flag} onChange={e => setAddForm({...addForm, flag: e.target.value})} />
+              </div>
+            </div>
+          )}
+
+          {!isCustomCountryAdd && addForm.flag && (
+            <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <label>معاينة العلم التلقائي:</label>
+              <img src={addForm.flag} alt="Flag Preview" style={{ height: '24px', border: '1px solid #ccc', borderRadius: '3px' }} />
+              <span style={{ fontSize: '12px', color: '#666' }}>{addForm.flag}</span>
+            </div>
+          )}
+
           <div className="form-group">
             <label>المراحل الدراسية</label>
             <input type="text" placeholder="مثال: بكالوريوس، ماجستير" value={addForm.degree} onChange={e => setAddForm({...addForm, degree: e.target.value})} />
@@ -402,7 +517,7 @@ function Admin() {
             <input type="text" placeholder="مثال: الإنجليزية، التركية" value={addForm.language} onChange={e => setAddForm({...addForm, language: e.target.value})} />
           </div>
           <div className="form-group">
-            <label>حالة التقديم</label>
+            <label>حالة التتقديم</label>
             <select value={addForm.status} onChange={e => setAddForm({...addForm, status: e.target.value})}>
               <option value="open">مفتوح</option>
               <option value="closed">مغلق</option>
@@ -418,13 +533,14 @@ function Admin() {
           </div>
           <div className="form-group">
             <label>وصف المنحة (قصير)</label>
-            <textarea placeholder="اكتب وصفاً مختصراً يظهر في بطاقة المنحة الدراسية الرئيسيّة..." value={addForm.desc} onChange={e => setAddForm({...addForm, desc: e.target.value})}></textarea>
+            <textarea placeholder="اكتب وصفاً مختصراً..." value={addForm.desc} onChange={e => setAddForm({...addForm, desc: e.target.value})}></textarea>
           </div>
+
           <div className="files-section">
             <p className="sub-title-file">🎁 المميزات</p>
             {addForm.benefits.map((item, i) => (
               <div key={i} className="file-row">
-                <input type="text" placeholder="مثال: رسوم دراسية كاملة" value={item} onChange={e => handleFileTypeChange('add', 'benefits', i, e.target.value)} />
+                <input type="text" value={item} onChange={e => handleFileTypeChange('add', 'benefits', i, e.target.value)} />
                 <button type="button" className="btn-remove-file" onClick={() => removeFileField('add', 'benefits', i)}>✕</button>
               </div>
             ))}
@@ -435,15 +551,16 @@ function Admin() {
             <p className="sub-title-file">📋 الشروط</p>
             {addForm.requirements.map((item, i) => (
               <div key={i} className="file-row">
-                <input type="text" placeholder="مثال: شهادة الثانوية العامة" value={item} onChange={e => handleFileTypeChange('add', 'requirements', i, e.target.value)} />
+                <input type="text" value={item} onChange={e => handleFileTypeChange('add', 'requirements', i, e.target.value)} />
                 <button type="button" className="btn-remove-file" onClick={() => removeFileField('add', 'requirements', i)}>✕</button>
               </div>
             ))}
             <button type="button" className="btn-add-file" onClick={() => addFileField('add', 'requirements')}>+ إضافة شرط</button>
           </div>
+
           <div className="form-group">
             <label>📚 التخصصات المتاحة (افصل بينها بفاصلة ,)</label>
-            <input type="text" placeholder="مثال: كلية الطب" value={addForm.majors} onChange={e => setAddForm({...addForm, majors: e.target.value})} />
+            <input type="text" value={addForm.majors} onChange={e => setAddForm({...addForm, majors: e.target.value})} />
           </div>
 
           <div className="files-section">
@@ -451,7 +568,7 @@ function Admin() {
             <p className="sub-title-file">📌 الملفات الإجبارية</p>
             {addForm.requiredFiles.map((file, i) => (
               <div key={i} className="file-row">
-                <input type="text" placeholder="مثال: نسخة من جواز السفر..." value={file} onChange={e => handleFileTypeChange('add', 'requiredFiles', i, e.target.value)} />
+                <input type="text" value={file} onChange={e => handleFileTypeChange('add', 'requiredFiles', i, e.target.value)} />
                 <button type="button" className="btn-remove-file" onClick={() => removeFileField('add', 'requiredFiles', i)}>✕</button>
               </div>
             ))}
@@ -462,7 +579,7 @@ function Admin() {
             <p className="sub-title-file">📎 الملفات الاختيارية</p>
             {addForm.optionalFiles.map((file, i) => (
               <div key={i} className="file-row">
-                <input type="text" placeholder="مثال: شهادات تطوع أو إنجاز..." value={file} onChange={e => handleFileTypeChange('add', 'optionalFiles', i, e.target.value)} />
+                <input type="text" value={file} onChange={e => handleFileTypeChange('add', 'optionalFiles', i, e.target.value)} />
                 <button type="button" className="btn-remove-file" onClick={() => removeFileField('add', 'optionalFiles', i)}>✕</button>
               </div>
             ))}
@@ -471,48 +588,49 @@ function Admin() {
 
           <div className="form-group">
             <label>رابط التقديم للموقع الرسمي</label>
-            <input type="url" placeholder="https://..." value={addForm.link} onChange={e => setAddForm({...addForm, link: e.target.value})} />
+            <input type="url" value={addForm.link} onChange={e => setAddForm({...addForm, link: e.target.value})} />
           </div>
 
           <div className="files-section">
-            <h4>📣 روابط مجموعات Telegram</h4>
+            <h4>📂 روابط مجموعات Telegram</h4>
             <div className="form-group">
               <label>🔗 رابط قناة المنحة</label>
-              <input type="url" placeholder="https://t.me/..." value={addForm.groupLink} onChange={e => setAddForm({...addForm, groupLink: e.target.value})} />
+              <input type="url" value={addForm.groupLink} onChange={e => setAddForm({...addForm, groupLink: e.target.value})} />
             </div>
             <div className="form-group">
               <label>💬 رابط مناقشة المنحة</label>
-              <input type="url" placeholder="https://t.me/..." value={addForm.discussionLink} onChange={e => setAddForm({...addForm, discussionLink: e.target.value})} />
+              <input type="url" value={addForm.discussionLink} onChange={e => setAddForm({...addForm, discussionLink: e.target.value})} />
             </div>
           </div>
 
           <div className="form-group">
-            <label>📝 تفاصيل أو ملاحظات إضافية</label>
-            <textarea placeholder="أي شروحات دقيقة تظهر بداخل صفحة التفاصيل المفردة..." value={addForm.notes} onChange={e => setAddForm({...addForm, notes: e.target.value})}></textarea>
+            <label>📝 ملاحظات إضافية</label>
+            <textarea value={addForm.notes} onChange={e => setAddForm({...addForm, notes: e.target.value})}></textarea>
           </div>
 
-          <button className="btn-submit" onClick={handleAddScholarship}>✅ إضافة المنحة للمستودع</button>
+          <div style={{ display: 'flex', gap: '15px', marginTop: '20px' }}>
+            <button className="btn-submit" style={{ flex: 1 }} onClick={handleAddScholarship}>✅ إضافة المنحة للمستودع</button>
+            {hasStoredDraft && (
+              <button className="btn-delete" style={{ padding: '0 25px', backgroundColor: '#d32f2f', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }} onClick={handleClearDraft}>🗑️ حذف المسودة</button>
+            )}
+          </div>
         </div>
       )}
 
-      {/* ================= تبويب إدارة المنح ================= */}
       {activeTab === 'manage' && (
         <div className="section-manage">
-          <button className="btn-submit" style={{ marginBottom: '15px' }} onClick={handleLoadScholarships}>
-            🔄 تحديث ومزامنة القائمة
-          </button>
-
+          <button className="btn-submit" style={{ marginBottom: '15px' }} onClick={handleLoadScholarships}>🔄 تحديث ومزامنة القائمة</button>
           {loadingList ? (
-            <p style={{ textAlign: 'center', color: '#888' }}>⏳ جاري سحب المنح وتحديثات السيرفر...</p>
+            <p style={{ textAlign: 'center', color: '#888' }}>⏳ جاري سحب المنح...</p>
           ) : scholarships.length === 0 ? (
-            <p style={{ textAlign: 'center', color: '#aaa' }}>لا توجد منح دراسية مضافة حالياً في السجل</p>
+            <p style={{ textAlign: 'center', color: '#aaa' }}>لا توجد منح دراسية مضافة</p>
           ) : (
             <div className="scholarships-list">
               {scholarships.map((s, index) => (
                 <div key={s.id || index} className="scholarship-item">
                   <div>
-                    <h3>{s.flag} {s.name || s.title}</h3>
-                    <p>{s.country} — {s.degree || s.degrees}</p>
+                    <h3>{s.flag && <img src={s.flag} alt="" style={{ height: '16px', marginLeft: '5px', verticalAlign: 'middle' }} />} {s.name || s.title}</h3>
+                    <p>{s.country} — {s.degree}</p>
                   </div>
                   <div className="item-btns">
                     <button className="btn-edit" onClick={() => handleOpenEditModal(index)}>✏️ تعديل</button>
@@ -525,146 +643,79 @@ function Admin() {
         </div>
       )}
 
-      {/* ================= نافذة تأكيد الحذف ================= */}
       {deleteConfirm.open && (
-        <div className="modal-overlay open" onClick={handleCancelDelete}>
+        <div className="modal-overlay open" onClick={() => setDeleteConfirm({ open: false, index: -1, name: '' })}>
           <div className="modal-box" style={{ maxWidth: '420px' }} onClick={(e) => e.stopPropagation()}>
             <h2>⚠️ تأكيد الحذف</h2>
-            <p style={{ margin: '15px 0', color: '#555', lineHeight: '1.7' }}>
-              هل أنت متأكد من حذف منحة <strong>"{deleteConfirm.name}"</strong>؟<br/>
-              لا يمكن التراجع عن هذا الإجراء.
-            </p>
+            <p>هل أنت متأكد من حذف منحة <strong>"{deleteConfirm.name}"</strong>؟</p>
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-              <button className="btn-cancel-delete" onClick={handleCancelDelete}>إلغاء</button>
-              <button className="btn-confirm-delete" onClick={handleConfirmDelete}>نعم، احذف المنحة</button>
+              <button className="btn-cancel-delete" onClick={() => setDeleteConfirm({ open: false, index: -1, name: '' })}>إلغاء</button>
+              <button className="btn-confirm-delete" onClick={handleConfirmDelete}>نعم، احذف</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ================= المودال (نافذة التعديل) ================= */}
       {isModalOpen && (
         <div className="modal-overlay open" onClick={() => setIsModalOpen(false)}>
           <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setIsModalOpen(false)}>✕</button>
-            <h2>✏️ تعديل بيانات المنحة المختارة</h2>
+            <h2>✏️ تعديل بيانات المنحة</h2>
             {editMessage.text && <p className={`admin-msg ${editMessage.type}`}>{editMessage.text}</p>}
 
             <div className="form-group">
               <label>اسم المنحة *</label>
               <input type="text" value={editForm.title} onChange={e => setEditForm({...editForm, title: e.target.value})} />
             </div>
+            
             <div className="form-group">
-              <label>الاسم الإنجليزي</label>
-              <input type="text" value={editForm.enTitle} onChange={e => setEditForm({...editForm, enTitle: e.target.value})} />
+              <label>🌍 تعديل دولة المنحة *</label>
+              <select 
+                value={isCustomCountryEdit ? 'custom' : editForm.country} 
+                onChange={e => handleCountryDropdownChange('edit', e.target.value)}
+              >
+                <option value="">-- اختر الدولة --</option>
+                {COUNTRIES_LIST.map((c, idx) => (
+                  <option key={idx} value={c.name}>
+                    {getFlagEmoji(c.code)} {c.name}
+                  </option>
+                ))}
+                <option value="custom">⚙️ الخيار 50: إضافة دولة وعلم يدوياً (احتياطي)</option>
+              </select>
             </div>
-            <div className="form-group">
-              <label>الدولة *</label>
-              <input type="text" value={editForm.country} onChange={e => setEditForm({...editForm, country: e.target.value})} />
-            </div>
-            <div className="form-group">
-              <label>رمز الدولة (علم)</label>
-              <input type="text" value={editForm.flag} onChange={e => setEditForm({...editForm, flag: e.target.value})} />
-            </div>
+
+            {isCustomCountryEdit && (
+              <div style={{ backgroundColor: '#f9f9f9', padding: '15px', borderRadius: '6px', border: '1px dashed #ccc', marginBottom: '15px' }}>
+                <div className="form-group">
+                  <label>اسم الدولة اليدوي *</label>
+                  <input type="text" value={editForm.country} onChange={e => setEditForm({...editForm, country: e.target.value})} />
+                </div>
+                <div className="form-group">
+                  <label>رابط علم الدولة اليدوي (PNG)</label>
+                  <input type="url" value={editForm.flag} onChange={e => setEditForm({...editForm, flag: e.target.value})} />
+                </div>
+              </div>
+            )}
+
+            {!isCustomCountryEdit && editForm.flag && (
+              <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <label>رابط العلم:</label>
+                <img src={editForm.flag} alt="Preview" style={{ height: '24px', border: '1px solid #ccc', borderRadius: '3px' }} />
+                <span style={{ fontSize: '12px', color: '#666' }}>{editForm.flag}</span>
+              </div>
+            )}
+
+          
             <div className="form-group">
               <label>المراحل الدراسية</label>
               <input type="text" value={editForm.degree} onChange={e => setEditForm({...editForm, degree: e.target.value})} />
             </div>
             <div className="form-group">
-              <label>🌐 لغة الدراسة</label>
-              <input type="text" value={editForm.language} onChange={e => setEditForm({...editForm, language: e.target.value})} />
-            </div>
-            <div className="form-group">
-              <label>حالة التقديم</label>
-              <select value={editForm.status} onChange={e => setEditForm({...editForm, status: e.target.value})}>
-                <option value="open">مفتوح</option>
-                <option value="closed">مغلق</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label>📅 موعد فتح التقديم</label>
-              <input type="date" value={editForm.open_date} onChange={e => setEditForm({...editForm, open_date: e.target.value})} />
-            </div>
-            <div className="form-group">
-              <label>📅 آخر موعد للتقديم</label>
-              <input type="date" value={editForm.deadline} onChange={e => setEditForm({...editForm, deadline: e.target.value})} />
-            </div>
-            <div className="form-group">
-              <label>وصف المنحة (قصير)</label>
+              <label>وصف المنحة</label>
               <textarea value={editForm.desc} onChange={e => setEditForm({...editForm, desc: e.target.value})}></textarea>
             </div>
-            <div className="files-section">
-              <p className="sub-title-file">🎁 المميزات</p>
-              {editForm.benefits.map((item, i) => (
-                <div key={i} className="file-row">
-                  <input type="text" value={item} onChange={e => handleFileTypeChange('edit', 'benefits', i, e.target.value)} />
-                  <button type="button" className="btn-remove-file" onClick={() => removeFileField('edit', 'benefits', i)}>✕</button>
-                </div>
-              ))}
-              <button type="button" className="btn-add-file" onClick={() => addFileField('edit', 'benefits')}>+ إضافة ميزة</button>
-            </div>
 
-            <div className="files-section">
-              <p className="sub-title-file">📋 الشروط</p>
-              {editForm.requirements.map((item, i) => (
-                <div key={i} className="file-row">
-                  <input type="text" value={item} onChange={e => handleFileTypeChange('edit', 'requirements', i, e.target.value)} />
-                  <button type="button" className="btn-remove-file" onClick={() => removeFileField('edit', 'requirements', i)}>✕</button>
-                </div>
-              ))}
-              <button type="button" className="btn-add-file" onClick={() => addFileField('edit', 'requirements')}>+ إضافة شرط</button>
-            </div>
-            <div className="form-group">
-              <label>📚 التخصصات</label>
-              <input type="text" value={editForm.majors} onChange={e => setEditForm({...editForm, majors: e.target.value})} />
-            </div>
-
-            <div className="files-section">
-              <h4>📂 تعديل المستندات</h4>
-              <p className="sub-title-file">📌 الملفات الإجبارية</p>
-              {editForm.requiredFiles.map((file, i) => (
-                <div key={i} className="file-row">
-                  <input type="text" value={file} onChange={e => handleFileTypeChange('edit', 'requiredFiles', i, e.target.value)} />
-                  <button type="button" className="btn-remove-file" onClick={() => removeFileField('edit', 'requiredFiles', i)}>✕</button>
-                </div>
-              ))}
-              <button type="button" className="btn-add-file" onClick={() => addFileField('edit', 'requiredFiles')}>+ إضافة مستند إجباري</button>
-
-              <hr className="section-divider"/>
-
-              <p className="sub-title-file">📎 الملفات الاختيارية</p>
-              {editForm.optionalFiles.map((file, i) => (
-                <div key={i} className="file-row">
-                  <input type="text" value={file} onChange={e => handleFileTypeChange('edit', 'optionalFiles', i, e.target.value)} />
-                  <button type="button" className="btn-remove-file" onClick={() => removeFileField('edit', 'optionalFiles', i)}>✕</button>
-                </div>
-              ))}
-              <button type="button" className="btn-add-file" onClick={() => addFileField('edit', 'optionalFiles')}>+ إضافة مستند اختياري</button>
-            </div>
-
-            <div className="form-group">
-              <label>رابط التقديم الرسمي</label>
-              <input type="url" value={editForm.link} onChange={e => setEditForm({...editForm, link: e.target.value})} />
-            </div>
-
-            <div className="files-section">
-              <h4>📣 روابط مجموعات Telegram</h4>
-              <div className="form-group">
-                <label>🔗 رابط قناة المنحة</label>
-                <input type="url" placeholder="https://t.me/..." value={editForm.groupLink} onChange={e => setEditForm({...editForm, groupLink: e.target.value})} />
-              </div>
-              <div className="form-group">
-                <label>💬 رابط مناقشة المنحة</label>
-                <input type="url" placeholder="https://t.me/..." value={editForm.discussionLink} onChange={e => setEditForm({...editForm, discussionLink: e.target.value})} />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>📝 تفاصيل إضافية</label>
-              <textarea value={editForm.notes} onChange={e => setEditForm({...editForm, notes: e.target.value})}></textarea>
-            </div>
-
-            <button className="btn-save" onClick={handleSaveEdit}>💾 حفظ التعديلات </button>
+            <button className="btn-save" onClick={handleSaveEdit}>💾 حفظ التعديلات</button>
           </div>
         </div>
       )}
