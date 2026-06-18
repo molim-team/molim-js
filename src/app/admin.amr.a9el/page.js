@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function Admin() {
   const OWNER = 'molim-team';
@@ -17,6 +17,7 @@ function Admin() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState(-1);
   const [deleteConfirm, setDeleteConfirm] = useState({ open: false, index: -1, name: '' });
+  const [draftSaved, setDraftSaved] = useState(false); 
 
   const initialFormState = {
     title: '', enTitle: '', country: '', flag: '', degree: '', language: '',
@@ -28,6 +29,46 @@ function Admin() {
 
   const [addForm, setAddForm] = useState(initialFormState);
   const [editForm, setEditForm] = useState(initialFormState);
+
+  // ✅ 1. استرجاع صامت ومستقر للمسودة عند فتح الصفحة لأول مرة
+  useEffect(() => {
+    const saved = localStorage.getItem('draft_scholarship');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        // التحقق من وجود بيانات فعلية قبل تحميلها في الحقول
+        if (parsed.title || parsed.country || parsed.desc) {
+          setAddForm(parsed);
+        }
+      } catch (e) {
+        console.error("فشل قراءة المسودة المحفوظة:", e);
+      }
+    }
+  }, []);
+
+  // ✅ 2. حفظ تلقائي آمن بعد ثانية ونصف من التوقف عن الكتابة
+  useEffect(() => {
+    const isEmpty = !addForm.title?.trim() && !addForm.country?.trim() && !addForm.desc?.trim();
+    if (isEmpty) return;
+
+    const saveTimer = setTimeout(() => {
+      localStorage.setItem('draft_scholarship', JSON.stringify(addForm));
+      setDraftSaved(true);
+    }, 1500);
+
+    return () => clearTimeout(saveTimer);
+  }, [addForm]);
+
+  // ✅ 3. مؤقت منفصل آمن لإخفاء إشعار الحفظ تلقائياً دون تداخل أو تسريب ذاكرة
+  useEffect(() => {
+    if (!draftSaved) return;
+
+    const hideTimer = setTimeout(() => {
+      setDraftSaved(false);
+    }, 2000);
+
+    return () => clearTimeout(hideTimer);
+  }, [draftSaved]);
 
   const toBase64 = (str) => {
     const bytes = new TextEncoder().encode(str);
@@ -129,17 +170,18 @@ function Admin() {
       currentList.push(newEntry);
       await saveGitHubFile(fileData.sha, currentList, `إضافة منحة: ${newEntry.name}`);
       setMessage({ text: '✅ تمت إضافة المنحة بنجاح! ستظهر على الموقع خلال دقائق.', type: 'success' });
-if (newEntry.open) {
-  fetch('/api/notify-scholarship', {
-    method: 'POST',
-    headers: { 
-      'Content-Type': 'application/json',
-      'x-notify-secret': process.env.NEXT_PUBLIC_NOTIFY_SECRET,
-    },
-    body: JSON.stringify({ scholarship: newEntry }),
-  }).catch(console.error);
-}
+      if (newEntry.open) {
+        fetch('/api/notify-scholarship', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-notify-secret': process.env.NEXT_PUBLIC_NOTIFY_SECRET,
+          },
+          body: JSON.stringify({ scholarship: newEntry }),
+        }).catch(console.error);
+      }
       setAddForm(initialFormState);
+      localStorage.removeItem('draft_scholarship'); // ✅ مسح المسودة فور الإرسال الناجح
     } catch (e) {
       setMessage({ text: `❌ حدث خطأ: ${e.message}`, type: 'error' });
     }
@@ -233,16 +275,16 @@ if (newEntry.open) {
 
       setEditMessage({ text: '✅ تم حفظ التعديلات بنجاح!', type: 'success' });
       const isNowOpen = editForm.status === 'open';
-if (!wasOpen && isNowOpen) {
-  fetch('/api/notify-scholarship', {
-  method: 'POST',
-  headers: { 
-    'Content-Type': 'application/json',
-    'x-notify-secret': process.env.NEXT_PUBLIC_NOTIFY_SECRET,
-  },
-  body: JSON.stringify({ scholarship: updatedList[editingIndex] }),
-}).catch(console.error);
-}
+      if (!wasOpen && isNowOpen) {
+        fetch('/api/notify-scholarship', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-notify-secret': process.env.NEXT_PUBLIC_NOTIFY_SECRET,
+          },
+          body: JSON.stringify({ scholarship: updatedList[editingIndex] }),
+        }).catch(console.error);
+      }
       setTimeout(() => {
         setIsModalOpen(false);
         handleLoadScholarships();
@@ -426,6 +468,13 @@ if (!wasOpen && isNowOpen) {
             <textarea placeholder="أي شروحات دقيقة تظهر بداخل صفحة التفاصيل المفردة..." value={addForm.notes} onChange={e => setAddForm({...addForm, notes: e.target.value})}></textarea>
           </div>
 
+          {/* ✅ إشعار المسودة المستقر والمصلح */}
+          {draftSaved && (
+            <p style={{ color: '#4caf50', fontSize: '13px', textAlign: 'center', marginBottom: '8px' }}>
+              💾 تم حفظ المسودة تلقائياً
+            </p>
+          )}
+
           <button className="btn-submit" onClick={handleAddScholarship}>✅ إضافة المنحة للمستودع</button>
         </div>
       )}
@@ -477,7 +526,7 @@ if (!wasOpen && isNowOpen) {
         </div>
       )}
 
-      {/* ================= المودال (نافذة التعديل ) ================= */}
+      {/* ================= المودال (نافذة التعديل) ================= */}
       {isModalOpen && (
         <div className="modal-overlay open" onClick={() => setIsModalOpen(false)}>
           <div className="modal-box" onClick={(e) => e.stopPropagation()}>
@@ -510,7 +559,7 @@ if (!wasOpen && isNowOpen) {
               <input type="text" value={editForm.language} onChange={e => setEditForm({...editForm, language: e.target.value})} />
             </div>
             <div className="form-group">
-              <label>حالة التقديم</label>
+              <label>حالة التتقديم</label>
               <select value={editForm.status} onChange={e => setEditForm({...editForm, status: e.target.value})}>
                 <option value="open">مفتوح</option>
                 <option value="closed">مغلق</option>
