@@ -52,11 +52,11 @@ function Admin() {
   useEffect(() => {
     const isEmpty = !addForm.title?.trim() && !addForm.country?.trim() && !addForm.desc?.trim();
     if (isEmpty) return;
-
+// =============== متى تنفحظ المسودع بعد التوقف عن الكتابه للتعديل هنا =============//
     const saveTimer = setTimeout(() => {
       localStorage.setItem('draft_scholarship', JSON.stringify(addForm));
       setDraftSaved(true);
-    }, 1500);
+    }, 2500);
 
     return () => clearTimeout(saveTimer);
   }, [addForm]);
