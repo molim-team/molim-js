@@ -30,13 +30,13 @@ function Admin() {
   const [addForm, setAddForm] = useState(initialFormState);
   const [editForm, setEditForm] = useState(initialFormState);
 
-  // ✅ 1. استرجاع صامت ومستقر للمسودة عند فتح الصفحة لأول مرة
+  // استرجاع المسوده
   useEffect(() => {
     const saved = localStorage.getItem('draft_scholarship');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // التحقق من وجود بيانات فعلية قبل تحميلها في الحقول
+        //  يشوف اذا المسوده فيها نصوص 
         if (parsed.title || parsed.country || parsed.desc) {
           setAddForm(parsed);
         }
@@ -46,7 +46,7 @@ function Admin() {
     }
   }, []);
 
-  // ✅ 2. حفظ تلقائي آمن بعد ثانية ونصف من التوقف عن الكتابة
+  // حفظ المسوده بعد ثانيتين 
   useEffect(() => {
     const isEmpty = !addForm.title?.trim() && !addForm.country?.trim() && !addForm.desc?.trim();
     if (isEmpty) return;
@@ -59,7 +59,7 @@ function Admin() {
     return () => clearTimeout(saveTimer);
   }, [addForm]);
 
-  // ✅ 3. مؤقت منفصل آمن لإخفاء إشعار الحفظ تلقائياً دون تداخل أو تسريب ذاكرة
+  
   useEffect(() => {
     if (!draftSaved) return;
 
@@ -181,7 +181,7 @@ function Admin() {
         }).catch(console.error);
       }
       setAddForm(initialFormState);
-      localStorage.removeItem('draft_scholarship'); // ✅ مسح المسودة فور الإرسال الناجح
+      localStorage.removeItem('draft_scholarship'); // يمسح المسوده اذا ارسل المنحه
     } catch (e) {
       setMessage({ text: `❌ حدث خطأ: ${e.message}`, type: 'error' });
     }
@@ -468,7 +468,7 @@ function Admin() {
             <textarea placeholder="أي شروحات دقيقة تظهر بداخل صفحة التفاصيل المفردة..." value={addForm.notes} onChange={e => setAddForm({...addForm, notes: e.target.value})}></textarea>
           </div>
 
-          {/* ✅ إشعار المسودة المستقر والمصلح */}
+          {/* اشعار بحفظ المسوده */}
           {draftSaved && (
             <p style={{ color: '#4caf50', fontSize: '13px', textAlign: 'center', marginBottom: '8px' }}>
               💾 تم حفظ المسودة تلقائياً
