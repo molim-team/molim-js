@@ -5,15 +5,8 @@ import { readFile } from 'fs/promises';
 import path from 'path';
 import { getIsOpen } from '@/lib/scholarshipUtils';
 
-// تولد كل صفحات المنح وقت البناء
-export async function generateStaticParams() {
-  const filePath = path.join(process.cwd(), 'public', 'scholarships.json');
-  const data = await readFile(filePath, 'utf-8');
-  const scholarships = JSON.parse(data);
-  return scholarships.map((s) => ({ id: String(s.id) }));
-}
+export const dynamic = 'force-dynamic';
 
-// تقرأ البيانات مرة وحدة وقت البناء
 async function getScholarship(id) {
   const filePath = path.join(process.cwd(), 'public', 'scholarships.json');
   const data = await readFile(filePath, 'utf-8');

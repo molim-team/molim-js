@@ -5,6 +5,8 @@ import AboutSection from '@/components/home/AboutSection';
 import ScholarshipsSlider from '@/components/home/ScholarshipsSlider';
 import { getIsOpen } from '@/lib/scholarshipUtils';
 
+export const dynamic = 'force-dynamic';
+
 async function getScholarships() {
   const filePath = path.join(process.cwd(), 'public', 'scholarships.json');
   const data = JSON.parse(readFileSync(filePath, 'utf-8'));

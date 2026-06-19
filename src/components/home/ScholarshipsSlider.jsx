@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Heart } from 'lucide-react';
 import { useFavorites } from '@/lib/context/FavoritesContext';
+import { getIsOpen } from '@/lib/scholarshipUtils';
 
 function getCountdown(deadline) {
   if (!deadline) return null;
@@ -39,6 +40,9 @@ export default function ScholarshipsSlider({ scholarships }) {
   const [scrollLeftState, setScrollLeftState] = useState(0);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
+
+  // Client-side re-filter: ensure expired scholarships are never shown
+  const openScholarships = scholarships.filter(s => getIsOpen(s));
 
   useEffect(() => {
     const handleScroll = () => setShowBackToTop(window.scrollY > 300);
@@ -111,10 +115,10 @@ export default function ScholarshipsSlider({ scholarships }) {
             onMouseUp={handleMouseUp}
             onMouseMove={handleMouseMove}
           >
-            {scholarships.length === 0 ? (
+            {openScholarships.length === 0 ? (
               <p>لا توجد منح مفتوحة حالياً</p>
             ) : (
-              scholarships.map(s => {
+              openScholarships.map(s => {
                 const active = favorites.includes(String(s.id));
                 const cd = getCountdown(s.deadline);
                 return (
