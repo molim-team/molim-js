@@ -179,12 +179,7 @@ interface FormState {
   optionalFiles: string[];
 }
 
-// ─── Proxy helper ─────────────────────────────────────────────────────────────
-/**
- * All requests go through /api/github-proxy.
- * The session token (returned after login) is sent in x-session-token.
- * No GitHub token or ADMIN_SECRET ever touches the client.
- */
+// Proxy helper 
 async function proxyRequest(
   action: string,
   sessionToken: string,
@@ -200,7 +195,7 @@ async function proxyRequest(
   });
 }
 
-// ─── Utility ──────────────────────────────────────────────────────────────────
+// Utility
 
 const getFlagEmoji = (countryCode: string): string => {
   if (!countryCode) return "🌍";
@@ -211,7 +206,7 @@ const getFlagEmoji = (countryCode: string): string => {
   return String.fromCodePoint(...codePoints);
 };
 
-// ─── Initial state ────────────────────────────────────────────────────────────
+// Initial state 
 
 const initialFormState: FormState = {
   title: "",
@@ -235,10 +230,8 @@ const initialFormState: FormState = {
   optionalFiles: [""],
 };
 
-// ═════════════════════════════════════════════════════════════════════════════
-// Login Screen
-// ═════════════════════════════════════════════════════════════════════════════
 
+// Login Screen
 interface LoginScreenProps {
   onSuccess: (token: string) => void;
 }
@@ -386,19 +379,17 @@ function LoginScreen({ onSuccess }: LoginScreenProps) {
             transition: "background-color 0.2s",
           }}
         >
-          {loading ? "⏳ جاري التحقق..." : "🔓 دخول"}
+          {loading ? "⏳ جاري التحقق..." : " دخول"}
         </button>
       </div>
     </div>
   );
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-// Main Admin Component
-// ═════════════════════════════════════════════════════════════════════════════
 
+// Main Admin Component
 function Admin() {
-  // ── Auth state ─────────────────────────────────────────────────────────────
+  // Auth state
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [authChecked, setAuthChecked]   = useState(false);
 
@@ -416,7 +407,7 @@ function Admin() {
     setSessionToken(null);
   };
 
-  // ── Core state ─────────────────────────────────────────────────────────────
+  // Core state 
   const [activeTab, setActiveTab]         = useState<"add" | "manage">("add");
   const [message, setMessage]             = useState({ text: "", type: "" });
   const [editMessage, setEditMessage]     = useState({ text: "", type: "" });
@@ -437,18 +428,14 @@ function Admin() {
   const [addForm, setAddForm]   = useState<FormState>(initialFormState);
   const [editForm, setEditForm] = useState<FormState>(initialFormState);
 
-  // ── Session expiry handler ─────────────────────────────────────────────────
-  /**
-   * Called when the server returns 401 — token expired or invalid.
-   * Forces re-login without losing UI context.
-   */
+  // Session expiry handler
   const handleSessionExpired = useCallback(() => {
     sessionStorage.removeItem(SESSION_KEY);
     setSessionToken(null);
     alert("⚠️ انتهت جلستك، يرجى تسجيل الدخول مجدداً.");
   }, []);
 
-  // ── Proxy wrapper (auto-handles 401) ──────────────────────────────────────
+  // Proxy wrapper (auto-handles 401)
   const proxy = useCallback(
     async (action: string, extra: Record<string, unknown> = {}): Promise<Response> => {
       if (!sessionToken) throw new Error("غير مصرح");
@@ -462,7 +449,7 @@ function Admin() {
     [sessionToken, handleSessionExpired]
   );
 
-  // ── Draft persistence ──────────────────────────────────────────────────────
+  // Draft persistence 
   useEffect(() => {
     if (!sessionToken) return;
     const saved = localStorage.getItem("draft_scholarship");
@@ -519,7 +506,7 @@ function Admin() {
     }
   };
 
-  // ── Country helpers ────────────────────────────────────────────────────────
+  // Country helpers
   const handleCountryDropdownChange = (formType: "add" | "edit", selectedValue: string) => {
     if (selectedValue === "custom") {
       if (formType === "add") {
@@ -562,7 +549,7 @@ function Admin() {
     }
   };
 
-  // ── Dynamic list helpers ───────────────────────────────────────────────────
+  // Dynamic list helpers
   const handleFileTypeChange = (
     formType: "add" | "edit",
     fileType: keyof FormState,
@@ -588,7 +575,7 @@ function Admin() {
     setForm({ ...targetForm, [fileType]: (targetForm[fileType] as string[]).filter((_, i) => i !== index) });
   };
 
-  // ── GitHub operations ──────────────────────────────────────────────────────
+  // GitHub operations 
   const fetchFile = async (): Promise<{ sha: string; scholarships: Scholarship[] }> => {
     const res = await proxy("fetch");
     if (!res.ok) {
@@ -610,7 +597,7 @@ function Admin() {
     proxy("notify", { scholarship }).catch(console.error);
   };
 
-  // ── Add scholarship ────────────────────────────────────────────────────────
+  // Add scholarship 
   const handleAddScholarship = async () => {
     if (!addForm.title.trim() || !addForm.country.trim()) {
       setMessage({ text: "❌ اسم المنحة والدولة مطلوبان!", type: "error" });
@@ -668,7 +655,7 @@ function Admin() {
     }
   };
 
-  // ── Load scholarships ──────────────────────────────────────────────────────
+  // Load scholarships 
   const handleLoadScholarships = useCallback(async () => {
     setLoadingList(true);
     setMessage({ text: "", type: "" });
@@ -684,7 +671,7 @@ function Admin() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [proxy]);
 
-  // ── Open edit modal ────────────────────────────────────────────────────────
+  // Open edit modal
   const handleOpenEditModal = (index: number) => {
     const s = scholarships[index];
     setEditingIndex(index);
@@ -724,7 +711,7 @@ function Admin() {
     setIsModalOpen(true);
   };
 
-  // ── Save edit ──────────────────────────────────────────────────────────────
+  // Save edit
   const handleSaveEdit = async () => {
     if (!editForm.title.trim() || !editForm.country.trim()) {
       setEditMessage({ text: "❌ اسم المنحة والدولة مطلوبان!", type: "error" });
@@ -781,7 +768,7 @@ function Admin() {
     }
   };
 
-  // ── Delete ─────────────────────────────────────────────────────────────────
+  // Delete
   const handleDeleteClick = (index: number) => {
     const s = scholarships[index];
     setDeleteConfirm({ open: true, index, name: s.name || s.title || "هذه المنحة" });
@@ -805,7 +792,7 @@ function Admin() {
     }
   };
 
-  // ── Filtered list ──────────────────────────────────────────────────────────
+  // Filtered list
   const filteredScholarships = scholarships.filter((s) => {
     const q = searchFilter.trim().toLowerCase();
     if (!q) return true;
@@ -814,13 +801,13 @@ function Admin() {
     return name.includes(q) || country.includes(q);
   });
 
-  // ── Render: waiting for auth check ────────────────────────────────────────
+  // Render: waiting for auth check 
   if (!authChecked) return null;
 
-  // ── Render: login screen ───────────────────────────────────────────────────
+  // Render: login screen 
   if (!sessionToken) return <LoginScreen onSuccess={handleLoginSuccess} />;
 
-  // ── Render: admin panel ────────────────────────────────────────────────────
+  // Render: admin panel 
   return (
     <div className="admin-container">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
