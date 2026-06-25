@@ -244,7 +244,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ok: true });
   }
-
   // Unknown action
   return NextResponse.json({ error: "Unknown action" }, { status: 400 });
 }
