@@ -1,12 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   allowedDevOrigins: ["192.168.8.21"],
-  experimental: {
-    serverComponentsExternalPackages: [
-      '@sparticuz/chromium',
-      'puppeteer-core'
-    ],
-  },
+  serverExternalPackages: [
+    '@sparticuz/chromium',
+    'puppeteer-core'
+  ],
   async headers() {
     return [
       {
