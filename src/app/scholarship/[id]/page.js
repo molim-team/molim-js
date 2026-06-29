@@ -1,11 +1,44 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import ShareButton from './ShareButton';
 import { notFound } from 'next/navigation';
 import { readFile } from 'fs/promises';
 import path from 'path';
 import { getIsOpen } from '@/lib/scholarshipUtils';
+import JsonLd from '@/components/JsonLd';
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({ params }) {
+  const { id } = await params;
+  const scholarship = await getScholarship(id);
+
+  if (!scholarship) {
+    return {
+      title: 'منحة غير موجودة | مُلم',
+    };
+  }
+
+  return {
+    title: `${scholarship.name} | مُلم`,
+    description: scholarship.description || `قدم الآن على منحة ${scholarship.name} في ${scholarship.country}. آخر موعد للتقديم: ${scholarship.deadline}`,
+    openGraph: {
+      title: `${scholarship.name} | مُلم`,
+      description: scholarship.description || `قدم الآن على منحة ${scholarship.name} في ${scholarship.country}. آخر موعد للتقديم: ${scholarship.deadline}`,
+      images: [
+        {
+          url: scholarship.flag || '/og-default.png',
+          width: 800,
+          height: 600,
+          alt: `منحة ${scholarship.name}`,
+        },
+      ],
+    },
+    alternates: {
+      canonical: `https://molim.team/scholarship/${id}`,
+    },
+  };
+}
 
 async function getScholarship(id) {
   const filePath = path.join(process.cwd(), 'public', 'scholarships.json');
@@ -24,11 +57,29 @@ export default async function ScholarshipDetails({ params }) {
 
   const isOpen = getIsOpen(s);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "EducationalOccupationalProgram",
+    "name": s.name,
+    "url": `https://molim.team/scholarship/${id}`,
+    "description": s.description || `قدم الآن على منحة ${s.name} في ${s.country}. آخر موعد للتقديم: ${s.deadline}`,
+    "provider": {
+      "@type": "Organization",
+      "name": s.provider || s.university || s.name,
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": s.country
+      }
+    }
+  };
+
   return (
-    <div id="scholarship-details" className="details-container">
-      <div className="details-hero-container">
+    <>
+      <JsonLd data={jsonLd} />
+      <div id="scholarship-details" className="details-container">
+        <div className="details-hero-container">
         {s.flag && (
-          <img src={s.flag} alt="flag" className="details-flag" />
+          <Image src={s.flag} alt="flag" className="details-flag" width={64} height={48} loading="lazy" />
         )}
         <h1>{s.name}</h1>
         <p>{s.name_en || ''}</p>
@@ -117,5 +168,6 @@ export default async function ScholarshipDetails({ params }) {
         <Link href="/scholarships" className="btn-main">← العودة لجميع المنح</Link>
       </div>
     </div>
+    </>
   );
 }

@@ -1,6 +1,12 @@
 import ScholarshipsClient from './ScholarshipsClient';
+import JsonLd from '@/components/JsonLd';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata = {
+  title: 'جميع المنح الدراسية | مُلم',
+  description: 'استكشف جميع المنح الدراسية المتاحة حول العالم وقدم عليها الآن عبر منصة مُلم.',
+};
 
 export default async function ScholarshipsPage() {
   const res = await fetch(
@@ -9,5 +15,24 @@ export default async function ScholarshipsPage() {
   );
   const scholarships = await res.json();
 
-  return <ScholarshipsClient scholarships={scholarships} />;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "المنح الدراسية",
+    "url": "https://molim.team/scholarships",
+    "description": "قائمة المنح الدراسية المتاحة للطلاب العرب",
+    "inLanguage": "ar",
+    "publisher": {
+      "@type": "Organization",
+      "name": "مُلم",
+      "url": "https://molim.team"
+    }
+  };
+
+  return (
+    <>
+      <JsonLd data={jsonLd} />
+      <ScholarshipsClient scholarships={scholarships} />
+    </>
+  );
 }

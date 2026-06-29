@@ -1,5 +1,10 @@
 import React from 'react';
 
+export const metadata = {
+  title: 'سياسة الخصوصية | مُلم',
+  description: 'اقرأ سياسة خصوصية منصة مُلم وكيف نحمي بياناتك',
+};
+
 export default function Privacy() {
   return (
     <div className="privacy-container">

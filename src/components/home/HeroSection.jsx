@@ -4,7 +4,7 @@ export default function HeroSection() {
   return (
     <section className="hero">
       <div className="hero-logo-wrap">
-        <img src="/images/logo.png" alt="مُلم" className="hero-logo" />
+        <img src="/images/logo.png" alt="مُلم" className="hero-logo" style={{ height: 'auto' }} />
         <div className="hero-glow"></div>
       </div>
       <p className="hero-sub">منصتك الأولى لاكتشاف المنح الدراسية حول العالم</p>

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Heart } from 'lucide-react';
 import { useFavorites } from '@/lib/context/FavoritesContext';
@@ -140,7 +141,7 @@ export default function ScholarshipsSlider({ scholarships }) {
                       </button>
 
                       {s.flag && (s.flag.startsWith('http') || s.flag.includes('/') || s.flag.includes('.')) ? (
-                        <img className="card-flag" src={s.flag} alt="flag" />
+                        <Image className="card-flag" src={s.flag} alt="flag" width={32} height={24} loading="lazy" />
                       ) : (
                         <span className="card-flag">{s.flag || ''}</span>
                       )}

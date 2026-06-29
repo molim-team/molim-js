@@ -4,6 +4,7 @@ import HeroSection from '@/components/home/HeroSection';
 import AboutSection from '@/components/home/AboutSection';
 import ScholarshipsSlider from '@/components/home/ScholarshipsSlider';
 import { getIsOpen } from '@/lib/scholarshipUtils';
+import JsonLd from '@/components/JsonLd';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,11 +23,28 @@ export const metadata = {
 export default async function HomePage() {
   const scholarships = await getScholarships();
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "مُلم",
+    "url": "https://molim.team",
+    "description": "منصة مُلم تساعد الطلاب العرب على اكتشاف والتقدم للمنح الدراسية",
+    "inLanguage": "ar",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://molim.team/scholarships?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  };
+
   return (
-    <div className="main-home-container px-4 md:px-6">
-      <HeroSection />
-      <ScholarshipsSlider scholarships={scholarships} />
-      <AboutSection />
-    </div>
+    <>
+      <JsonLd data={jsonLd} />
+      <div className="main-home-container px-4 md:px-6">
+        <HeroSection />
+        <ScholarshipsSlider scholarships={scholarships} />
+        <AboutSection />
+      </div>
+    </>
   );
 }

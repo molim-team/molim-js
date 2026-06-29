@@ -22,8 +22,17 @@ const tajawal = Tajawal({
 });
 
 export const metadata = {
+  metadataBase: new URL('https://molim.team'),
   title: 'مُلم — منصة المنح الدراسية',
   description: 'منصتك الأولى لاكتشاف المنح الدراسية حول العالم',
+  openGraph: {
+    siteName: 'مُلم — منصة المنح الدراسية',
+    locale: 'ar_SA',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+  },
 };
 
 export default function RootLayout({ children }) {

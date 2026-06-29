@@ -1,3 +1,8 @@
+export const metadata = {
+  title: 'تواصل معنا | مُلم',
+  description: 'تواصل مع فريق مُلم لأي استفسار حول المنح الدراسية',
+};
+
 export default function Contact() {
 
   const socialPlatforms = [
