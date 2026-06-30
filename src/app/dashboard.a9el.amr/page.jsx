@@ -94,6 +94,7 @@ export default function Dashboard() {
             <option value="شهادة خبرة">شهادة خبرة</option>
             <option value="شهادة مشاركة">شهادة مشاركة</option>
             <option value="شهادة متطوع الشهر">شهادة متطوع الشهر</option>
+            <option value="شهادة إداري الشهر">شهادة إداري الشهر</option>
           </select>
         </div>
 
@@ -165,6 +166,7 @@ export default function Dashboard() {
     <option value="Experience Certificate">Experience Certificate</option>
     <option value="Participation Certificate">Participation Certificate</option>
     <option value="Volunteer of the Month Certificate">Volunteer of the Month Certificate</option>
+    <option value="Manager of the Month Certificate">Manager of the Month Certificate</option>
   </select>
 </div>
 

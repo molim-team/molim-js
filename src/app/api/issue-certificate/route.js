@@ -18,6 +18,7 @@ function resolveCertType(cert_type) {
   if (val.includes('مشاركة') || val.includes('participation')) return 'participation';
   if (val.includes('خبرة')   || val.includes('experience'))    return 'experience';
   if (val.includes('متطوع الشهر') || val.includes('volunteer of the month')) return 'volunteer-of-month';
+  if (val.includes('إداري الشهر') || val.includes('اداري الشهر') || val.includes('manager of the month')) return 'volunteer-of-month';
   return 'volunteer'; // تطوع أو أي قيمة أخرى
 }
 
