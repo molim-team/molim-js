@@ -7,6 +7,25 @@ export const metadata = {
 const guides = [
   {
     id: 1,
+    title: "الدليل التعريفي لفريق مُلم",
+    description:
+      "تعرّف على فريق مُلم، رؤيته، وأهدافه، وكيف يمكنك أن تكون جزءًا من رحلته في دعم الطلاب.",
+    available: true,
+    filePath: "/الدليل التعريفي لفريق ملم.pdf",
+    fileName: "الدليل التعريفي لفريق ملم.pdf",
+    iconBg: "#fff1ec",
+    iconColor: "#ff4500",
+    icon: (
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ff4500" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+    ),
+  },
+  {
+    id: 2,
     title: "الدليل الشامل للتقديم على المنح",
     description:
       "كل ما تحتاج معرفته للتقديم على المنح الدراسية خطوة بخطوة — من اختيار المنحة المناسبة، إلى إعداد الملف، حتى متابعة النتائج.",
@@ -26,7 +45,24 @@ const guides = [
     ),
   },
   {
-    id: 2,
+    id: 3,
+    title: "الدليل الشامل لكتابة خطاب التوصية",
+    description: "كيف تكتب خطاب توصية قوي وما الذي يجب أن يتضمنه لزيادة فرص قبولك.",
+    available: true,
+    filePath: "/الدليل الشامل لكتابة خطاب التوصية.pdf",
+    fileName: "الدليل الشامل لكتابة خطاب التوصية.pdf",
+    iconBg: "#fff1ec",
+    iconColor: "#ff4500",
+    icon: (
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ff4500" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+        <polyline points="16 11 18 13 22 9"/>
+      </svg>
+    ),
+  },
+  {
+    id: 4,
     title: "الدليل الشامل لكتابة خطاب الحافز",
     description: "تعلّم كيف تكتب خطاب حافز يلفت الانتباه ويعكس شخصيتك وأهدافك بوضوح.",
     available: false,
@@ -40,7 +76,7 @@ const guides = [
     ),
   },
   {
-    id: 3,
+    id: 5,
     title: "الدليل الشامل لكتابة السيرة الذاتية (CV)",
     description: "قالب وإرشادات لبناء سيرة ذاتية احترافية تناسب متطلبات المنح الدراسية الدولية.",
     available: false,
@@ -57,17 +93,45 @@ const guides = [
     ),
   },
   {
-    id: 4,
-    title: "الدليل الشامل لكتابة خطاب التوصية",
-    description: "كيف تكتب خطاب توصية قوي وما الذي يجب أن يتضمنه لزيادة فرص قبولك.",
+    id: 6,
+    title: "الدليل الشامل لاختبار الايلتس IELTS",
+    description: "استراتيجيات وإرشادات عملية للتحضير لاختبار الايلتس وتحقيق الدرجة المطلوبة.",
     available: false,
     iconBg: "#eef2ff",
     iconColor: "#1a3a6e",
     icon: (
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1a3a6e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-        <circle cx="12" cy="7" r="4"/>
-        <polyline points="16 11 18 13 22 9"/>
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="2" y1="12" x2="22" y2="12"/>
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+      </svg>
+    ),
+  },
+  {
+    id: 7,
+    title: "الدليل الشامل لاختبار التوفل TOEFL",
+    description: "خطة تحضير شاملة لاختبار التوفل تغطي أقسام الكتابة والقراءة والاستماع والمحادثة.",
+    available: false,
+    iconBg: "#eef2ff",
+    iconColor: "#1a3a6e",
+    icon: (
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1a3a6e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+      </svg>
+    ),
+  },
+  {
+    id: 8,
+    title: "الدليل الشامل لاختبار السات SAT",
+    description: "دليلك للتحضير لاختبار السات بفعالية، يشمل أقسام القراءة والكتابة والرياضيات.",
+    available: false,
+    iconBg: "#eef2ff",
+    iconColor: "#1a3a6e",
+    icon: (
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1a3a6e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+        <path d="M6 12v5c3 3 9 3 12 0v-5"/>
       </svg>
     ),
   },

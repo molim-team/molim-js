@@ -15,7 +15,7 @@ export default function HeroSection() {
           <span className="stat-label">🎓 مستفيد</span>
         </div>
         <div className="stat-item">
-          <span className="stat-number">+70</span>
+          <span className="stat-number">+100</span>
           <span className="stat-label">📚 منحة</span>
         </div>
         <div className="stat-item">
