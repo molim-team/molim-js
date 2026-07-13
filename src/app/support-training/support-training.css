@@ -1,0 +1,238 @@
+.training-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  font-family: system-ui, -apple-system, sans-serif;
+  direction: rtl;
+}
+
+.training-card {
+  background: #ffffff;
+  width: 100%;
+  max-width: 900px;
+  border-radius: 1.5rem;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+  padding: 2.5rem;
+  border: 1px solid #f1f5f9;
+}
+
+.training-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.training-main-title {
+  color: #0f172a;
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+.training-main-subtitle {
+  color: #ff4500;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.training-tabs {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #f1f5f9;
+  padding-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.training-tab-btn {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 0.85rem 1.25rem;
+  border-radius: 1rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-align: right;
+}
+
+.training-tab-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.tab-icon {
+  font-size: 1.25rem;
+}
+
+.tab-title {
+  font-weight: 700;
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+.tab-active {
+  background: #ff4500 !important;
+  border-color: #ff4500 !important;
+}
+
+.tab-active .tab-title {
+  color: #ffffff !important;
+}
+
+.training-body-content {
+  background: #ffffff;
+  animation: fadeIn 0.4s ease;
+}
+
+.training-section h3 {
+  color: #0f172a;
+  font-size: 1.3rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+}
+
+.training-section p {
+  color: #475569;
+  line-height: 1.7;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.training-list {
+  list-style: none;
+  padding: 0;
+}
+
+.training-list li {
+  position: relative;
+  padding-right: 1.5rem;
+  margin-bottom: 1rem;
+  color: #334155;
+  line-height: 1.6;
+}
+
+.training-list li::before {
+  content: "✦";
+  position: absolute;
+  right: 0;
+  color: #ff4500;
+  font-weight: bold;
+}
+
+.scenario-box {
+  padding: 1.25rem;
+  border-radius: 1rem;
+  margin-top: 1rem;
+  border-right: 5px solid;
+}
+
+.invalid-box {
+  background: #fef2f2;
+  border-color: #ef4444;
+  color: #991b1b;
+}
+
+.valid-box {
+  background: #f0fdf4;
+  border-color: #22c55e;
+  color: #166534;
+}
+
+.scenario-box h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.scenario-text {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.quiz-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.quiz-question p {
+  color: #0f172a;
+  margin-bottom: 0.75rem;
+}
+
+.quiz-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 0.85rem 1rem;
+  border-radius: 0.85rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+  color: #334155;
+}
+
+.quiz-option:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.quiz-option input[type="radio"] {
+  accent-color: #ff4500;
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.training-btn {
+  background: #0f172a;
+  color: #ffffff;
+  border: none;
+  padding: 0.9rem 1.5rem;
+  border-radius: 0.85rem;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.training-btn:hover {
+  background: #1e293b;
+}
+
+.quiz-result {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border-radius: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.score-full {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.score-low {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
