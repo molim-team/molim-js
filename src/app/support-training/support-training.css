@@ -19,24 +19,23 @@
   border: 1px solid #f1f5f9;
 }
 
-/* تنسيق الهيدر الأنيق بدون المربع الداكن ومع الخط البرتقالي الفاصل */
 .training-header {
   text-align: center;
   margin-bottom: 2.5rem;
-  background: transparent !important; /* إلغاء المربع الأزرق تماماً */
+  background: transparent !important;
   padding: 1rem 0;
-  border-bottom: 2px solid #ff4500 !important; /* الخط البرتقالي الفاصل المميز */
+  border-bottom: 2px solid #ff4500 !important;
 }
 
 .training-main-title {
-  color: #0f172a !important; /* لون كحلي غامق فخم للعنوان الرئيسي */
+  color: #0f172a !important;
   font-size: 1.8rem;
   font-weight: 800;
   margin-bottom: 0.75rem;
 }
 
 .training-main-subtitle {
-  color: #ff4500 !important; /* لون برتقالي للعنوان الفرعي */
+  color: #ff4500 !important;
   font-size: 1.05rem;
   font-weight: 600;
   margin-bottom: 1rem;
@@ -84,6 +83,15 @@
 .tab-active {
   background: #ff4500 !important;
   border-color: #ff4500 !important;
+}
+
+.tab-active:focus, 
+.tab-active:active,
+.tab-active:focus-visible {
+  background: #ff4500 !important;
+  border-color: #ff4500 !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .tab-active .tab-title {
