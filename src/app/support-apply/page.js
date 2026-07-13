@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import "../feedback.css"; 
+import "./apply.css";
 
 const skillLabels = {
   1: "سيئ",
