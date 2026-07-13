@@ -32,12 +32,12 @@ const trainingModules = [
         
         <div className="scenario-box invalid-box">
           <h4>❌ موقف: مستفيد يسأل عن حل مشكلة تقنية لا تعرفها</h4>
-          <p className="scenario-text"><strong>الرد الخاطئ:</strong> "والله ما أدري، اسأل أحد ثاني بالجروب أو انتظر المشرف."</p>
+          <p className="scenario-text"><strong>الرد الخاطئ:</strong> "والله ما أدري، اسأل أحد ثاني بالقروب أو انتظر المشرف."</p>
         </div>
         
         <div className="scenario-box valid-box">
           <h4>✅ الرد الاحترافي المعتمد:</h4>
-          <p className="scenario-text">"أهلاً بك يا غالي، سعداء بخدمتك. سأقوم برفع مشكلتك التقنية حالاً للقسم المختص بالفريق للمراجعة، وسيتم الرد عليك هنا فور حلها مباشرة. شكراً لصبرك معنا."</p>
+          <p className="scenario-text">"أهلاً بك ، سعداء بخدمتك. سأقوم برفع مشكلتك  حالاً للقسم المختص للمراجعة، وسيتم الرد عليك فور حلها مباشرة. شاكرين تفهمك ."</p>
         </div>
 
         <div className="scenario-box invalid-box" style={{ marginTop: "1.5rem" }}>
