@@ -231,3 +231,19 @@ fieldset.feedback-group {
   color: #64748b;
   font-size: 1rem;
 }
+
+.input-invalid {
+  background-color: #fef2f2 !important;
+  border-color: #fca5a5 !important;
+}
+
+.input-invalid:focus {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
+}
+
+
+.field-invalid {
+  background-color: #fff5f5;
+  border: 1px dashed #feb2b2;
+}
