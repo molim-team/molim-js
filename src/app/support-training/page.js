@@ -85,7 +85,7 @@ function QuizContainer() {
         <p><strong>السؤال الأول: اكتشفت أنك قدمت معلومة خاطئة بالخطأ لمستفيد، ما هو الإجراء الصحيح؟</strong></p>
         <label className="quiz-option">
           <input type="radio" name="q1" value="wrong1" onChange={(e) => setQ1(e.target.value)} />
-          <span>تتجاهل الأمر وتتمنى ألا يلاحظ المستفيد ذلك دمجاً للمشاكل.</span>
+          <span>تتجاهل الأمر وتتمنى ألا يلاحظ المستفيد ذلك تفادياً للمشاكل.</span>
         </label>
         <label className="quiz-option">
           <input type="radio" name="q1" value="correct" onChange={(e) => setQ1(e.target.value)} />
@@ -109,7 +109,7 @@ function QuizContainer() {
       
       {score !== null && (
         <div className={`quiz-result ${score === 100 ? "score-full" : "score-low"}`}>
-          {score === 100 ? "🎉 ممتاز! إجاباتك كاملة وصحيحة، أنت جاهز تماماً للانضمام للدعم الفني بمُلِم!" : "⚠️ ركز جيداً، بعض الإجابات غير صحيحة، يرجى مراجعة القواعد التدريبية مرة أخرى."}
+          {score === 100 ? "🎉 ممتاز! إجابات  صحيحة !" : "⚠️ركز جيداً، بعض الإجابات غير صحيحة، يرجى مراجعة القواعد التدريبية مرة أخرى."}
         </div>
       )}
     </div>
