@@ -195,7 +195,7 @@ export default function SupportApplyPage() {
 
                   <div className="feedback-group">
                     <label className="feedback-legend">رقم الواتساب (اختياري)</label>
-                    <input type="tel" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="+9665xxxxxxxx" className="feedback-textarea" style={{ height: "auto", padding: "0.85rem 1rem", direction: "ltr", textAlign: "right" }} />
+                    <input type="tel" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="مع رمز الدولة :+967" className="feedback-textarea" style={{ height: "auto", padding: "0.85rem 1rem", direction: "ltr", textAlign: "right" }} />
                   </div>
 
                   <div className="feedback-group">
