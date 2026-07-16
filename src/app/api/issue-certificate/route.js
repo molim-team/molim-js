@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
 import path from 'path';
 import fs from 'fs';
 import QRCode from 'qrcode';
@@ -12,6 +13,12 @@ export const dynamic = "force-dynamic"
 
 const ADMIN_TOKEN = process.env.CERT_ADMIN_TOKEN;
 
+// ─── تنظيف عنوان الإيميل من حقن الرؤوس ─────────────────────────────────────
+function sanitizeEmailSubject(str) {
+  if (!str) return '';
+  return str.replace(/[\r\n]+/g, ' ').trim();
+}
+
 // ─── استنتاج مفتاح النوع من نص الشهادة (عربي أو إنجليزي) ────────────────────
 function resolveCertType(cert_type, certTypeKey) {
   if (certTypeKey === 'custom') return 'custom';
@@ -21,6 +28,25 @@ function resolveCertType(cert_type, certTypeKey) {
   if (val.includes('متطوع الشهر') || val.includes('volunteer of the month')) return 'volunteer-of-month';
   if (val.includes('إداري الشهر') || val.includes('اداري الشهر') || val.includes('manager of the month')) return 'volunteer-of-month';
   return 'volunteer'; // تطوع أو أي قيمة أخرى
+}
+
+// ─── توليد رقم شهادة آمن تشفيرياً ──────────────────────────────────────────
+function generateSecureCertId() {
+  return `MOLIM-2026-${crypto.randomBytes(6).toString('hex').toUpperCase()}`;
+}
+
+// ─── توليد رقم شهادة فريد مع التحقق من عدم التكرار في Supabase ──────────────
+async function generateUniqueCertId(maxRetries = 5) {
+  for (let i = 0; i < maxRetries; i++) {
+    const id = generateSecureCertId();
+    const { data } = await supabase
+      .from('certificates')
+      .select('id')
+      .eq('id', id)
+      .single();
+    if (!data) return id;
+  }
+  throw new Error('فشل توليد رقم شهادة فريد بعد عدة محاولات.');
 }
 
 // ─── اختيار مسار التمبلت بناءً على نوع الشهادة فقط ───────────────────────────
@@ -222,10 +248,50 @@ async function buildEnglishPDF(pdfDoc, customFont, qrCodeBuffer, data, type) {
 // ─────────────────────────────────────────────────────────────────────────────
 export async function POST(request) {
   try {
-    // ── التحقق من التوكن ──
+    // ── التنظيف الاحتمالي لجدول تقييد الطلبات (5% من الطلبات) ──
+    if (Math.random() < 0.05) {
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      supabase.from('rate_limits').delete().lt('created_at', oneHourAgo).then(); // غير مقيد بالـ await لعدم التأخير
+    }
+
+    // ── تقييد الطلبات (Rate Limiting) ──
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+    
+    // إدراج المحاولة الحالية
+    await supabase.from('rate_limits').insert([{ ip }]);
+    
+    // حساب المحاولات خلال آخر 10 دقائق
+    const { count, error: rlError } = await supabase
+      .from('rate_limits')
+      .select('*', { count: 'exact', head: true })
+      .eq('ip', ip)
+      .gte('created_at', tenMinutesAgo);
+      
+    if (!rlError && count > 5) {
+      return NextResponse.json(
+        { error: 'تم تجاوز الحد المسموح. يرجى المحاولة بعد 10 دقائق.' },
+        { status: 429 }
+      );
+    }
+
+    // ── التحقق من التوكن (آمن زمنياً) ──
     const authHeader = request.headers.get('authorization');
-    const token = authHeader?.replace('Bearer ', '').trim();
-    if (!ADMIN_TOKEN || token !== ADMIN_TOKEN) {
+    const token = authHeader?.replace('Bearer ', '').trim() || '';
+    
+    if (!ADMIN_TOKEN) {
+      return NextResponse.json({ error: 'السيرفر غير مهيأ.' }, { status: 500 });
+    }
+    
+    let isAuthorized = false;
+    if (token.length === ADMIN_TOKEN.length) {
+      isAuthorized = crypto.timingSafeEqual(
+        Buffer.from(token),
+        Buffer.from(ADMIN_TOKEN)
+      );
+    }
+    
+    if (!isAuthorized) {
       return NextResponse.json(
         { error: 'غير مصرح. التوكن غير صحيح.' },
         { status: 401 }
@@ -246,7 +312,28 @@ export async function POST(request) {
       return NextResponse.json({ error: 'جميع الحقول مطلوبة.' }, { status: 400 });
     }
 
-    const certId = `MOLIM-2026-${Math.floor(10000 + Math.random() * 90000)}`;
+    // ── تحقق من حدود الطول ──
+    if (
+      (name && name.length > 100) ||
+      (nameEn && nameEn.length > 100) ||
+      (cert_type && cert_type.length > 100) ||
+      (cert_typeEn && cert_typeEn.length > 100) ||
+      (certificateText && certificateText.length > 1000) ||
+      (certificateTextEn && certificateTextEn.length > 1000)
+    ) {
+      return NextResponse.json({ error: 'أحد الحقول تجاوز الحد الأقصى المسموح للطول.' }, { status: 400 });
+    }
+
+    // ── توليد رقم شهادة آمن وفريد ──
+    let certId;
+    try {
+      certId = await generateUniqueCertId();
+    } catch (e) {
+      return NextResponse.json(
+        { error: 'فشل توليد رقم شهادة فريد. حاول مرة أخرى.' },
+        { status: 500 }
+      );
+    }
     const verifyUrl = `https://molim.team/verify/${certId}`;
 
     const qrCodeBuffer = await QRCode.toBuffer(verifyUrl, { width: 120, margin: 1 });
@@ -312,7 +399,7 @@ export async function POST(request) {
     await transporter.sendMail({
       from: '"فريق مُلم التطوعي" <molim.team@gmail.com>',
       to: email,
-      subject: `${cert_type} معتمدة - ${name}`,
+      subject: `${sanitizeEmailSubject(cert_type)} معتمدة - ${sanitizeEmailSubject(name)}`,
       text: `مرحباً ${name}،\n\nيسعدنا تقديم شهادتك التطوعية من فريق مُلِم.\n\nرابط التحقق:\n${verifyUrl}`,
       attachments: [
         {

@@ -138,6 +138,7 @@ export default function Dashboard() {
                 value={formData.cert_type}
                 onChange={(e) => setFormData({ ...formData, cert_type: e.target.value })}
                 required
+                maxLength={100}
                 style={inputStyle}
               />
             </div>
@@ -149,6 +150,7 @@ export default function Dashboard() {
                 value={formData.cert_typeEn}
                 onChange={(e) => setFormData({ ...formData, cert_typeEn: e.target.value })}
                 required
+                maxLength={100}
                 style={{ ...inputStyle, direction: 'ltr' }}
               />
             </div>
@@ -163,6 +165,7 @@ export default function Dashboard() {
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             required
+            maxLength={100}
             style={inputStyle}
           />
         </div>
@@ -190,6 +193,7 @@ export default function Dashboard() {
             value={formData.certificateText}
             onChange={(e) => setFormData({ ...formData, certificateText: e.target.value })}
             required
+            maxLength={1000}
             rows={5}
             style={{ ...inputStyle, resize: 'vertical', lineHeight: '1.7', minHeight: '120px' }}
           />
@@ -205,6 +209,7 @@ export default function Dashboard() {
     value={formData.nameEn}
     onChange={(e) => setFormData({ ...formData, nameEn: e.target.value })}
     required
+    maxLength={100}
     style={{ ...inputStyle, direction: 'ltr' }}
   />
 </div>
@@ -238,6 +243,7 @@ export default function Dashboard() {
     value={formData.certificateTextEn}
     onChange={(e) => setFormData({ ...formData, certificateTextEn: e.target.value })}
     required
+    maxLength={1000}
     rows={5}
     style={{ ...inputStyle, direction: 'ltr', resize: 'vertical', minHeight: '120px' }}
   />

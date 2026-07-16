@@ -1,6 +1,16 @@
 import path from 'path';
 import fs from 'fs';
 
+// ─── تنظيف النص من حروف HTML الخاصة لمنع حقن HTML ───────────────────────────
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export async function generateArabicCertPDF({ name, cert_type, certificateText, qrCodeBase64, type }) {
 
   const issueDate = new Date().toLocaleDateString('ar-EG', {
@@ -41,7 +51,14 @@ export async function generateArabicCertPDF({ name, cert_type, certificateText, 
     fontBoldBase64 = fs.readFileSync(fontBoldPath).toString('base64');
   } catch {}
 
-  const formattedCertText = certificateText.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+  // أولاً: تنظيف النص الخام لمنع حقن HTML
+  const escapedCertText = escapeHtml(certificateText);
+  // ثانياً: تطبيق Bold بعد التنظيف — النجمتان (*) لا تتأثران بالتنظيف
+  const formattedCertText = escapedCertText.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+
+  // تنظيف الاسم ونوع الشهادة
+  const safeName = escapeHtml(name);
+  const safeCertType = escapeHtml(cert_type);
 
   const html = `<!DOCTYPE html>
 <html dir="rtl" lang="ar">
@@ -100,9 +117,9 @@ export async function generateArabicCertPDF({ name, cert_type, certificateText, 
 <body>
   <img class="bg" src="data:image/png;base64,${imgBase64}" />
   <div class="content">
-    <div class="cert-type">${cert_type}</div>
+    <div class="cert-type">${safeCertType}</div>
     <div class="subtitle">تقدم هذه الشهادة إلى عضو فريق مُلم</div>
-    <div class="name">${name}</div>
+    <div class="name">${safeName}</div>
     <div class="body-text">${formattedCertText}</div>
   </div>
   <div class="signature-area">
