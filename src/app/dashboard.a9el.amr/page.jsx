@@ -10,10 +10,34 @@ export default function Dashboard() {
     nameEn: '',
     certificateTextEn: '',
     cert_typeEn: 'Volunteer Certificate',
+    certTypeKey: '',
   });
   const [token, setToken] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+
+  // ─── ربط نوع الشهادة العربي بالإنجليزي المقابل ───────────────────────────
+  const certTypeMap = {
+    'شهادة تطوع': 'Volunteer Certificate',
+    'شهادة خبرة': 'Experience Certificate',
+    'شهادة مشاركة': 'Participation Certificate',
+    'شهادة متطوع الشهر': 'Volunteer of the Month Certificate',
+    'شهادة إداري الشهر': 'Manager of the Month Certificate',
+  };
+
+  const handleCertTypeChange = (e) => {
+    const value = e.target.value;
+    if (value === '__custom__') {
+      setFormData({ ...formData, cert_type: '', cert_typeEn: '', certTypeKey: 'custom' });
+    } else {
+      setFormData({
+        ...formData,
+        cert_type: value,
+        cert_typeEn: certTypeMap[value] || 'Volunteer Certificate',
+        certTypeKey: '',
+      });
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,7 +56,10 @@ export default function Dashboard() {
       const data = await res.json();
       if (data.success) {
         setMessage(`✅ نجاح! رقم الشهادة: ${data.certId}`);
-        setFormData({ name: '', email: '', cert_type: 'شهادة تطوع', certificateText: '' });
+        setFormData({
+          name: '', email: '', cert_type: 'شهادة تطوع', certificateText: '',
+          nameEn: '', certificateTextEn: '', cert_typeEn: 'Volunteer Certificate', certTypeKey: '',
+        });
         setToken('');
       } else {
         setMessage(`❌ خطأ: ${data.error}`);
@@ -54,6 +81,8 @@ export default function Dashboard() {
     width: '100%',
     boxSizing: 'border-box',
   };
+
+  const isCustom = formData.certTypeKey === 'custom';
 
   return (
     <div style={{
@@ -86,8 +115,8 @@ export default function Dashboard() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           <label style={{ fontWeight: '600', fontSize: '14px', color: '#333' }}>نوع الشهادة</label>
           <select
-            value={formData.cert_type}
-            onChange={(e) => setFormData({ ...formData, cert_type: e.target.value })}
+            value={isCustom ? '__custom__' : formData.cert_type}
+            onChange={handleCertTypeChange}
             style={inputStyle}
           >
             <option value="شهادة تطوع">شهادة تطوع</option>
@@ -95,8 +124,36 @@ export default function Dashboard() {
             <option value="شهادة مشاركة">شهادة مشاركة</option>
             <option value="شهادة متطوع الشهر">شهادة متطوع الشهر</option>
             <option value="شهادة إداري الشهر">شهادة إداري الشهر</option>
+            <option value="__custom__">(عنوان حر)</option>
           </select>
         </div>
+
+        {/* حقول العنوان الحر عند اختيار النوع المخصص */}
+        {isCustom && (
+          <>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontWeight: '600', fontSize: '14px', color: '#333' }}>عنوان الشهادة (عربي)</label>
+              <input
+                type="text"
+                value={formData.cert_type}
+                onChange={(e) => setFormData({ ...formData, cert_type: e.target.value })}
+                required
+                style={inputStyle}
+              />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontWeight: '600', fontSize: '14px', color: '#333' }}>Certificate Title (English)</label>
+              <input
+                type="text"
+                placeholder="e.g. Achievement Certificate"
+                value={formData.cert_typeEn}
+                onChange={(e) => setFormData({ ...formData, cert_typeEn: e.target.value })}
+                required
+                style={{ ...inputStyle, direction: 'ltr' }}
+              />
+            </div>
+          </>
+        )}
 
         {/* الاسم */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -152,7 +209,8 @@ export default function Dashboard() {
   />
 </div>
 
-{/* cert_type بالإنجليزي */}
+{/* cert_type بالإنجليزي — يظهر فقط عند الأنواع الجاهزة */}
+{!isCustom && (
 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
   <label style={{ fontWeight: '600', fontSize: '14px', color: '#333' }}>
     Certificate Type (English)
@@ -169,6 +227,7 @@ export default function Dashboard() {
     <option value="Manager of the Month Certificate">Manager of the Month Certificate</option>
   </select>
 </div>
+)}
 
 {/* نص الشهادة بالإنجليزي */}
 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>

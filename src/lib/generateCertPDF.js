@@ -20,6 +20,9 @@ export async function generateArabicCertPDF({ name, cert_type, certificateText, 
     case 'volunteer-of-month':
       imgFileName = 'volunteer-of-month-bg.png';
       break;
+    case 'custom':
+      imgFileName = 'custom-bg.png';
+      break;
     case 'volunteer':
     default:
       imgFileName = 'volunteer-bg.png';

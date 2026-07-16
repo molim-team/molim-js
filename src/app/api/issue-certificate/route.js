@@ -13,7 +13,8 @@ export const dynamic = "force-dynamic"
 const ADMIN_TOKEN = process.env.CERT_ADMIN_TOKEN;
 
 // ─── استنتاج مفتاح النوع من نص الشهادة (عربي أو إنجليزي) ────────────────────
-function resolveCertType(cert_type) {
+function resolveCertType(cert_type, certTypeKey) {
+  if (certTypeKey === 'custom') return 'custom';
   const val = (cert_type || '').toLowerCase();
   if (val.includes('مشاركة') || val.includes('participation')) return 'participation';
   if (val.includes('خبرة')   || val.includes('experience'))    return 'experience';
@@ -31,6 +32,8 @@ function getTemplatePath(type) {
       return path.resolve(process.cwd(), 'public/templates/experience-bg.png');
     case 'volunteer-of-month':
       return path.resolve(process.cwd(), 'public/templates/volunteer-of-month-bg.png');
+    case 'custom':
+      return path.resolve(process.cwd(), 'public/templates/custom-bg.png');
     case 'volunteer':
     default:
       return path.resolve(process.cwd(), 'public/templates/volunteer-bg.png');
@@ -233,11 +236,11 @@ export async function POST(request) {
 
     const {
       name, email, cert_type, certificateText,
-      nameEn, cert_typeEn, certificateTextEn,
+      nameEn, cert_typeEn, certificateTextEn, certTypeKey,
     } = body;
 
     // يُستنتج تلقائياً من نص الشهادة — لا حاجة لإرساله من الفورم
-    const type = resolveCertType(cert_type);
+    const type = resolveCertType(cert_type, certTypeKey);
 
     if (!name || !email || !cert_type || !certificateText) {
       return NextResponse.json({ error: 'جميع الحقول مطلوبة.' }, { status: 400 });
