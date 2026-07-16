@@ -398,7 +398,7 @@ function QuizContainer({
       <div className="quiz-box results-page-content" style={{ animation: "fadeIn 0.5s ease" }}>
         <div className="quiz-header-fame">
           <h3 className="results-title"> النتائج   </h3>
-          <p className="results-subtitle">القسم الثاني: التقرير المفصل ومراجعة الأداء للأستاذ(ة): {fullName}</p>
+          <p className="results-subtitle">القسم الثاني: التقرير المفصل ومراجعة الأداء : {fullName}</p>
         </div>
 
         <div className={`score-badge-card ${finalScore >= 80 ? "score-perfect" : "score-try-again"}`}>
@@ -502,7 +502,7 @@ function QuizContainer({
         </div>
       </div>
 
-      <button 
+           <button 
         type="button" 
         onClick={handleShowResults} 
         className="training-btn submit-quiz-btn" 
@@ -516,8 +516,9 @@ function QuizContainer({
       >
         {(isAllAnswered() && fullName.trim() && telegram.trim()) 
           ? "الانتقال إلى القسم الثاني وعرض النتيجة 🚀" 
-          : "يرجى حل الأسئلة وتعبئة الاسم والتيليجرام لعرض النتائج 
+          : "يرجى حل الأسئلة وتعبئة الاسم والتيليجرام لعرض النتائج"}
       </button>
+
     </div>
   );
 }
