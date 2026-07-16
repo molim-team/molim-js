@@ -397,7 +397,7 @@ function QuizContainer({
     return (
       <div className="quiz-box results-page-content" style={{ animation: "fadeIn 0.5s ease" }}>
         <div className="quiz-header-fame">
-          <h3 className="results-title">🏆 نتائج تقييم الجاهزية المهنية</h3>
+          <h3 className="results-title"> النتائج   </h3>
           <p className="results-subtitle">القسم الثاني: التقرير المفصل ومراجعة الأداء للأستاذ(ة): {fullName}</p>
         </div>
 
@@ -405,7 +405,7 @@ function QuizContainer({
           <div className="score-number">{finalScore}%</div>
           <div className="score-status">
             {finalScore === 100 
-              ? "تهانينا! أداء مثالي واحترافي يعكس جاهزيتك التامة لقيادة الدعم في مُلِم" 
+              ? " اداء مثالي ، انتظر رد مسؤلي الذعم" 
               : finalScore >= 80 
               ? "رائع جداً! إجاباتك تدل على فهم عالٍ لمبادئ وقيم الخدمة" 
               : "نوصيك بمراجعة ميثاق الدعم والسيناريوهات والبدء مجدداً لتلافي الإنذارات"}
@@ -474,14 +474,14 @@ function QuizContainer({
 
       {/* نموذج جمع البيانات الشخصية المضاف قبل زر عرض النتائج */}
       <div className="user-info-fields-section" style={{ marginTop: "3rem", paddingTop: "2rem", borderTop: "2px dashed #e2e8f0" }}>
-        <h4 style={{ color: "#0f172a", fontWeight: "800", marginBottom: "1.25rem", fontSize: "1.1rem" }}>✍️ تسجيل بيانات الإداري لاعتماد الاختبار:</h4>
+        <h4 style={{ color: "#0f172a", fontWeight: "800", marginBottom: "1.25rem", fontSize: "1.1rem" }}>تسجيل بيانات الإداري  :</h4>
         
         <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
           <div className="form-input-group">
             <label className="field-label">الاسم الثلاثي بالكامل <span style={{ color: "#dc2626" }}>*</span></label>
             <input 
               type="text" 
-              placeholder="مثال: محمد أحمد العريفي" 
+              placeholder="مثال: محمد حلمي العريفي" 
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               className="mulim-input-style"
@@ -516,7 +516,7 @@ function QuizContainer({
       >
         {(isAllAnswered() && fullName.trim() && telegram.trim()) 
           ? "الانتقال إلى القسم الثاني وعرض النتيجة 🚀" 
-          : "يرجى حل الأسئلة وتعبئة الاسم والتيليجرام لتفعيل الزر"}
+          : "يرجى حل الأسئلة وتعبئة الاسم والتيليجرام لعرض النتائج 
       </button>
     </div>
   );
@@ -605,7 +605,7 @@ export default function SupportTrainingPage() {
           {/* شارة إغلاق لوحة الإدارة إذا كانت مفتوحة */}
           {isAdminAuthenticated && (
             <div className="admin-status-bar">
-              <span>⚠️ لوحة تحكم الإدارة النشطة</span>
+              <span> لوحة تحكم - النتائج </span>
               <button onClick={() => setIsAdminAuthenticated(false)} className="close-admin-view-btn">
                 إغلاق وضع المسؤول ❌
               </button>
@@ -688,8 +688,8 @@ export default function SupportTrainingPage() {
       {showSecretModal && (
         <div className="admin-modal-overlay">
           <div className="admin-modal-card" style={{ animation: "fadeIn 0.3s ease" }}>
-            <h3 className="admin-modal-title">🔐 لوحة الإدارة الفنية المحمية</h3>
-            <p className="admin-modal-desc">يرجى إدخال الرمز السري الخاص بمنصة مُلِم لعرض تقارير الإداريين المختبرين:</p>
+            <h3 className="admin-modal-title">🔐 لوحة التحكم - نتائج المختبرين</h3>
+            <p className="admin-modal-desc">يرجى إدخال الرمز السري    :</p>
             
             <form onSubmit={handlePasswordSubmit}>
               <input 
