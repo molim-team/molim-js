@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import "./support-training.css";
 
-// 1. هيكلة الأقسام الثلاثة الجديدة بعد الدمج والتنقيح
 const trainingModules = (fullName, setFullName, telegram, setTelegram, step, setStep, answers, handleSelect, isAllAnswered, resetQuiz, quizQuestions) => [
   {
     id: 1,
@@ -56,8 +55,6 @@ const trainingModules = (fullName, setFullName, telegram, setTelegram, step, set
       <div className="training-section">
         <h3>أمثلة حية لكيفية الرد الذكي والتعامل مع المواقف الصعبة</h3>
         <p>إليك دليلك العملي للتعامل مع المواقف الشائعة (الرد الصحيح مقابل الرد الخاطئ):</p>
-        
-        {/* السياسة الحمراء الصارمة */}
         <div className="scenario-box invalid-box" style={{ borderColor: "#dc2626", background: "#fef2f2", borderWidth: "2px", borderStyle: "solid" }}>
           <h4 style={{ color: "#dc2626", fontSize: "1.1rem", fontWeight: "900" }}>⚠️ [سياسة حمراء صارمة] موقف: مستفيد يسيء أو يستخدم ألفاظاً غير لائقة</h4>
           <p className="scenario-text" style={{ color: "#991b1b" }}>
@@ -378,7 +375,7 @@ function QuizContainer({
     
     const finalScore = calculateScore();
     
-    // حفظ النتيجة في التخزين المحلي للمتصفح
+   
     const currentResults = JSON.parse(localStorage.getItem("mulim_quiz_results") || "[]");
     const newRecord = {
       id: Date.now(),
@@ -405,7 +402,7 @@ function QuizContainer({
           <div className="score-number">{finalScore}%</div>
           <div className="score-status">
             {finalScore === 100 
-              ? " اداء مثالي ، انتظر رد مسؤلي الذعم" 
+              ? " اداء مثالي ، انتظر رد مسوؤلي الدعم" 
               : finalScore >= 80 
               ? "رائع جداً! إجاباتك تدل على فهم عالٍ لمبادئ وقيم الخدمة" 
               : "نوصيك بمراجعة ميثاق الدعم والسيناريوهات والبدء مجدداً لتلافي الإنذارات"}
