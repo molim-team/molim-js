@@ -25,6 +25,13 @@ export default function AboutSection() {
             <p>انضم لقروب التليجرام الخاص بنا للحصول على آخر أخبار المنح والمواعيد النهائية للتقديم، وللتواصل مع طلاب يمرون بنفس تجربتك.</p>
           </div>
         </a>
+        <a href="https://airtable.com/appKSN4NvFXywJuUW/shrH9x9YwyEcHuvIi" target="_blank" rel="noreferrer">
+          <div className="about-card">
+            <span className="about-icon">🤝</span>
+            <h3>أترك أثر.. وتطوّع معنا</h3>
+            <p>لديك الشغف لمساعدة زملائك الطلاب؟ انضم لفريقنا وطوّر مهاراتك، واحصل على شهادة تطوع موثقة تُثري بها سيرتك الذاتية.</p>
+          </div>
+        </a>
       </div>
     </section>
   );
