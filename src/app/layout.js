@@ -4,6 +4,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import LlamamBot from '../components/LlamamBot';
 import ScrollToTop from '../components/ScrollToTop';
+import { GoogleAnalytics } from '@next/third-parties/google';
 import Script from 'next/script';
 import './globals.css';
 
@@ -63,6 +64,7 @@ export default function RootLayout({ children }) {
             })();
           `}
         </Script>
+        <GoogleAnalytics gaId="G-0VET8JF7N5" />
       </body>
     </html>
   );
