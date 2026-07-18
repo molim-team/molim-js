@@ -103,7 +103,7 @@ export default function ScholarshipsSlider({ scholarships }) {
 
   return (
     <>
-      <section className="open-scholarships-section">
+      <section id="available-scholarships" className="open-scholarships-section">
         <h2 className="section-title">المنح المتاحة حالياً 🟢</h2>
         <div className="slider-wrapper">
           <button className="slider-btn prev" onClick={() => slideCards(-1)}>&#8250;</button>
