@@ -70,7 +70,7 @@ export default function WhatWeOfferSection({ openCount, totalCount }) {
   return (
     <section className="about-section" style={{ marginTop: '20px', marginBottom: '20px' }}>
       <h2 className="section-title">ماذا نقدم</h2>
-      <div className="cards-wrapper" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
+      <div className="cards-wrapper grid grid-cols-2 md:grid-cols-4 gap-3" style={{ alignItems: 'stretch' }}>
         {features.map((feature) => {
           const CardContent = (
             <div 
