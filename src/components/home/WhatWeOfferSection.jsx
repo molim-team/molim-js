@@ -8,7 +8,7 @@ export default function WhatWeOfferSection({ openCount, totalCount }) {
     {
       id: 'scholarships-open',
       title: 'أحدث المنح المفتوحة',
-      description: `تفاصيل لأكثر من ${openCount || 50} منحة متاحة للتقديم`,
+      description: `تفاصيل لأكثر من ${openCount || 50} منحة متاحة للتقديم حالياَ`,
       icon: <GraduationCap size={24} className="about-icon" style={{ marginBottom: '8px' }} />,
       href: '/#available-scholarships'
     },
