@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { GraduationCap, BookOpen, Compass, Globe, Bell, Bot, Headset, LayoutGrid } from 'lucide-react';
+import { GraduationCap, BookOpen, Compass, Globe, Bell, Bot, Headset, LayoutGrid, Video } from 'lucide-react';
 
 export default function WhatWeOfferSection({ openCount, totalCount }) {
   const features = [
@@ -18,6 +18,14 @@ export default function WhatWeOfferSection({ openCount, totalCount }) {
       description: `تصفح ${totalCount || 100} منحة دراسية في قاعدتنا`,
       icon: <LayoutGrid size={24} className="about-icon" style={{ marginBottom: '8px' }} />,
       href: '/scholarships'
+    },
+    {
+      id: 'youtube',
+      title: 'مقاطع شروحات في اليوتيوب',
+      description: 'شرح تفصيلي لطرق التقديم على المنح الدراسية عبر اليوتيوب',
+      icon: <Video size={24} className="about-icon" style={{ marginBottom: '8px' }} />,
+      href: 'https://youtube.com/@molim_team?si=23FNgC84iLpRGgEt', 
+      target: '_blank'
     },
     {
       id: 'library',
@@ -67,9 +75,6 @@ export default function WhatWeOfferSection({ openCount, totalCount }) {
     }
   ];
 
-  // CSS مكتوب يدويًا (بدون الاعتماد على كلاسات Tailwind) لضمان ظهور الشبكة
-  // بعمودين على الجوال و4 أعمدة على الديسكتوب، بغض النظر عن أي مشكلة
-  // بناء/كاش قد تمنع كلاسات Tailwind من التوليد الصحيح وقت النشر.
   const gridStyles = `
     .molim-offer-grid {
       display: grid !important;
@@ -79,6 +84,18 @@ export default function WhatWeOfferSection({ openCount, totalCount }) {
     @media (min-width: 768px) {
       .molim-offer-grid {
         grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+      }
+    }
+    .molim-offer-grid > a:last-child,
+    .molim-offer-grid > div:last-child {
+      grid-column: 1 / -1;
+      justify-self: center;
+      width: calc(50% - 6px);
+    }
+    @media (min-width: 768px) {
+      .molim-offer-grid > a:last-child,
+      .molim-offer-grid > div:last-child {
+        width: calc(25% - 9px);
       }
     }
   `;
