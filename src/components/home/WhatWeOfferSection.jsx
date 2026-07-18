@@ -62,15 +62,32 @@ export default function WhatWeOfferSection({ openCount, totalCount }) {
       title: 'دعم فني متخصص',
       description: 'فريق دعم يرد على جميع استفساراتك بدقة ومجانًا',
       icon: <Headset size={24} className="about-icon" style={{ marginBottom: '8px' }} />,
-      href: 'https://t.me/@molim_ContactBot',
+      href: 'https://t.me/molim_ContactBot',
       target: '_blank'
     }
   ];
 
+  // CSS مكتوب يدويًا (بدون الاعتماد على كلاسات Tailwind) لضمان ظهور الشبكة
+  // بعمودين على الجوال و4 أعمدة على الديسكتوب، بغض النظر عن أي مشكلة
+  // بناء/كاش قد تمنع كلاسات Tailwind من التوليد الصحيح وقت النشر.
+  const gridStyles = `
+    .molim-offer-grid {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 12px !important;
+    }
+    @media (min-width: 768px) {
+      .molim-offer-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+      }
+    }
+  `;
+
   return (
     <section className="about-section" style={{ marginTop: '20px', marginBottom: '20px' }}>
       <h2 className="section-title">ماذا نقدم</h2>
-      <div className="cards-wrapper grid grid-cols-2 md:grid-cols-4 gap-3" style={{ alignItems: 'stretch' }}>
+      <style>{gridStyles}</style>
+      <div className="molim-offer-grid" style={{ alignItems: 'stretch' }}>
         {features.map((feature) => {
           const CardContent = (
             <div 
