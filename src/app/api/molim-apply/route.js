@@ -113,7 +113,8 @@ export async function POST(req) {
           {
             fields: airtableFields
           }
-        ]
+        ],
+        typecast: true
       })
     });
 
