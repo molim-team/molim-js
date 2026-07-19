@@ -38,6 +38,9 @@ export default function SupportApplyPage() {
   const [agreePrivacy, setAgreePrivacy] = useState(false);
   const [agreeTraining, setAgreeTraining] = useState(false);
 
+  // Honeypot field: hidden from real users, bots tend to fill every input they find.
+  const [honeypot, setHoneypot] = useState("");
+
   const [touchedStep1, setTouchedStep1] = useState(false);
   const [touchedStep2, setTouchedStep2] = useState(false);
   const [touchedStep3, setTouchedStep3] = useState(false);
@@ -92,7 +95,9 @@ export default function SupportApplyPage() {
           arabicSkill: skillLabels[arabicSkill], 
           writtenCommSkill: skillLabels[writtenCommSkill], 
           explainingSkill: skillLabels[explainingSkill],
-          scenario1, scenario2, scenario3, scenario4, scenario5
+          scenario1, scenario2, scenario3, scenario4, scenario5,
+          agreeEthics, agreePrivacy, agreeTraining,
+          honeypot
         }),
       });
 
@@ -157,7 +162,21 @@ export default function SupportApplyPage() {
             </div>
 
             <form onSubmit={handleSubmit}>
-              
+
+              {/* Honeypot field: hidden visually and from assistive tech; real users never see or fill it. */}
+              <div style={{ position: "absolute", left: "-9999px", top: "-9999px", height: 0, width: 0, overflow: "hidden" }} aria-hidden="true">
+                <label htmlFor="website">Website</label>
+                <input
+                  type="text"
+                  id="website"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                />
+              </div>
+
               {currentStep === 1 && (
                 <div className="step-container">
                   <h2 className="feedback-title" style={{ textAlign: "right" }}>المعلومات الشخصية</h2>
