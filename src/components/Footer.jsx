@@ -22,7 +22,7 @@ export default function Footer() {
           <h4>تواصل معنا</h4>
           <a href="https://t.me/molim_ContactBot" target="_blank" rel="noopener noreferrer">الدعم الفني - تليجرام</a>
           <a href="mailto:molim.team@gmail.com">molim.team@gmail.com</a>
-          <a href="https://airtable.com/appKSN4NvFXywJuUW/shrH9x9YwyEcHuvIi" target="_blank" rel="noopener noreferrer">تطوع معنا</a>
+          <a href="https://www.molim.team/molim-apply" target="_blank" rel="noopener noreferrer">تطوع معنا</a>
         </div>
       </div>
 

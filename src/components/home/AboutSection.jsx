@@ -20,7 +20,7 @@ export default function AboutSection() {
             <p>انضم لقروب التليجرام الخاص بنا للحصول على آخر أخبار المنح والمواعيد النهائية للتقديم، وللتواصل مع طلاب يمرون بنفس تجربتك.</p>
           </div>
         </a>
-        <a href="https://airtable.com/appKSN4NvFXywJuUW/shrH9x9YwyEcHuvIi" target="_blank" rel="noreferrer">
+        <a href="https://www.molim.team/molim-apply" target="_blank" rel="noreferrer">
           <div className="about-card">
             <span className="about-icon">🤝</span>
             <h3>أترك أثر.. وتطوّع معنا</h3>

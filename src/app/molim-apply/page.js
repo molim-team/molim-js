@@ -297,7 +297,7 @@ export default function MolimApply() {
         </div>
 
         <button type="submit" className="apply-submit-btn" disabled={isSubmitting}>
-          {isSubmitting ? 'جاري الإرسال...' : 'Submit'}
+          {isSubmitting ? 'جاري الإرسال...' : 'إرسال طلب التطوع'}
         </button>
       </form>
     </div>
