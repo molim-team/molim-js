@@ -131,6 +131,9 @@
   --admin-btn-remove-file-bg: #880000;
   --admin-section-divider-border: #1a3a6e;
 }
+[data-theme="dark"] .about-card h3 {
+  color: var(--primary-color);
+}
 
 *:focus:not(:focus-visible) {
   outline: none;
