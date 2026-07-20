@@ -11,6 +11,7 @@ export default function HeroSection() {
         muted
         loop
         playsInline
+        preload="auto"
       />
       <div className="hero-overlay"></div>
 
