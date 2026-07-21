@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { GraduationCap, BookOpen, Compass, Globe, Bell, Bot, Headset, LayoutGrid, Video } from 'lucide-react';
 
-export default function WhatWeOfferSection({ openCount, totalCount }) {
+export default function WhatWeOfferSection({ openCount, totalCount, countriesCount }) {
   const features = [
     {
       id: 'scholarships-open',
@@ -15,7 +15,7 @@ export default function WhatWeOfferSection({ openCount, totalCount }) {
     {
       id: 'scholarships-all',
       title: 'جميع المنح',
-      description: `تصفح ${totalCount || 100} منحة دراسية في قاعدتنا`,
+      description: `تصفح ${totalCount || 100} منحة دراسية في ${countriesCount || 30} دولة على منصتنا`,
       icon: <LayoutGrid size={24} className="about-icon" style={{ marginBottom: '8px' }} />,
       href: '/scholarships'
     },

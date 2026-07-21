@@ -13,7 +13,8 @@ async function getScholarshipsData() {
   const filePath = path.join(process.cwd(), 'public', 'scholarships.json');
   const data = JSON.parse(readFileSync(filePath, 'utf-8'));
   const open = data.filter(s => getIsOpen(s));
-  return { open, totalCount: data.length };
+  const countriesCount = new Set(data.map(s => s.country)).size;
+  return { open, totalCount: data.length, countriesCount };
 }
 
 export const metadata = {
@@ -22,7 +23,7 @@ export const metadata = {
 };
 
 export default async function HomePage() {
-  const { open: scholarships, totalCount } = await getScholarshipsData();
+  const { open: scholarships, totalCount, countriesCount } = await getScholarshipsData();
   const openCount = scholarships.length;
 
   const jsonLd = {
@@ -44,7 +45,7 @@ export default async function HomePage() {
       <JsonLd data={jsonLd} />
       <div className="main-home-container px-4 md:px-6">
         <HeroSection />
-        <WhatWeOfferSection openCount={openCount} totalCount={totalCount} />
+        <WhatWeOfferSection openCount={openCount} totalCount={totalCount} countriesCount={countriesCount} />
         <ScholarshipsSlider scholarships={scholarships} />
         <AboutSection />
       </div>
