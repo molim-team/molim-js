@@ -860,7 +860,7 @@ footer p {
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   header {
-    padding: 10px 15px;
+    padding: 0px 12px;
     flex-wrap: wrap;
   }
 
