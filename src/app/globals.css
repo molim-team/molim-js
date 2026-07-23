@@ -460,10 +460,9 @@ nav a:hover {
 
 .card .desc {
   flex: 1;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
+  overflow-y: auto;
+  max-height: 70px; 
+  display: block;
   font-size: 13px;
   color: var(--secondary-color);
   margin: 10px 0;

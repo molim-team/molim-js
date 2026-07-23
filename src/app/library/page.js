@@ -62,6 +62,58 @@ const guides = [
     ),
   },
   {
+    id: 5,
+    title: "الدليل الشامل لكتابة السيرة الذاتية (CV)",
+    description: "قالب وإرشادات لبناء سيرة ذاتية احترافية تناسب متطلبات المنح الدراسية الدولية.",
+    available: true,
+    filePath: "/الدليل الشامل لكتابة السيرة الذاتية.pdf",
+    fileName: "الدليل الشامل لكتابة السيرة الذاتية.pdf",
+    iconBg: "#fff1ec",
+    iconColor: "#ff4500",
+    icon: (
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ff4500" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+        <line x1="8" y1="21" x2="16" y2="21"/>
+        <line x1="12" y1="17" x2="12" y2="21"/>
+        <circle cx="9" cy="9" r="2"/>
+        <path d="M15 8h2M15 12H9"/>
+      </svg>
+    ),
+  },
+  {
+    id: 8,
+    title: "الدليل الشامل لإختبار السات SAT",
+    description: "دليلك للتحضير لاختبار السات بفعالية، يشمل أقسام القراءة والكتابة والرياضيات.",
+    available: true,
+    filePath: "/الدليل الشامل لإختبار السات.pdf",
+    fileName: "الدليل الشامل لإختبار السات.pdf",
+    iconBg: "#fff1ec",
+    iconColor: "#ff4500",
+    icon: (
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ff4500" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+        <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+      </svg>
+    ),
+  },
+  {
+    id: 9,
+    title: "الدليل الشامل لإختبار CSCA للمنح الصينية",
+    description: "دليلك الشامل للتحضير لاختبار CSCA المطلوب للتقديم على المنح الدراسية الصينية.",
+    available: true,
+    filePath: "/الدليل الشامل لإختبار CSCA للمنح الصينية.pdf",
+    fileName: "الدليل الشامل لإختبار CSCA للمنح الصينية.pdf",
+    iconBg: "#fff1ec",
+    iconColor: "#ff4500",
+    icon: (
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ff4500" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2 2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+      </svg>
+    ),
+  },
+  {
     id: 4,
     title: "الدليل الشامل لكتابة خطاب الحافز",
     description: "تعلّم كيف تكتب خطاب حافز يلفت الانتباه ويعكس شخصيتك وأهدافك بوضوح.",
@@ -73,24 +125,8 @@ const guides = [
         <path d="M12 20h9"/>
         <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
       </svg>
-    ),
-  },
-  {
-    id: 5,
-    title: "الدليل الشامل لكتابة السيرة الذاتية (CV)",
-    description: "قالب وإرشادات لبناء سيرة ذاتية احترافية تناسب متطلبات المنح الدراسية الدولية.",
-    available: false,
-    iconBg: "#eef2ff",
-    iconColor: "#1a3a6e",
-    icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1a3a6e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-        <line x1="8" y1="21" x2="16" y2="21"/>
-        <line x1="12" y1="17" x2="12" y2="21"/>
-        <circle cx="9" cy="9" r="2"/>
-        <path d="M15 8h2M15 12H9"/>
-      </svg>
-    ),
+
+),
   },
   {
     id: 6,
@@ -121,20 +157,6 @@ const guides = [
       </svg>
     ),
   },
-  {
-    id: 8,
-    title: "الدليل الشامل لاختبار السات SAT",
-    description: "دليلك للتحضير لاختبار السات بفعالية، يشمل أقسام القراءة والكتابة والرياضيات.",
-    available: false,
-    iconBg: "#eef2ff",
-    iconColor: "#1a3a6e",
-    icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1a3a6e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-        <path d="M6 12v5c3 3 9 3 12 0v-5"/>
-      </svg>
-    ),
-  },
 ];
 
 export default function LibraryPage() {
@@ -162,10 +184,10 @@ export default function LibraryPage() {
               key={guide.id}
               className={`guide-card ${!guide.available ? "guide-card--soon" : ""}`}
             >
-              {/* شارة الحالة */}
-              <span className={`guide-badge ${guide.available ? "badge--ready" : "badge--soon"}`}>
-                {guide.available ? "متاح الآن" : "قريبًا"}
-              </span>
+              {/* شارة الحالة - تظهر فقط للملفات المقفلة */}
+              {!guide.available && (
+                <span className="guide-badge badge--soon">قريبًا</span>
+              )}
 
               {/* الأيقونة */}
               <div
@@ -216,7 +238,8 @@ export default function LibraryPage() {
         /* ── Base ── */
         .library-page {
           font-family: 'Cairo', 'Tajawal', sans-serif;
-          min-height: 100vh;
+
+min-height: 100vh;
         }
 
         /* ── Hero ── */
@@ -379,7 +402,8 @@ export default function LibraryPage() {
         .guide-btn--download:hover {
           background: #e03d00;
         }
-        .guide-btn--soon {
+
+.guide-btn--soon {
           background: #ebebeb;
           color: #999;
           cursor: not-allowed;
