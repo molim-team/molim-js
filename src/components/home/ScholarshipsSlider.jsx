@@ -123,7 +123,7 @@ export default function ScholarshipsSlider({ scholarships }) {
                 const active = favorites.includes(String(s.id));
                 const cd = getCountdown(s.deadline);
                 return (
-                  <div key={s.id} className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
+                  <div key={s.id} className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start'}}>
                     <div>
                       <button
                         className={`fav-btn ${active ? 'active' : ''}`}

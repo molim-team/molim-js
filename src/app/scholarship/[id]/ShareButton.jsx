@@ -11,7 +11,6 @@ export default function ShareButton({ scholarship, id }) {
       navigator.share({
         title: `مُلم | ${s.name}`,
         text: text,
-        url: cleanUrl
       }).catch(console.error);
     } else {
       navigator.clipboard.writeText(cleanUrl).then(() => alert('تم نسخ رابط المنحة بنجاح'));
