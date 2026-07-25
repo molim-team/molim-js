@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
+import { parseScholarshipText, ExtraSection } from "@/lib/parser";
 
 const SESSION_KEY = "molim_admin_token";
 
@@ -155,9 +156,12 @@ interface Scholarship {
   notes?: string;
   groupLink?: string;
   discussionLink?: string;
+  extraSections?: ExtraSection[];
 }
 
 interface FormState {
+  rawText?: string;
+  customId: string;
   title: string;
   enTitle: string;
   country: string;
@@ -177,6 +181,7 @@ interface FormState {
   discussionLink: string;
   requiredFiles: string[];
   optionalFiles: string[];
+  extraSections: ExtraSection[];
 }
 
 // Proxy helper 
@@ -209,6 +214,8 @@ const getFlagEmoji = (countryCode: string): string => {
 // Initial state 
 
 const initialFormState: FormState = {
+  rawText: "",
+  customId: "",
   title: "",
   enTitle: "",
   country: "",
@@ -228,6 +235,7 @@ const initialFormState: FormState = {
   discussionLink: "",
   requiredFiles: [""],
   optionalFiles: [""],
+  extraSections: [],
 };
 
 
@@ -597,6 +605,57 @@ function Admin() {
     proxy("notify", { scholarship }).catch(console.error);
   };
 
+  // Raw text parser handler
+  const handleParseRawText = () => {
+    if (!addForm.rawText || !addForm.rawText.trim()) {
+      setMessage({ text: "⚠️ يرجى لصق نص المنحة أولاً قبل التحليل", type: "error" });
+      return;
+    }
+    const parsed = parseScholarshipText(addForm.rawText);
+
+    const isCustomCountry = parsed.country ? !COUNTRIES_LIST.some((c) => c.name === parsed.country) : false;
+    if (isCustomCountry) {
+      setIsCustomCountryAdd(true);
+      if (parsed.flag) {
+        const match = parsed.flag.match(/\/w40\/([a-z]{2})\.png/);
+        if (match) setManualCountryCodeAdd(match[1]);
+      }
+    } else {
+      setIsCustomCountryAdd(false);
+    }
+
+    setAddForm((prev) => ({
+      ...prev,
+      customId: parsed.id || prev.customId,
+      title: parsed.name || prev.title,
+      enTitle: parsed.name_en || prev.enTitle,
+      country: parsed.country || prev.country,
+      flag: parsed.flag || prev.flag,
+      degree: parsed.degree || prev.degree,
+      language: parsed.language || prev.language,
+      status: parsed.open ? "open" : "closed",
+      open_date: parsed.open_date || prev.open_date,
+      deadline: parsed.deadline || prev.deadline,
+      desc: parsed.description || prev.desc,
+      benefits: parsed.benefits.length > 0 ? parsed.benefits : [""],
+      requirements: parsed.requirements.length > 0 ? parsed.requirements : [""],
+      majors: parsed.majors.join(", "),
+      requiredFiles: parsed.requiredFiles.length > 0 ? parsed.requiredFiles : [""],
+      optionalFiles: parsed.optionalFiles.length > 0 ? parsed.optionalFiles : [""],
+      link: parsed.link || prev.link,
+      groupLink: parsed.groupLink || prev.groupLink,
+      discussionLink: parsed.discussionLink || prev.discussionLink,
+      notes: parsed.notes || prev.notes,
+      extraSections: parsed.extraSections || [],
+    }));
+
+    if (parsed.warnings && parsed.warnings.length > 0) {
+      setMessage({ text: `⚠️ اكتمل التحليل مع ملاحظات: ${parsed.warnings.join(" - ")}`, type: "info" });
+    } else {
+      setMessage({ text: "✅ تم تحليل النص وتعبئة الفورم بنجاح! راجع البيانات أدناه قبل الحفظ.", type: "success" });
+    }
+  };
+
   // Add scholarship 
   const handleAddScholarship = async () => {
     if (!addForm.title.trim() || !addForm.country.trim()) {
@@ -606,7 +665,9 @@ function Admin() {
 
     setMessage({ text: "⏳ جاري الإضافة...", type: "info" });
 
-    const generatedId = addForm.enTitle
+    const generatedId = addForm.customId?.trim()
+      ? addForm.customId.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]/g, "")
+      : addForm.enTitle
       ? addForm.enTitle.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]/g, "")
       : "scholarship-" + Date.now();
 
@@ -633,6 +694,7 @@ function Admin() {
       notes:          addForm.notes.trim(),
       groupLink:      addForm.groupLink.trim(),
       discussionLink: addForm.discussionLink.trim(),
+      extraSections:  addForm.extraSections && addForm.extraSections.length > 0 ? addForm.extraSections : undefined,
     };
 
     try {
@@ -687,6 +749,7 @@ function Admin() {
     }
 
     setEditForm({
+      customId:      s.id || "",
       title:         s.name || s.title || "",
       enTitle:       s.name_en || "",
       country:       s.country || "",
@@ -706,6 +769,7 @@ function Admin() {
       discussionLink: s.discussionLink || "",
       requiredFiles: s.documents?.required?.length ? s.documents.required : [""],
       optionalFiles: s.documents?.optional?.length ? s.documents.optional : [""],
+      extraSections: s.extraSections || [],
     });
 
     setIsModalOpen(true);
@@ -728,6 +792,7 @@ function Admin() {
 
       const updated: Scholarship = {
         ...(oldData as Scholarship),
+        id:             editForm.customId?.trim() || oldData.id,
         name:           editForm.title.trim(),
         name_en:        editForm.enTitle.trim(),
         country:        editForm.country.trim(),
@@ -749,6 +814,7 @@ function Admin() {
         notes:          editForm.notes.trim(),
         groupLink:      editForm.groupLink.trim(),
         discussionLink: editForm.discussionLink.trim(),
+        extraSections:  editForm.extraSections && editForm.extraSections.length > 0 ? editForm.extraSections : undefined,
       };
 
       freshList[editingIndex] = updated;
@@ -880,6 +946,65 @@ function Admin() {
       {/* ═══════════════════════ تبويب الإضافة ═══════════════════════ */}
       {activeTab === "add" && (
         <div className="section-form">
+          {/* Raw Text Box & Parser Button */}
+          <div style={{ backgroundColor: "#eef6ff", padding: "20px", borderRadius: "12px", border: "1px solid #bbdefb", marginBottom: "25px" }}>
+            <h3 style={{ margin: "0 0 10px", fontSize: "17px", color: "#1565c0", display: "flex", alignItems: "center", gap: "8px" }}>
+              📝 الإدخال السريع (ألصق نص المنحة كاملاً)
+            </h3>
+            <p style={{ fontSize: "13px", color: "#555", margin: "0 0 12px" }}>
+              ألصق نص المنحة كاملاً كما يصلك من المصدر، ثم انقر زر "تحليل النص". سيتم استخراج وتعبئة جميع الحقول أدناه تلقائياً لمراجعتها قبل الحفظ.
+            </p>
+            <textarea
+              rows={8}
+              placeholder="ألصق نص المنحة هنا..."
+              value={addForm.rawText || ""}
+              onChange={(e) => setAddForm({ ...addForm, rawText: e.target.value })}
+              style={{
+                width: "100%",
+                padding: "12px",
+                borderRadius: "8px",
+                border: "1px solid #90caf9",
+                fontSize: "14px",
+                fontFamily: "inherit",
+                direction: "rtl",
+                boxSizing: "border-box",
+                marginBottom: "12px",
+              }}
+            />
+            <button
+              type="button"
+              onClick={handleParseRawText}
+              style={{
+                backgroundColor: "#1976d2",
+                color: "#fff",
+                padding: "12px 24px",
+                border: "none",
+                borderRadius: "8px",
+                fontSize: "15px",
+                fontWeight: "bold",
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              ⚡ تحليل النص وتعبئة الحقول
+            </button>
+          </div>
+
+          <div style={{ borderTop: "2px dashed #ddd", paddingTop: "20px", marginBottom: "20px" }}>
+            <h4 style={{ margin: "0 0 15px", fontSize: "16px", color: "#333" }}>📋 مراجعة وتعديل بيانات المنحة قبل الحفظ</h4>
+          </div>
+
+          <div className="form-group">
+            <label>معرّف المنحة (Slug / ID في الرابط)</label>
+            <input
+              type="text"
+              placeholder="مثال: study-in-egypt-2026"
+              value={addForm.customId}
+              onChange={(e) => setAddForm({ ...addForm, customId: e.target.value })}
+            />
+          </div>
           <div className="form-group">
             <label>اسم المنحة *</label>
             <input
@@ -1025,6 +1150,122 @@ function Admin() {
             <label>📝 تفاصيل أو ملاحظات إضافية</label>
             <textarea placeholder="أي شروحات دقيقة تظهر بداخل صفحة التفاصيل المفردة..." value={addForm.notes} onChange={(e) => setAddForm({ ...addForm, notes: e.target.value })} />
           </div>
+
+          {/* Extra Sections Manager */}
+          <div className="files-section" style={{ backgroundColor: "#fafafa", padding: "15px", borderRadius: "8px", border: "1px solid #eee", marginBottom: "20px" }}>
+            <h4>🧩 الأقسام العامة والإضافية (Extra Sections)</h4>
+            <p style={{ fontSize: "13px", color: "#666", margin: "0 0 12px" }}>
+              الأقسام غير النمطية الخاصة بالمنح المعقدة (مثل الجدول الزمني، شروط اختبار SAT، تفاصيل الجامعات...)
+            </p>
+            {addForm.extraSections.map((sec, i) => (
+              <div key={i} style={{ border: "1px solid #ddd", borderRadius: "8px", padding: "12px", marginBottom: "12px", backgroundColor: "#fff" }}>
+                <div style={{ display: "flex", gap: "10px", marginBottom: "8px", alignItems: "center" }}>
+                  <input
+                    type="text"
+                    placeholder="عنوان القسم (مثال: الجدول الزمني)"
+                    value={sec.title}
+                    onChange={(e) => {
+                      const updated = [...addForm.extraSections];
+                      updated[i].title = e.target.value;
+                      setAddForm({ ...addForm, extraSections: updated });
+                    }}
+                    style={{ flex: 1, padding: "8px", border: "1px solid #ccc", borderRadius: "6px" }}
+                  />
+                  <select
+                    value={sec.type}
+                    onChange={(e) => {
+                      const updated = [...addForm.extraSections];
+                      updated[i].type = e.target.value as "list" | "text";
+                      setAddForm({ ...addForm, extraSections: updated });
+                    }}
+                    style={{ padding: "8px", border: "1px solid #ccc", borderRadius: "6px" }}
+                  >
+                    <option value="list">قائمة بنود</option>
+                    <option value="text">فقرة نصية</option>
+                  </select>
+                  <button
+                    type="button"
+                    className="btn-remove-file"
+                    onClick={() => {
+                      const updated = addForm.extraSections.filter((_, idx) => idx !== i);
+                      setAddForm({ ...addForm, extraSections: updated });
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {sec.type === "list" ? (
+                  <div>
+                    {(sec.items || [""]).map((item, itemIdx) => (
+                      <div key={itemIdx} style={{ display: "flex", gap: "6px", marginBottom: "6px" }}>
+                        <input
+                          type="text"
+                          placeholder="بند..."
+                          value={item}
+                          onChange={(e) => {
+                            const updated = [...addForm.extraSections];
+                            const items = [...(updated[i].items || [])];
+                            items[itemIdx] = e.target.value;
+                            updated[i].items = items;
+                            setAddForm({ ...addForm, extraSections: updated });
+                          }}
+                          style={{ flex: 1, padding: "6px", border: "1px solid #eee", borderRadius: "4px" }}
+                        />
+                        <button
+                          type="button"
+                          className="btn-remove-file"
+                          onClick={() => {
+                            const updated = [...addForm.extraSections];
+                            updated[i].items = (updated[i].items || []).filter((_, idx) => idx !== itemIdx);
+                            setAddForm({ ...addForm, extraSections: updated });
+                          }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      className="btn-add-file"
+                      onClick={() => {
+                        const updated = [...addForm.extraSections];
+                        updated[i].items = [...(updated[i].items || []), ""];
+                        setAddForm({ ...addForm, extraSections: updated });
+                      }}
+                    >
+                      + إضافة بند
+                    </button>
+                  </div>
+                ) : (
+                  <textarea
+                    rows={3}
+                    placeholder="محتوى الفقرة..."
+                    value={sec.content || ""}
+                    onChange={(e) => {
+                      const updated = [...addForm.extraSections];
+                      updated[i].content = e.target.value;
+                      setAddForm({ ...addForm, extraSections: updated });
+                    }}
+                    style={{ width: "100%", padding: "8px", border: "1px solid #eee", borderRadius: "4px", boxSizing: "border-box" }}
+                  />
+                )}
+              </div>
+            ))}
+            <button
+              type="button"
+              className="btn-add-file"
+              onClick={() => {
+                setAddForm({
+                  ...addForm,
+                  extraSections: [...addForm.extraSections, { title: "", type: "list", items: [""] }],
+                });
+              }}
+            >
+              + إضافة قسم إضافي
+            </button>
+          </div>
+
           <div style={{ display: "flex", gap: "15px", marginTop: "20px" }}>
             <button className="btn-submit" style={{ flex: 1 }} onClick={handleAddScholarship}>
               ✅ إضافة المنحة للمستودع
@@ -1110,6 +1351,10 @@ function Admin() {
             <button className="modal-close" onClick={() => setIsModalOpen(false)}>✕</button>
             <h2>✏️ تعديل بيانات المنحة المختارة</h2>
             {editMessage.text && <p className={`admin-msg ${editMessage.type}`}>{editMessage.text}</p>}
+            <div className="form-group">
+              <label>معرّف المنحة (Slug / ID في الرابط)</label>
+              <input type="text" value={editForm.customId} onChange={(e) => setEditForm({ ...editForm, customId: e.target.value })} />
+            </div>
             <div className="form-group">
               <label>اسم المنحة *</label>
               <input type="text" value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} />
@@ -1233,6 +1478,119 @@ function Admin() {
               <label>📝 تفاصيل إضافية</label>
               <textarea value={editForm.notes} onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })} />
             </div>
+
+            {/* Extra Sections Manager in Modal */}
+            <div className="files-section" style={{ backgroundColor: "#fafafa", padding: "15px", borderRadius: "8px", border: "1px solid #eee", marginBottom: "15px" }}>
+              <h4>🧩 الأقسام العامة والإضافية (Extra Sections)</h4>
+              {editForm.extraSections.map((sec, i) => (
+                <div key={i} style={{ border: "1px solid #ddd", borderRadius: "8px", padding: "12px", marginBottom: "10px", backgroundColor: "#fff" }}>
+                  <div style={{ display: "flex", gap: "10px", marginBottom: "8px", alignItems: "center" }}>
+                    <input
+                      type="text"
+                      placeholder="عنوان القسم"
+                      value={sec.title}
+                      onChange={(e) => {
+                        const updated = [...editForm.extraSections];
+                        updated[i].title = e.target.value;
+                        setEditForm({ ...editForm, extraSections: updated });
+                      }}
+                      style={{ flex: 1, padding: "8px", border: "1px solid #ccc", borderRadius: "6px" }}
+                    />
+                    <select
+                      value={sec.type}
+                      onChange={(e) => {
+                        const updated = [...editForm.extraSections];
+                        updated[i].type = e.target.value as "list" | "text";
+                        setEditForm({ ...editForm, extraSections: updated });
+                      }}
+                      style={{ padding: "8px", border: "1px solid #ccc", borderRadius: "6px" }}
+                    >
+                      <option value="list">قائمة بنود</option>
+                      <option value="text">فقرة نصية</option>
+                    </select>
+                    <button
+                      type="button"
+                      className="btn-remove-file"
+                      onClick={() => {
+                        const updated = editForm.extraSections.filter((_, idx) => idx !== i);
+                        setEditForm({ ...editForm, extraSections: updated });
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  {sec.type === "list" ? (
+                    <div>
+                      {(sec.items || [""]).map((item, itemIdx) => (
+                        <div key={itemIdx} style={{ display: "flex", gap: "6px", marginBottom: "6px" }}>
+                          <input
+                            type="text"
+                            placeholder="بند..."
+                            value={item}
+                            onChange={(e) => {
+                              const updated = [...editForm.extraSections];
+                              const items = [...(updated[i].items || [])];
+                              items[itemIdx] = e.target.value;
+                              updated[i].items = items;
+                              setEditForm({ ...editForm, extraSections: updated });
+                            }}
+                            style={{ flex: 1, padding: "6px", border: "1px solid #eee", borderRadius: "4px" }}
+                          />
+                          <button
+                            type="button"
+                            className="btn-remove-file"
+                            onClick={() => {
+                              const updated = [...editForm.extraSections];
+                              updated[i].items = (updated[i].items || []).filter((_, idx) => idx !== itemIdx);
+                              setEditForm({ ...editForm, extraSections: updated });
+                            }}
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        className="btn-add-file"
+                        onClick={() => {
+                          const updated = [...editForm.extraSections];
+                          updated[i].items = [...(updated[i].items || []), ""];
+                          setEditForm({ ...editForm, extraSections: updated });
+                        }}
+                      >
+                        + إضافة بند
+                      </button>
+                    </div>
+                  ) : (
+                    <textarea
+                      rows={3}
+                      placeholder="محتوى الفقرة..."
+                      value={sec.content || ""}
+                      onChange={(e) => {
+                        const updated = [...editForm.extraSections];
+                        updated[i].content = e.target.value;
+                        setEditForm({ ...editForm, extraSections: updated });
+                      }}
+                      style={{ width: "100%", padding: "8px", border: "1px solid #eee", borderRadius: "4px", boxSizing: "border-box" }}
+                    />
+                  )}
+                </div>
+              ))}
+              <button
+                type="button"
+                className="btn-add-file"
+                onClick={() => {
+                  setEditForm({
+                    ...editForm,
+                    extraSections: [...editForm.extraSections, { title: "", type: "list", items: [""] }],
+                  });
+                }}
+              >
+                + إضافة قسم إضافي
+              </button>
+            </div>
+
             <button className="btn-save" onClick={handleSaveEdit}>💾 حفظ التعديلات</button>
           </div>
         </div>

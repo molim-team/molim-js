@@ -144,6 +144,21 @@ export default async function ScholarshipDetails({ params }) {
           </div>
         )}
 
+        {s.extraSections?.length > 0 && s.extraSections.map((sec, idx) => (
+          <div key={idx} className="details-card">
+            <h2>{sec.title}</h2>
+            {sec.type === 'list' && Array.isArray(sec.items) && sec.items.length > 0 ? (
+              <ul>
+                {sec.items.map((item, i) => (
+                  <li key={i}>{item}</li>
+                ))}
+              </ul>
+            ) : (
+              <p style={{ whiteSpace: 'pre-wrap' }}>{sec.content || (Array.isArray(sec.items) ? sec.items.join('\n') : '')}</p>
+            )}
+          </div>
+        ))}
+
         {s.groupLink && (
           <div className="btn-split">
             <a href={s.groupLink} target="_blank" rel="noreferrer" className="btn-main btn-split-half">
