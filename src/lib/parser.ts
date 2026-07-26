@@ -30,36 +30,104 @@ export interface ParsedScholarship {
   warnings: string[];
 }
 
+/**
+ * كل مفتاح هنا هو صيغة/إملاء مختلف لنفس الدولة (مع همزة/بدونها، أو
+ * الاسم الرسمي الطويل مقابل الشائع) — مش تكرار عن طريق الخطأ. الهدف
+ * إن أي طريقة كتابة شائعة للدولة تتطابق مع نفس كود ISO.
+ * أضفنا كمان صيغ النسبة (روسي/روسية، أمريكي/أمريكية...) لأن نصوص
+ * المنح غالبًا بتوصف الدولة كصفة ("المراكز الروسية") مش كاسم دائمًا.
+ */
 const COUNTRY_MAP: Record<string, string> = {
+  // مصر
   مصر: "eg",
   "جمهورية مصر العربية": "eg",
+  مصري: "eg",
+  المصري: "eg",
+  المصرية: "eg",
+  // السعودية
   السعودية: "sa",
   "المملكة العربية السعودية": "sa",
+  سعودي: "sa",
+  السعودي: "sa",
+  // الإمارات
   الإمارات: "ae",
   "الإمارات العربية المتحدة": "ae",
   امارات: "ae",
+  إماراتي: "ae",
+  الإماراتي: "ae",
+  الإماراتية: "ae",
+  // تركيا
   تركيا: "tr",
+  تركي: "tr",
+  التركي: "tr",
+  التركية: "tr",
+  // المجر
   المجر: "hu",
+  // ألمانيا
   ألمانيا: "de",
   المانيا: "de",
+  ألماني: "de",
+  الألماني: "de",
+  الألمانية: "de",
+  // بريطانيا
   بريطانيا: "gb",
   "المملكة المتحدة": "gb",
   إنجلترا: "gb",
   انجلترا: "gb",
+  بريطاني: "gb",
+  البريطاني: "gb",
+  البريطانية: "gb",
+  // أمريكا
   أمريكا: "us",
   امريكا: "us",
   "الولايات المتحدة": "us",
   "الولايات المتحدة الأمريكية": "us",
+  أمريكي: "us",
+  الأمريكي: "us",
+  الأمريكية: "us",
+  // كندا
   كندا: "ca",
+  كندي: "ca",
+  الكندي: "ca",
+  الكندية: "ca",
+  // روسيا
   روسيا: "ru",
+  روسي: "ru",
+  الروسي: "ru",
+  الروسية: "ru",
+  // الصين
   الصين: "cn",
+  صيني: "cn",
+  الصيني: "cn",
+  الصينية: "cn",
+  // اليابان
   اليابان: "jp",
+  ياباني: "jp",
+  الياباني: "jp",
+  اليابانية: "jp",
+  // فرنسا
   فرنسا: "fr",
+  فرنسي: "fr",
+  الفرنسي: "fr",
+  الفرنسية: "fr",
+  // إيطاليا
   إيطاليا: "it",
   ايطاليا: "it",
+  إيطالي: "it",
+  الإيطالي: "it",
+  الإيطالية: "it",
+  // إسبانيا
   إسبانيا: "es",
   اسبانيا: "es",
+  إسباني: "es",
+  الإسباني: "es",
+  الإسبانية: "es",
+  // ماليزيا
   ماليزيا: "my",
+  ماليزي: "my",
+  الماليزي: "my",
+  الماليزية: "my",
+  // باقي الدول (بدون صيغ نسبة إضافية حاليًا)
   قطر: "qa",
   الكويت: "kw",
   البحرين: "bh",
@@ -90,6 +158,9 @@ const COUNTRY_MAP: Record<string, string> = {
   إندونيسيا: "id",
   اندونيسيا: "id",
   الهند: "in",
+  هندي: "in",
+  الهندي: "in",
+  الهندية: "in",
   باكستان: "pk",
   بروناي: "bn",
   أذربيجان: "az",
@@ -207,10 +278,22 @@ function parseArabicDate(str: string): string {
   return "";
 }
 
+// مجموعة الرموز الزخرفية (إيموجي + علامات تعداد) المعروفة. الاعتماد
+// الفعلي في التصنيف هو على الكلمات المفتاحية وعلامة ":" — الرموز هنا
+// بتُستخدم بس للتنظيف (إزالتها من القيم النهائية) وللكشف عن أن سطر
+// معين "معدود بنقطة" (bullet) بغض النظر عن شكل الرمز المستخدم.
+const DECORATIVE_CLASS =
+  "\\p{Emoji_Presentation}\\p{Extended_Pictographic}\\u25A0-\\u25FF\\u2600-\\u26FF\\u2700-\\u27BF✦◈═🔷️🟠🏛🔗📣📝📌🎁📚📂📋💬•\\-\\*";
+
+const LEADING_BULLET_REGEX = new RegExp(
+  `^[\\s\\uFE0F\\u200B-\\u200D]*[${DECORATIVE_CLASS}\\+]`,
+  "u"
+);
+
 function cleanDecorations(str: string): string {
   if (!str) return "";
   return str
-    .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}\u25A0-\u25FF\u2600-\u26FF\u2700-\u27BF✦◈═🔷️🟠🏛🔗📣📝📌🎁📚📂📋💬•\-\*]/gu, "")
+    .replace(new RegExp(`[${DECORATIVE_CLASS}]`, "gu"), "")
     .replace(/[\uFE0F\u200B-\u200D\uFEFF]/gu, "")
     .replace(/^[\s:—–\-\*\•\+]+|[\s:—–\-\*\•\+]+$/g, "")
     .trim();
@@ -219,10 +302,17 @@ function cleanDecorations(str: string): string {
 function stripItemBullet(str: string): string {
   if (!str) return "";
   return str
-    .replace(/^[\s\uFE0F\u200B-\u200D]*[\p{Emoji_Presentation}\p{Extended_Pictographic}\u25A0-\u25FF\u2600-\u26FF\u2700-\u27BF✦◈═🔷️🟠🏛🔗📣📝📌🎁📚📂📋💬•\-\*\+]+\s*/gu, "")
+    .replace(new RegExp(`^[\\s\\uFE0F\\u200B-\\u200D]*[${DECORATIVE_CLASS}\\+]+\\s*`, "gu"), "")
     .replace(/^[\s\uFE0F\u200B-\u200D]*[\-\*\•\+✦]\s*/g, "")
     .replace(/^[\s\uFE0F\u200B-\u200D\uFEFF]+/gu, "")
     .trim();
+}
+
+// سطر "عنوان فرعي" داخل قسم (مثل "المستندات الاختيارية :" أو
+// "الجامعة الأمريكية في بيروت:") — نعتبره label بس لو ينتهي فعليًا
+// بعلامة ":"، مش لو الكلمة المفتاحية اتذكرت جوه محتوى الجملة نفسها.
+function isColonLabel(rawLine: string): boolean {
+  return /[:：]\s*$/.test(rawLine.trim());
 }
 
 function generateSlug(enTitle: string, arTitle: string): string {
@@ -250,8 +340,7 @@ function generateSlug(enTitle: string, arTitle: string): string {
 /**
  * يحدد الفئة "المعروفة" لعنوان قسم (أو null لو مش من القائمة المعروفة).
  * الغرض منها: منع العناوين الفرعية التابعة لنفس الفئة (مثل "المستندات
- * الإجبارية" جوه "المستندات") من التقطّع لبلوك مستقل ومنفصل عن أبيه —
- * وهو السبب الأساسي وراء أخطاء المستندات والتخصصات.
+ * الإجبارية" جوه "المستندات") من التقطّع لبلوك مستقل ومنفصل عن أبيه.
  */
 function matchCategory(title: string): string | null {
   if (/^(المعلومات العامة|معلومات المنحة)/.test(title)) return "info";
@@ -323,11 +412,13 @@ export function parseScholarshipText(rawText: string): ParsedScholarship {
     if (!clean) return false;
     if (l.length > 80 && !l.includes(":")) return false;
 
+    // الاعتماد فقط على: (أ) الكلمات المفتاحية المعروفة، أو (ب) البنية
+    // (السطر ينتهي بـ ":")— مفيش أي اعتماد على إيموجي معين كشرط تصنيف،
+    // لأن الإيموجي ممكن يختلف أو يتحذف حسب مصدر النص.
     const knownHeaderRegex = /^(المعلومات العامة|المميزات|الشروط|المعايير|التخصصات|المستندات|الملفات|الوثائق|ملاحظات|تفاصيل إضافية|رابط التقديم|رابط قناة|قناة المنحة|مناقشة المنحة|رابط مناقشة|المراحل الدراسية|لغة الدراسة|حالة التقديم|موعد فتح|موعد إغلاق|تاريخ إغلاق|الجدول الزمني|شروط اختبار|الدولة|اختر دولة المنحة)/i;
 
     if (l.endsWith(":") || l.endsWith("：")) return true;
     if (knownHeaderRegex.test(clean)) return true;
-    if (/^[🟠🏛🔗📣📝🎁]\s*/.test(l) && l.length < 60) return true;
 
     return false;
   };
@@ -516,19 +607,16 @@ export function parseScholarshipText(rawText: string): ParsedScholarship {
       requirements.push(...items);
     } else if (bTitle.includes("التخصصات")) {
       const rawLines = block.lines;
-      const hasSubHeaders = rawLines.some((l) => /[:：]\s*$/.test(l.trim()));
-      const hasBulletMarkers = rawLines.some((l) =>
-        /^[\s\uFE0F\u200B-\u200D]*[✦\-\*\+•]/.test(l)
-      );
+      const hasSubHeaders = rawLines.some((l) => isColonLabel(l));
+      const hasBulletMarkers = rawLines.some((l) => LEADING_BULLET_REGEX.test(l));
 
       if (hasSubHeaders) {
         // قسم تخصصات مقسّم حسب فئة/جامعة — نحافظ على السياق بدل ما نضيعه
         let currentGroup = "";
         const collected: string[] = [];
         for (const line of rawLines) {
-          const trimmed = line.trim();
-          if (/[:：]\s*$/.test(trimmed)) {
-            currentGroup = cleanDecorations(trimmed).replace(/[:：]\s*$/, "").trim();
+          if (isColonLabel(line)) {
+            currentGroup = cleanDecorations(line.trim()).replace(/[:：]\s*$/, "").trim();
             continue;
           }
           const itemVal = stripItemBullet(line);
@@ -537,6 +625,7 @@ export function parseScholarshipText(rawText: string): ParsedScholarship {
         }
         majors.push(...collected);
       } else if (hasBulletMarkers) {
+        // كل سطر معدود بنقطة (أيًا كان شكل الرمز) = تخصص مستقل
         const items = rawLines.map(stripItemBullet).filter(Boolean);
         majors.push(...items);
       } else {
@@ -550,15 +639,18 @@ export function parseScholarshipText(rawText: string): ParsedScholarship {
         }
       }
     } else if (bTitle.includes("المستندات") || bTitle.includes("الملفات") || bTitle.includes("الوثائق")) {
-      // نبدأ من عنوان البلوك نفسه (احتياطًا)، وبعدين نطبّق التبديل حسب
-      // العناوين الفرعية المدمجة جوه نفس البلوك (بعد إصلاح التقطيع أعلاه)
+      // نبدأ من عنوان البلوك نفسه (احتياطًا)، وبعدين نطبّق التبديل بس عند
+      // سطور "عنوان فرعي" الفعلية (تنتهي بـ ":") — مش أي سطر بيذكر كلمة
+      // "مطلوب"/"اختياري" بالمصادفة كجزء من وصف المستند نفسه.
       let curTarget: "required" | "optional" = cleanDecorations(bTitle).includes("اختيار") ? "optional" : "required";
       for (const line of block.lines) {
         const cleanL = cleanDecorations(line);
         const itemVal = stripItemBullet(line);
-        if (cleanL.includes("إجبار") || cleanL.includes("مطلوب")) {
+        const isLabel = isColonLabel(line);
+
+        if (isLabel && (cleanL.includes("إجبار") || cleanL.includes("مطلوب"))) {
           curTarget = "required";
-        } else if (cleanL.includes("اختيار")) {
+        } else if (isLabel && cleanL.includes("اختيار")) {
           curTarget = "optional";
         } else if (itemVal) {
           if (curTarget === "required") requiredFiles.push(itemVal);
