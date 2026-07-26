@@ -247,6 +247,31 @@ function generateSlug(enTitle: string, arTitle: string): string {
   return `scholarship-${Date.now()}`;
 }
 
+/**
+ * يحدد الفئة "المعروفة" لعنوان قسم (أو null لو مش من القائمة المعروفة).
+ * الغرض منها: منع العناوين الفرعية التابعة لنفس الفئة (مثل "المستندات
+ * الإجبارية" جوه "المستندات") من التقطّع لبلوك مستقل ومنفصل عن أبيه —
+ * وهو السبب الأساسي وراء أخطاء المستندات والتخصصات.
+ */
+function matchCategory(title: string): string | null {
+  if (/^(المعلومات العامة|معلومات المنحة)/.test(title)) return "info";
+  if (/^(المراحل الدراسية|المرحلة الدراسية)/.test(title)) return "degree";
+  if (/^(لغة الدراسة|اللغة)/.test(title)) return "language";
+  if (/^(حالة التقديم|حالة المنحة)/.test(title)) return "status";
+  if (/^(موعد فتح|بداية التقديم|تاريخ البدء)/.test(title)) return "open_date";
+  if (/^(موعد إغلاق|تاريخ إغلاق|آخر موعد|انتهاء التقديم)/.test(title)) return "deadline";
+  if (/^(الدولة|اختر دولة المنحة|دولة المنحة)/.test(title)) return "country";
+  if (/^(المميزات|التمويل|الفوائد)/.test(title)) return "benefits";
+  if (/^(الشروط|المعايير|المتطلبات)/.test(title)) return "requirements";
+  if (/^(التخصصات)/.test(title)) return "majors";
+  if (/^(المستندات|الملفات|الوثائق)/.test(title)) return "documents";
+  if (/^(رابط التقديم|الموقع الرسمي)/.test(title)) return "link";
+  if (/^(قناة المنحة|رابط قناة)/.test(title)) return "group";
+  if (/^(مناقشة المنحة|رابط مناقشة)/.test(title)) return "discussion";
+  if (/^(ملاحظات|تنبيهات|تفاصيل إضافية)/.test(title)) return "notes";
+  return null;
+}
+
 export function parseScholarshipText(rawText: string): ParsedScholarship {
   const warnings: string[] = [];
   const lines = rawText.split(/\r?\n/).map((l) => l.trim()).filter((l) => l.length > 0);
@@ -298,8 +323,8 @@ export function parseScholarshipText(rawText: string): ParsedScholarship {
     if (!clean) return false;
     if (l.length > 80 && !l.includes(":")) return false;
 
-    const knownHeaderRegex = /^(المعلومات العامة|المميزات|الشروط|المعايير|التخصصات|المستندات|الملفات|الوثائق|ملاحظات|تفاصيل إضافية|رابط التقديم|رابط قناة|قناة المنحة|مناقشة المنحة|رابط مناقشة|المراحل الدراسية|لغة الدراسة|حالة التقديم|موعد فتح|موعد إغلاق|تاريخ إغلاق|الجدول الزمني|شروط اختبار)/i;
-    
+    const knownHeaderRegex = /^(المعلومات العامة|المميزات|الشروط|المعايير|التخصصات|المستندات|الملفات|الوثائق|ملاحظات|تفاصيل إضافية|رابط التقديم|رابط قناة|قناة المنحة|مناقشة المنحة|رابط مناقشة|المراحل الدراسية|لغة الدراسة|حالة التقديم|موعد فتح|موعد إغلاق|تاريخ إغلاق|الجدول الزمني|شروط اختبار|الدولة|اختر دولة المنحة)/i;
+
     if (l.endsWith(":") || l.endsWith("：")) return true;
     if (knownHeaderRegex.test(clean)) return true;
     if (/^[🟠🏛🔗📣📝🎁]\s*/.test(l) && l.length < 60) return true;
@@ -314,6 +339,7 @@ export function parseScholarshipText(rawText: string): ParsedScholarship {
 
   const blocks: RawBlock[] = [];
   let currentBlock: RawBlock | null = null;
+  let activeCategory: string | null = null;
   let descriptionLines: string[] = [];
 
   for (let i = 1; i < lines.length; i++) {
@@ -323,11 +349,19 @@ export function parseScholarshipText(rawText: string): ParsedScholarship {
 
     if (isSectionHeader(line)) {
       const cleanTitle = cleanDecorations(line);
-      currentBlock = {
-        title: cleanTitle,
-        lines: [],
-      };
+      const cat = matchCategory(cleanTitle);
+
+      // لو العنوان ده نفس فئة القسم الحالي (مثال: "المستندات الاختيارية"
+      // جوه "المستندات"، أو عنوان جامعة جوه "التخصصات") — سيبه سطر عادي
+      // جوه نفس البلوك بدل ما يتقطّع لقسم مستقل وتضيع بياناته.
+      if (cat !== null && cat === activeCategory && currentBlock) {
+        currentBlock.lines.push(line);
+        continue;
+      }
+
+      currentBlock = { title: cleanTitle, lines: [] };
       blocks.push(currentBlock);
+      activeCategory = cat;
     } else if (currentBlock) {
       currentBlock.lines.push(line);
     } else {
@@ -338,6 +372,7 @@ export function parseScholarshipText(rawText: string): ParsedScholarship {
   const description = descriptionLines.map(stripItemBullet).join(" ").trim();
 
   let country = "";
+  let countryRaw = "";
   let flag = "";
   let degree = "";
   let language = "";
@@ -352,7 +387,7 @@ export function parseScholarshipText(rawText: string): ParsedScholarship {
 
   const benefits: string[] = [];
   const requirements: string[] = [];
-  let majors: string[] = [];
+  const majors: string[] = [];
   const requiredFiles: string[] = [];
   const optionalFiles: string[] = [];
 
@@ -363,6 +398,12 @@ export function parseScholarshipText(rawText: string): ParsedScholarship {
     const cleanL = cleanDecorations(line);
     const itemVal = stripItemBullet(line);
 
+    if (cleanL.includes("اختر دولة المنحة") || cleanL.includes("دولة المنحة") || cleanL.includes("الدولة")) {
+      const val = cleanL.split(/[:：]/)[1];
+      if (val && val.trim()) countryRaw = val.trim();
+      else if (itemVal) countryRaw = itemVal;
+      return true;
+    }
     if (cleanL.includes("المراحل الدراسية") || cleanL.includes("المرحلة الدراسية")) {
       const val = cleanL.split(/[:：]/)[1];
       if (val && val.trim()) degree = val.trim();
@@ -398,9 +439,11 @@ export function parseScholarshipText(rawText: string): ParsedScholarship {
   for (const block of blocks) {
     const bTitle = block.title;
 
-    // Check if block title is mechanical field header (e.g. "المراحل الدراسية", "لغة الدراسة", "حالة التقديم", "موعد فتح التقديم", "موعد إغلاق التقديم")
     if (extractMechanicalFromLine(bTitle)) {
       const items = block.lines.map(stripItemBullet).filter(Boolean);
+      if ((bTitle.includes("الدولة") || bTitle.includes("دولة المنحة")) && items.length > 0 && !countryRaw) {
+        countryRaw = items.join("، ");
+      }
       if (bTitle.includes("المراحل") && items.length > 0) degree = items.join("، ");
       if (bTitle.includes("لغة") && items.length > 0) language = items.join("، ");
       if (bTitle.includes("حالة")) {
@@ -423,7 +466,11 @@ export function parseScholarshipText(rawText: string): ParsedScholarship {
         const cleanL = cleanDecorations(line);
         const itemVal = stripItemBullet(line);
 
-        if (cleanL.includes("المراحل الدراسية")) {
+        if (cleanL.includes("اختر دولة المنحة") || cleanL.includes("دولة المنحة") || cleanL.includes("الدولة")) {
+          currentMechanicalField = "country";
+          const val = cleanL.split(/[:：]/)[1];
+          if (val && val.trim()) countryRaw = val.trim();
+        } else if (cleanL.includes("المراحل الدراسية")) {
           currentMechanicalField = "degree";
           const val = cleanL.split(/[:：]/)[1];
           if (val && val.trim()) degree = val.trim();
@@ -444,7 +491,9 @@ export function parseScholarshipText(rawText: string): ParsedScholarship {
           const parsed = parseArabicDate(cleanL);
           if (parsed) deadline = parsed;
         } else if (currentMechanicalField && itemVal) {
-          if (currentMechanicalField === "degree") {
+          if (currentMechanicalField === "country" && !countryRaw) {
+            countryRaw = itemVal;
+          } else if (currentMechanicalField === "degree") {
             degree = degree ? `${degree}، ${itemVal}` : itemVal;
           } else if (currentMechanicalField === "language") {
             language = language ? `${language}، ${itemVal}` : itemVal;
@@ -466,23 +515,50 @@ export function parseScholarshipText(rawText: string): ParsedScholarship {
       const items = block.lines.map(stripItemBullet).filter(Boolean);
       requirements.push(...items);
     } else if (bTitle.includes("التخصصات")) {
-      const items = block.lines.map(stripItemBullet).filter(Boolean);
-      if (items.length === 1 && !items[0].includes(",") && !items[0].includes("،")) {
-        majors.push(items[0]);
-      } else if (items.length > 1) {
+      const rawLines = block.lines;
+      const hasSubHeaders = rawLines.some((l) => /[:：]\s*$/.test(l.trim()));
+      const hasBulletMarkers = rawLines.some((l) =>
+        /^[\s\uFE0F\u200B-\u200D]*[✦\-\*\+•]/.test(l)
+      );
+
+      if (hasSubHeaders) {
+        // قسم تخصصات مقسّم حسب فئة/جامعة — نحافظ على السياق بدل ما نضيعه
+        let currentGroup = "";
+        const collected: string[] = [];
+        for (const line of rawLines) {
+          const trimmed = line.trim();
+          if (/[:：]\s*$/.test(trimmed)) {
+            currentGroup = cleanDecorations(trimmed).replace(/[:：]\s*$/, "").trim();
+            continue;
+          }
+          const itemVal = stripItemBullet(line);
+          if (!itemVal) continue;
+          collected.push(currentGroup ? `${currentGroup}: ${itemVal}` : itemVal);
+        }
+        majors.push(...collected);
+      } else if (hasBulletMarkers) {
+        const items = rawLines.map(stripItemBullet).filter(Boolean);
         majors.push(...items);
-      } else if (items.length === 1) {
-        const splitMajors = items[0].split(/[,،]/).map((s) => s.trim()).filter(Boolean);
-        majors.push(...splitMajors);
+      } else {
+        // فقرة وصفية متصلة بدون تعداد نقطي — عنصر واحد، إلا لو فيها فواصل واضحة
+        const joined = rawLines.map(stripItemBullet).filter(Boolean).join(" ").trim();
+        if (joined.includes(",") || joined.includes("،")) {
+          const splitMajors = joined.split(/[,،]/).map((s) => s.trim()).filter(Boolean);
+          majors.push(...splitMajors);
+        } else if (joined) {
+          majors.push(joined);
+        }
       }
     } else if (bTitle.includes("المستندات") || bTitle.includes("الملفات") || bTitle.includes("الوثائق")) {
-      let curTarget = "required";
+      // نبدأ من عنوان البلوك نفسه (احتياطًا)، وبعدين نطبّق التبديل حسب
+      // العناوين الفرعية المدمجة جوه نفس البلوك (بعد إصلاح التقطيع أعلاه)
+      let curTarget: "required" | "optional" = cleanDecorations(bTitle).includes("اختيار") ? "optional" : "required";
       for (const line of block.lines) {
         const cleanL = cleanDecorations(line);
         const itemVal = stripItemBullet(line);
-        if (cleanL.includes("إجبارية") || cleanL.includes("إجباري") || cleanL.includes("مطلوبة")) {
+        if (cleanL.includes("إجبار") || cleanL.includes("مطلوب")) {
           curTarget = "required";
-        } else if (cleanL.includes("اختيارية") || cleanL.includes("اختياري")) {
+        } else if (cleanL.includes("اختيار")) {
           curTarget = "optional";
         } else if (itemVal) {
           if (curTarget === "required") requiredFiles.push(itemVal);
@@ -531,12 +607,44 @@ export function parseScholarshipText(rawText: string): ParsedScholarship {
     if (tGroupMatch) groupLink = tGroupMatch[0];
   }
 
-  const fullTextToScan = `${name} ${description} ${rawText}`;
-  for (const [alias, iso] of Object.entries(COUNTRY_MAP)) {
-    if (fullTextToScan.includes(alias)) {
-      country = ISO_TO_STANDARD_ARABIC[iso] || alias;
-      flag = `https://flagcdn.com/w40/${iso}.png`;
-      break;
+  // استخراج الدولة: أولوية للحقل الصريح "اختر دولة المنحة" اللي جمعناه
+  // أثناء التحليل. نلجأ للمسح العام (fallback) بس لو الحقل ده مش موجود،
+  // ومحصور في الاسم + الوصف فقط (مش النص كامل) عشان ما نلقط دول
+  // مذكورة عرضيًا في الشروط أو الملاحظات أو التخصصات.
+  if (countryRaw) {
+    let matchedIso = "";
+    let matchedAlias = "";
+    for (const [alias, iso] of Object.entries(COUNTRY_MAP)) {
+      if (countryRaw.includes(alias) && alias.length > matchedAlias.length) {
+        matchedAlias = alias;
+        matchedIso = iso;
+      }
+    }
+    if (matchedIso) {
+      country = ISO_TO_STANDARD_ARABIC[matchedIso] || matchedAlias;
+      flag = `https://flagcdn.com/w40/${matchedIso}.png`;
+    } else {
+      // فيه قيمة صريحة بس مش موجودة بجدول الدول — نحتفظ بالنص الخام
+      // ونطلب من المستخدم مراجعتها بدل ما نفشل الحفظ بصمت
+      country = countryRaw;
+      warnings.push("تم العثور على اسم دولة صريح بالنص لكنه غير موجود بقائمة الدول المعروفة، فلم يتم تحديد العلم تلقائيًا. يرجى المراجعة.");
+    }
+  } else {
+    const scanText = `${name} ${description}`;
+    let bestIndex = Infinity;
+    let bestIso = "";
+    let bestAlias = "";
+    for (const [alias, iso] of Object.entries(COUNTRY_MAP)) {
+      const idx = scanText.indexOf(alias);
+      if (idx !== -1 && (idx < bestIndex || (idx === bestIndex && alias.length > bestAlias.length))) {
+        bestIndex = idx;
+        bestIso = iso;
+        bestAlias = alias;
+      }
+    }
+    if (bestIso) {
+      country = ISO_TO_STANDARD_ARABIC[bestIso] || bestAlias;
+      flag = `https://flagcdn.com/w40/${bestIso}.png`;
     }
   }
 
