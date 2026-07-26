@@ -66,8 +66,8 @@ const guides = [
     title: "الدليل الشامل لكتابة السيرة الذاتية (CV)",
     description: "قالب وإرشادات لبناء سيرة ذاتية احترافية تناسب متطلبات المنح الدراسية الدولية.",
     available: true,
-    filePath: "/الدليل الشامل لكتابة السيرة الذاتية.pdf",
-    fileName: "الدليل الشامل لكتابة السيرة الذاتية.pdf",
+    filePath: "/الدليل الشامل لكتابة السيرة الذاتية (CV).pdf",
+    fileName: "الدليل الشامل لكتابة السيرة الذاتية (CV).pdf",
     iconBg: "#fff1ec",
     iconColor: "#ff4500",
     icon: (
@@ -81,12 +81,28 @@ const guides = [
     ),
   },
   {
+    id: 7,
+    title: "الدليل الشامل لاختبار التوفل TOEFL",
+    description: "خطة تحضير شاملة لاختبار التوفل تغطي أقسام الكتابة والقراءة والاستماع والمحادثة.",
+    available: true,
+    filePath: "/الدليل الشامل لإختبار التوفل TOEFL.pdf",
+    fileName: "الدليل الشامل لإختبار التوفل TOEFL.pdf",
+    iconBg: "#fff1ec",
+    iconColor: "#ff4500",
+    icon: (
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1a3a6e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+      </svg>
+    ),
+  },
+  {
     id: 8,
     title: "الدليل الشامل لإختبار السات SAT",
     description: "دليلك للتحضير لاختبار السات بفعالية، يشمل أقسام القراءة والكتابة والرياضيات.",
     available: true,
-    filePath: "/الدليل الشامل لإختبار السات.pdf",
-    fileName: "الدليل الشامل لإختبار السات.pdf",
+    filePath: "/الدليل الشامل لإختبار السات SAT.pdf",
+    fileName: "الدليل الشامل لإختبار السات SAT.pdf",
     iconBg: "#fff1ec",
     iconColor: "#ff4500",
     icon: (
@@ -140,20 +156,6 @@ const guides = [
         <circle cx="12" cy="12" r="10"/>
         <line x1="2" y1="12" x2="22" y2="12"/>
         <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-      </svg>
-    ),
-  },
-  {
-    id: 7,
-    title: "الدليل الشامل لاختبار التوفل TOEFL",
-    description: "خطة تحضير شاملة لاختبار التوفل تغطي أقسام الكتابة والقراءة والاستماع والمحادثة.",
-    available: false,
-    iconBg: "#eef2ff",
-    iconColor: "#1a3a6e",
-    icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1a3a6e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
       </svg>
     ),
   },
