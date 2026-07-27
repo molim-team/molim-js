@@ -3,15 +3,25 @@ import { Resend } from "resend";
 import { db } from "@/lib/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// 1. إجبار المسار ليكون ديناميكي لتجاوز فحص Cloudflare أثناء البناء
+export const dynamic = 'force-dynamic';
+
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://molim.team";
 
 export async function POST(request) {
-
-   const secret = request.headers.get('x-notify-secret');
+  // التحقق من صلاحية الطلب
+  const secret = request.headers.get('x-notify-secret');
   if (secret !== process.env.NOTIFY_SECRET) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
+  // 2. استدعاء المفتاح وتهيئة المكتبة داخل الدالة وقت التشغيل فقط
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    return NextResponse.json({ error: 'Resend API key is missing' }, { status: 500 });
+  }
+  
+  const resend = new Resend(apiKey);
 
   try {
     const { scholarship } = await request.json();
