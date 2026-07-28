@@ -5622,5 +5622,50 @@
     "notes": "يجب التأكد من إدخال البيانات بدقة وإرفاق كافة المستندات المطلوبة عبر بوابة التقديم الرسمية.",
     "groupLink": "https://t.me/Molim_Grants",
     "discussionLink": "https://t.me/Molim_Scholarships"
+  },
+  {
+    "id": "human-rights-scholarship",
+    "name": "منحة حقوق الإنسان – جامعة ملبورن",
+    "name_en": "Human Rights Scholarship",
+    "country": "أستراليا",
+    "flag": "https://flagcdn.com/w40/au.png",
+    "degree": "الماجستير البحثي (Master by Research).   الدكتوراه (PhD).",
+    "language": "- الإنجليزية",
+    "description": "منحة ممولة بالكامل تقدمها جامعة ملبورن للطلاب المحليين والدوليين الراغبين في دراسة الماجستير البحثي أو الدكتوراه في مجال حقوق الإنسان، وتهدف إلى دعم الباحثين الذين يساهمون في تطوير مجال حقوق الإنسان من خلال أبحاثهم.",
+    "benefits": [
+      "✦ • إعفاء كامل من الرسوم الدراسية",
+      "✦ • راتب سنوي قدره 44,500 دولار أسترالي",
+      "✦ • الراتب لمدة سنتين للماجستير البحثي، وحتى 3.5 سنوات للدكتوراه",
+      "✦ • بدل انتقال بقيمة 2,000 دولار أسترالي للمنتقلين من خارج ولاية فيكتوريا، أو 3,000 دولار أسترالي للمنتقلين من خارج أستراليا",
+      "✦ • تأمين صحي للطلاب الدوليين (OSHC)",
+      "✦ • إجازات مرضية وإجازات أمومة/أبوة مدفوعة ضمن المخصصات"
+    ],
+    "requirements": [
+      "✦ - الحصول على عرض قبول في برنامج دراسات عليا بحثي بجامعة ملبورن",
+      "✦ - أن يكون البحث في مجال حقوق الإنسان",
+      "✦ - ألا يكون المتقدم قد حصل سابقًا على مؤهل بحثي بنفس المستوى أو أعلى",
+      "✦ - تقديم طلب منفصل للمنحة يتضمن شرح الالتزام بحقوق الإنسان وخبرة المتقدم في هذا المجال وكيف سيساهم بحثه في تطويره"
+    ],
+    "majors": [
+      "🔷️ جميع برامج الماجستير البحثي المتعلقة بحقوق الإنسان. 🔷️ جميع برامج الدكتوراه التي يكون موضوع البحث فيها في مجال حقوق الإنسان."
+    ],
+    "open_date": "2026-04-01",
+    "deadline": "2026-10-31",
+    "documents": {
+      "required": [
+        "✦ • عرض قبول من جامعة ملبورن",
+        "✦ • طلب المنحة الإلكتروني",
+        "✦ • بيان يوضح الأنشطة أو الخبرات المتعلقة بحقوق الإنسان (مثل العمل التطوعي أو الخبرة العملية)",
+        "✦ • مقترح أو وصف للبحث يوضح مساهمته في مجال حقوق الإنسان"
+      ],
+      "optional": [
+        "✦ • أي مستندات داعمة للأنشطة أو الخبرات في مجال حقوق الإنسان"
+      ]
+    },
+    "link": "https://login.smartygrants.com.au/realms/sg/protocol/openid-connect/auth?scope=openid&state=P3CamMybocLFAQ6_LpwMOpXU68teojtnl8ubWCh5geE.pDjqQ4Wsxts.cM3KrCpsT1uJ6Dn9UjlHCg.eyJydSI6Imh0dHBzOi8vdW5pbWVsYi1zY2hvbGFyc2hpcHMuc21hcnR5Z3JhbnRzLmNvbS5hdS9sb2dpbi9vYXV0aDIvY29kZS9vaWRjIiwicnQiOiJjb2RlIiwic3QiOiJzOXVacFNXTWdsVjMzWXIxeUR3djV0ejFlclR1QkxhbnNjZVpxODlUalVFPSJ9&response_type=code&client_id=sg_broker&redirect_uri=https%3A%2F%2Flogin.smartyfile.com.au%2Frealms%2Foc%2Fbroker%2Fsg_idp%2Fendpoint&redirect_source=https%3A%2F%2Funimelb-scholarships.smartygrants.com.au%2Flogin%2Foa&nonce=9jA0Ow6otnRitDfcoydJOA",
+    "open": true,
+    "notes": "✦ عدد المنح المتاحة سنويًا: 4 منح. ✦ يتم إعلان النتائج عبر البريد الإلكتروني خلال شهر فبراير من العام التالي. ✦ لا تقدم الجامعة أسبابًا أو ملاحظات للمتقدمين غير المقبولين",
+    "groupLink": "https://t.me/Molim_Grants",
+    "discussionLink": "https://t.me/Molim_Scholarships"
   }
 ]
