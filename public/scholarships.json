@@ -5709,5 +5709,44 @@
     "notes": "يتم تقديم طلبات المنح بالتوازي مع طلبات القبول الجامعي عبر الإنترنت من خلال البوابة الرسمية لـ مكتب القبول في جامعة سيول",
     "groupLink": "https://t.me/Molim_Grants",
     "discussionLink": "https://t.me/Molim_Scholarships"
+  },
+  {
+    "id": "bilkent-university-scholarship",
+    "name": "منحة جامعة بيلكنت",
+    "name_en": "Bilkent University Scholarship",
+    "country": "تركيا",
+    "flag": "https://flagcdn.com/w40/tr.png",
+    "degree": "البكالوريوس، الماجستير، الدكتوراه",
+    "language": "الانجليزية",
+    "description": "تقدم جامعة بيلكنت في تركيا منحاً دراسية للطلاب الدوليين تشمل إعفاءً من الرسوم الدراسية (تصل إلى 100%)، وتتضمن المنحة الشاملة رواتب شهرية، إعانة سكن، تأمين صحي، ودعماً للمؤتمرات.",
+    "benefits": [
+      "تغطية الرسوم الدراسية حسب الافضلية في الثانوية والملف الدراسي",
+      "سكن جامعي في بعض الحالات"
+    ],
+    "requirements": [
+      "اتقان اللغة الانجليزية",
+      "الحفاض على معدل تراكمي 2من4للدعم المالي",
+      "الحفاض على معدل 2.5للحاصلين على دعم سكن",
+      "يشترط على الحاصلين اكمال الحد الادنى من المقررات الدراسية"
+    ],
+    "majors": [
+      "جميع التخصصات متوفرة"
+    ],
+    "open_date": "2026-02-10",
+    "deadline": "2026-06-01",
+    "documents": {
+      "required": [
+        "شهادت الثانوية",
+        "جواز السفر",
+        "رسائل توصية",
+        "سجل اكاديمي قوي"
+      ],
+      "optional": []
+    },
+    "link": "https://w3.bilkent.edu.tr/international/scholarships-for-international-students/",
+    "open": false,
+    "notes": "يتم التقديم على الدعم المالي مع التقديم للجامعة",
+    "groupLink": "https://t.me/Molim_Grant",
+    "discussionLink": "https://t.me/Molim_Europe"
   }
 ]
