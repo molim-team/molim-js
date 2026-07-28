@@ -1,5 +1,4 @@
-import { readFileSync } from 'fs';
-import path from 'path';
+export const runtime = 'edge';
 import HeroSection from '@/components/home/HeroSection';
 import WhatWeOfferSection from '@/components/home/WhatWeOfferSection';
 import AboutSection from '@/components/home/AboutSection';
@@ -10,8 +9,8 @@ import JsonLd from '@/components/JsonLd';
 export const dynamic = 'force-dynamic';
 
 async function getScholarshipsData() {
-  const filePath = path.join(process.cwd(), 'public', 'scholarships.json');
-  const data = JSON.parse(readFileSync(filePath, 'utf-8'));
+  const res = await fetch('https://molim.team/scholarships.json', { cache: 'no-store' });
+  const data = await res.json();
   const open = data.filter(s => getIsOpen(s));
   const countriesCount = new Set(data.map(s => s.country)).size;
   return { open, totalCount: data.length, countriesCount };
