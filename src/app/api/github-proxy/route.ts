@@ -233,7 +233,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing scholarship object" }, { status: 400 });
     }
 
-    fetch(`${req.nextUrl.origin}/api/notify-scholarship`, {
+    fetch(`https://molim-js.vercel.app/api/notify-scholarship`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

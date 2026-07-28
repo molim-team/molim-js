@@ -45,7 +45,7 @@ export default function Dashboard() {
     setMessage('');
 
     try {
-      const res = await fetch('/api/issue-certificate', {
+      const res = await fetch('https://molim-js.vercel.app/api/issue-certificate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -87,7 +87,7 @@ export default function SupportApplyPage() {
     setSubmitting(true);
 
     try {
-      const response = await fetch("/api/airtable", {
+       const response = await fetch("https://molim-js.vercel.app/api/airtable", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

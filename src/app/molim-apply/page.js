@@ -82,7 +82,7 @@ export default function MolimApply() {
     setErrorMessage('');
 
     try {
-      const res = await fetch('/api/molim-apply', {
+      const res = await fetch('https://molim-js.vercel.app/api/molim-apply', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -86,8 +86,7 @@ export default function LlamamBot() {
     setIsTyping(true);
 
     try {
-      // هذا المسار /api/chat سيعمل بشكل ممتاز في Next.js عند إعدادنا لملف الـ API
-      const response = await fetch('/api/chat', {
+      const response = await fetch('https://molim-js.vercel.app/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ history: updatedHistory })
