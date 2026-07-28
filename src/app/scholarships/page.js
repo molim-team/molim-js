@@ -1,3 +1,4 @@
+export const runtime = 'edge';
 import ScholarshipsClient from './ScholarshipsClient';
 import JsonLd from '@/components/JsonLd';
 

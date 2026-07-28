@@ -2,8 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import ShareButton from './ShareButton';
 import { notFound } from 'next/navigation';
-import { readFile } from 'fs/promises';
-import path from 'path';
+export const runtime = 'edge'
 import { getIsOpen } from '@/lib/scholarshipUtils';
 import JsonLd from '@/components/JsonLd';
 
@@ -41,9 +40,8 @@ export async function generateMetadata({ params }) {
 }
 
 async function getScholarship(id) {
-  const filePath = path.join(process.cwd(), 'public', 'scholarships.json');
-  const data = await readFile(filePath, 'utf-8');
-  const scholarships = JSON.parse(data);
+  const res = await fetch('https://molim.team/scholarships.json', { cache: 'no-store' });
+  const scholarships = await res.json();
   return scholarships.find((item) => String(item.id) === String(id)) || null;
 }
 
