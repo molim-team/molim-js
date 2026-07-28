@@ -20,6 +20,17 @@ function checkRateLimit(ip) {
   return userRecord.count <= MAX_REQUESTS_PER_WINDOW;
 }
 
+export async function OPTIONS() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': 'https://molim.team',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
+}
+
 export async function POST(req) {
   try {
     const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
@@ -27,7 +38,10 @@ export async function POST(req) {
     if (!checkRateLimit(ip)) {
       return NextResponse.json(
         { error: 'لقد تجاوزت الحد المسموح من الطلبات. يرجى المحاولة لاحقاً.' },
-        { status: 429 }
+        {
+          status: 429,
+          headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+        }
       );
     }
 
@@ -53,25 +67,40 @@ export async function POST(req) {
     // 1. Honeypot check
     if (honeypot) {
       // Silently reject if honeypot is filled
-      return NextResponse.json({ success: true }, { status: 200 });
+      return NextResponse.json({ success: true }, {
+        status: 200,
+        headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+      });
     }
 
     // 2. Basic Server-side Validation
     if (!fullName || !email || !phone || !nationality || !volunteerFields || volunteerFields.length === 0 || !skills || skills.length === 0 || !experience || !previousVolunteering || !reasonToVolunteer || !weeklyHours || !telegramLink) {
-      return NextResponse.json({ error: 'يرجى تعبئة جميع الحقول المطلوبة' }, { status: 400 });
+      return NextResponse.json({ error: 'يرجى تعبئة جميع الحقول المطلوبة' }, {
+        status: 400,
+        headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+      });
     }
 
     if (volunteerFields.length > 2) {
-      return NextResponse.json({ error: 'يمكنك اختيار مجالين كحد أقصى للتطوع' }, { status: 400 });
+      return NextResponse.json({ error: 'يمكنك اختيار مجالين كحد أقصى للتطوع' }, {
+        status: 400,
+        headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+      });
     }
 
     if (skills.length > 5) {
-      return NextResponse.json({ error: 'يمكنك اختيار 5 مهارات كحد أقصى' }, { status: 400 });
+      return NextResponse.json({ error: 'يمكنك اختيار 5 مهارات كحد أقصى' }, {
+        status: 400,
+        headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+      });
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return NextResponse.json({ error: 'صيغة البريد الإلكتروني غير صحيحة' }, { status: 400 });
+      return NextResponse.json({ error: 'صيغة البريد الإلكتروني غير صحيحة' }, {
+        status: 400,
+        headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+      });
     }
 
     // 3. Prepare Airtable request
@@ -81,7 +110,10 @@ export async function POST(req) {
 
     if (!airtableToken || !baseId || !tableName) {
       console.error('Airtable credentials are not properly configured.');
-      return NextResponse.json({ error: 'حدث خطأ في الخادم' }, { status: 500 });
+      return NextResponse.json({ error: 'حدث خطأ في الخادم' }, {
+        status: 500,
+        headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+      });
     }
 
     // Map exactly to Airtable columns
@@ -121,13 +153,21 @@ export async function POST(req) {
     if (!response.ok) {
       const errorData = await response.json();
       console.error('Airtable API Error:', errorData);
-      return NextResponse.json({ error: 'فشل في إرسال الطلب، يرجى المحاولة لاحقاً' }, { status: 500 });
+      return NextResponse.json({ error: 'فشل في إرسال الطلب، يرجى المحاولة لاحقاً' }, {
+        status: 500,
+        headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+      });
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true }, {
+      headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+    });
     
   } catch (error) {
     console.error('Apply API Error:', error);
-    return NextResponse.json({ error: 'حدث خطأ غير متوقع' }, { status: 500 });
+    return NextResponse.json({ error: 'حدث خطأ غير متوقع' }, {
+      status: 500,
+      headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+    });
   }
 }

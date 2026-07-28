@@ -244,6 +244,20 @@ async function buildEnglishPDF(pdfDoc, customFont, qrCodeBuffer, data, type) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// CORS 
+// ─────────────────────────────────────────────────────────────────────────────
+export async function OPTIONS() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': 'https://molim.team',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // API Route Handler
 // ─────────────────────────────────────────────────────────────────────────────
 export async function POST(request) {
@@ -271,7 +285,7 @@ export async function POST(request) {
     if (!rlError && count > 5) {
       return NextResponse.json(
         { error: 'تم تجاوز الحد المسموح. يرجى المحاولة بعد 10 دقائق.' },
-        { status: 429 }
+        { status: 429, headers: { 'Access-Control-Allow-Origin': 'https://molim.team' } }
       );
     }
 
@@ -280,7 +294,10 @@ export async function POST(request) {
     const token = authHeader?.replace('Bearer ', '').trim() || '';
     
     if (!ADMIN_TOKEN) {
-      return NextResponse.json({ error: 'السيرفر غير مهيأ.' }, { status: 500 });
+      return NextResponse.json({ error: 'السيرفر غير مهيأ.' }, {
+        status: 500,
+        headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+      });
     }
     
     let isAuthorized = false;
@@ -294,7 +311,7 @@ export async function POST(request) {
     if (!isAuthorized) {
       return NextResponse.json(
         { error: 'غير مصرح. التوكن غير صحيح.' },
-        { status: 401 }
+        { status: 401, headers: { 'Access-Control-Allow-Origin': 'https://molim.team' } }
       );
     }
 
@@ -309,7 +326,10 @@ export async function POST(request) {
     const type = resolveCertType(cert_type, certTypeKey);
 
     if (!name || !email || !cert_type || !certificateText) {
-      return NextResponse.json({ error: 'جميع الحقول مطلوبة.' }, { status: 400 });
+      return NextResponse.json({ error: 'جميع الحقول مطلوبة.' }, {
+        status: 400,
+        headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+      });
     }
 
     // ── تحقق من حدود الطول ──
@@ -321,7 +341,10 @@ export async function POST(request) {
       (certificateText && certificateText.length > 1000) ||
       (certificateTextEn && certificateTextEn.length > 1000)
     ) {
-      return NextResponse.json({ error: 'أحد الحقول تجاوز الحد الأقصى المسموح للطول.' }, { status: 400 });
+      return NextResponse.json({ error: 'أحد الحقول تجاوز الحد الأقصى المسموح للطول.' }, {
+        status: 400,
+        headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+      });
     }
 
     // ── توليد رقم شهادة آمن وفريد ──
@@ -331,7 +354,7 @@ export async function POST(request) {
     } catch (e) {
       return NextResponse.json(
         { error: 'فشل توليد رقم شهادة فريد. حاول مرة أخرى.' },
-        { status: 500 }
+        { status: 500, headers: { 'Access-Control-Allow-Origin': 'https://molim.team' } }
       );
     }
     const verifyUrl = `https://molim.team/verify/${certId}`;
@@ -382,7 +405,10 @@ export async function POST(request) {
 
         if (supabaseError) {
             console.error('حدث خطأ أثناء الحفظ في Supabase:', supabaseError);
-            return NextResponse.json({ error: 'فشل حفظ الشهادة في قاعدة البيانات السحابية' }, { status: 500 });
+            return NextResponse.json({ error: 'فشل حفظ الشهادة في قاعدة البيانات السحابية' }, {
+              status: 500,
+              headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+            });
         }
 
     // ── إرسال الإيميل ──
@@ -413,10 +439,15 @@ export async function POST(request) {
       ],
     });
 
-    return NextResponse.json({ success: true, certId, message: 'تم إصدار الشهادة وإرسالها بنجاح!' });
+    return NextResponse.json({ success: true, certId, message: 'تم إصدار الشهادة وإرسالها بنجاح!' }, {
+      headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+    });
 
   } catch (error) {
     console.error('[issue-certificate] Error:', error);
-    return NextResponse.json({ error: 'حدث خطأ أثناء معالجة الشهادة.' }, { status: 500 });
+    return NextResponse.json({ error: 'حدث خطأ أثناء معالجة الشهادة.' }, {
+      status: 500,
+      headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+    });
   }
 }

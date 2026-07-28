@@ -22,6 +22,17 @@ function checkRateLimit(ip) {
   return userRecord.count <= MAX_REQUESTS_PER_WINDOW;
 }
 
+export async function OPTIONS() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': 'https://molim.team',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
+}
+
 export async function POST(req) {
   try {
     const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
@@ -29,7 +40,10 @@ export async function POST(req) {
     if (!checkRateLimit(ip)) {
       return NextResponse.json(
         { error: 'لقد تجاوزت الحد المسموح من الطلبات. يرجى المحاولة لاحقاً.' },
-        { status: 429 }
+        {
+          status: 429,
+          headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+        }
       );
     }
 
@@ -61,7 +75,10 @@ export async function POST(req) {
     // 1. Honeypot check
     if (honeypot) {
       // Silently reject if honeypot is filled (likely a bot)
-      return NextResponse.json({ success: true }, { status: 200 });
+      return NextResponse.json({ success: true }, {
+        status: 200,
+        headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+      });
     }
 
     // 2. Basic Server-side Validation
@@ -70,16 +87,25 @@ export async function POST(req) {
       !joinReason || !freeTime || !arabicSkill || !writtenCommSkill || !explainingSkill ||
       !scenario1 || !scenario2 || !scenario3 || !scenario4 || !scenario5
     ) {
-      return NextResponse.json({ error: 'يرجى تعبئة جميع الحقول المطلوبة' }, { status: 400 });
+      return NextResponse.json({ error: 'يرجى تعبئة جميع الحقول المطلوبة' }, {
+        status: 400,
+        headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+      });
     }
 
     if (!agreeEthics || !agreePrivacy || !agreeTraining) {
-      return NextResponse.json({ error: 'يرجى الموافقة على جميع التعهدات والشروط' }, { status: 400 });
+      return NextResponse.json({ error: 'يرجى الموافقة على جميع التعهدات والشروط' }, {
+        status: 400,
+        headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+      });
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return NextResponse.json({ error: 'صيغة البريد الإلكتروني غير صحيحة' }, { status: 400 });
+      return NextResponse.json({ error: 'صيغة البريد الإلكتروني غير صحيحة' }, {
+        status: 400,
+        headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+      });
     }
 
     const validSkillLabels = ['سيئ', 'مقبول', 'جيد', 'جيد جداً', 'ممتاز'];
@@ -88,7 +114,10 @@ export async function POST(req) {
       !validSkillLabels.includes(writtenCommSkill) ||
       !validSkillLabels.includes(explainingSkill)
     ) {
-      return NextResponse.json({ error: 'قيمة تقييم غير صحيحة' }, { status: 400 });
+      return NextResponse.json({ error: 'قيمة تقييم غير صحيحة' }, {
+        status: 400,
+        headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+      });
     }
 
     // 3. Prepare Airtable request
@@ -98,7 +127,10 @@ export async function POST(req) {
 
     if (!airtableToken || !baseId || !tableName) {
       console.error('Airtable support credentials are not properly configured.');
-      return NextResponse.json({ error: 'حدث خطأ في الخادم' }, { status: 500 });
+      return NextResponse.json({ error: 'حدث خطأ في الخادم' }, {
+        status: 500,
+        headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+      });
     }
 
     // Map exactly to Airtable columns
@@ -144,13 +176,21 @@ export async function POST(req) {
     if (!response.ok) {
       const errorData = await response.json();
       console.error('Airtable API Error:', errorData);
-      return NextResponse.json({ error: 'فشل في إرسال الطلب، يرجى المحاولة لاحقاً' }, { status: 500 });
+      return NextResponse.json({ error: 'فشل في إرسال الطلب، يرجى المحاولة لاحقاً' }, {
+        status: 500,
+        headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+      });
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true }, {
+      headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+    });
 
   } catch (error) {
     console.error('Support Apply API Error:', error);
-    return NextResponse.json({ error: 'حدث خطأ غير متوقع' }, { status: 500 });
+    return NextResponse.json({ error: 'حدث خطأ غير متوقع' }, {
+      status: 500,
+      headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+    });
   }
 }

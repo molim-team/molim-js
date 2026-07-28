@@ -8,17 +8,34 @@ export const dynamic = 'force-dynamic';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://molim.team";
 
+export async function OPTIONS() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': 'https://molim.team',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, x-notify-secret',
+    },
+  });
+}
+
 export async function POST(request) {
   // التحقق من صلاحية الطلب
   const secret = request.headers.get('x-notify-secret');
   if (secret !== process.env.NOTIFY_SECRET) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, {
+      status: 401,
+      headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+    });
   }
 
   // 2. استدعاء المفتاح وتهيئة المكتبة داخل الدالة وقت التشغيل فقط
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
-    return NextResponse.json({ error: 'Resend API key is missing' }, { status: 500 });
+    return NextResponse.json({ error: 'Resend API key is missing' }, {
+      status: 500,
+      headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+    });
   }
   
   const resend = new Resend(apiKey);
@@ -31,7 +48,9 @@ export async function POST(request) {
     const snapshot = await getDocs(q);
 
     if (snapshot.empty) {
-      return NextResponse.json({ message: "لا يوجد مشتركون" });
+      return NextResponse.json({ message: "لا يوجد مشتركون" }, {
+        headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+      });
     }
 
     const emails = snapshot.docs.map((d) => d.data().email).filter(Boolean);
@@ -48,9 +67,14 @@ export async function POST(request) {
     );
 
     const sent = results.filter((r) => r.status === "fulfilled").length;
-    return NextResponse.json({ sent });
+    return NextResponse.json({ sent }, {
+      headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+    });
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message }, {
+      status: 500,
+      headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+    });
   }
 }
 

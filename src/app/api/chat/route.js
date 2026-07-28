@@ -127,13 +127,18 @@ export async function POST(req) {
   }
 }
 
-export async function OPTIONS() {
+export async function OPTIONS(req) {
+  const origin = req.headers.get('origin') || '';
+  const allowedOrigins = ['https://molim.team', 'https://www.molim.team', 'http://localhost:3000'];
+  const isAllowedOrigin = allowedOrigins.includes(origin);
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': isAllowedOrigin ? origin : 'https://molim.team',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
+
   return new Response(null, {
     status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    }
+    headers: corsHeaders,
   });
 }

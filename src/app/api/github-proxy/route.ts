@@ -106,13 +106,25 @@ function sanitizeScholarship(raw: Record<string, unknown>): Record<string, unkno
   };
 }
 
+// CORS 
+export async function OPTIONS() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': 'https://molim.team',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, x-session-token',
+    },
+  });
+}
+
 // Main Handler 
 export async function POST(req: NextRequest) {
   // 1. Misconfiguration guard
   if (!GITHUB_TOKEN || !ADMIN_SECRET || !ADMIN_PASSWORD) {
     return NextResponse.json(
       { error: "Server misconfiguration — contact administrator" },
-      { status: 500 }
+      { status: 500, headers: { 'Access-Control-Allow-Origin': 'https://molim.team' } }
     );
   }
 
@@ -121,7 +133,7 @@ export async function POST(req: NextRequest) {
   if (isRateLimited(ip)) {
     return NextResponse.json(
       { error: "Too many requests — try again in a minute" },
-      { status: 429 }
+      { status: 429, headers: { 'Access-Control-Allow-Origin': 'https://molim.team' } }
     );
   }
 
@@ -130,7 +142,10 @@ export async function POST(req: NextRequest) {
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid JSON body" }, {
+      status: 400,
+      headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+    });
   }
 
   const { action } = body;
@@ -139,7 +154,10 @@ export async function POST(req: NextRequest) {
   if (action === "verify-password") {
     const { password } = body;
     if (typeof password !== "string" || !password) {
-      return NextResponse.json({ error: "كلمة المرور مطلوبة" }, { status: 400 });
+      return NextResponse.json({ error: "كلمة المرور مطلوبة" }, {
+        status: 400,
+        headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+      });
     }
 
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -152,10 +170,15 @@ export async function POST(req: NextRequest) {
 
     if (!match) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      return NextResponse.json({ error: "كلمة المرور غير صحيحة" }, { status: 401 });
+      return NextResponse.json({ error: "كلمة المرور غير صحيحة" }, {
+        status: 401,
+        headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+      });
     }
 
-    return NextResponse.json({ token: createSessionToken() });
+    return NextResponse.json({ token: createSessionToken() }, {
+      headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+    });
   }
 
   // 4. All other actions require a valid session token
@@ -163,7 +186,7 @@ export async function POST(req: NextRequest) {
   if (!verifySessionToken(sessionToken)) {
     return NextResponse.json(
       { error: "غير مصرح — يرجى تسجيل الدخول مجدداً" },
-      { status: 401 }
+      { status: 401, headers: { 'Access-Control-Allow-Origin': 'https://molim.team' } }
     );
   }
 
@@ -178,12 +201,14 @@ export async function POST(req: NextRequest) {
     if (!ghRes.ok) {
       return NextResponse.json(
         { error: "Failed to reach GitHub — check server token" },
-        { status: 502 }
+        { status: 502, headers: { 'Access-Control-Allow-Origin': 'https://molim.team' } }
       );
     }
     const data = (await ghRes.json()) as { sha: string; content: string };
     const scholarships = decodeBase64Json(data.content);
-    return NextResponse.json({ sha: data.sha, scholarships });
+    return NextResponse.json({ sha: data.sha, scholarships }, {
+      headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+    });
   }
 
   // Action: save 
@@ -193,11 +218,14 @@ export async function POST(req: NextRequest) {
     if (typeof sha !== "string" || !Array.isArray(scholarships)) {
       return NextResponse.json(
         { error: "Missing sha or scholarships array" },
-        { status: 400 }
+        { status: 400, headers: { 'Access-Control-Allow-Origin': 'https://molim.team' } }
       );
     }
     if (typeof commitMessage !== "string" || !commitMessage.trim()) {
-      return NextResponse.json({ error: "Missing commitMessage" }, { status: 400 });
+      return NextResponse.json({ error: "Missing commitMessage" }, {
+        status: 400,
+        headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+      });
     }
 
     const sanitized = (scholarships as Record<string, unknown>[]).map(sanitizeScholarship);
@@ -219,18 +247,23 @@ export async function POST(req: NextRequest) {
       const err = (await ghRes.json()) as { message?: string };
       return NextResponse.json(
         { error: err.message ?? "GitHub save failed" },
-        { status: 502 }
+        { status: 502, headers: { 'Access-Control-Allow-Origin': 'https://molim.team' } }
       );
     }
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true }, {
+      headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+    });
   }
 
   // Action: notify
   if (action === "notify") {
     const { scholarship } = body;
     if (!scholarship || typeof scholarship !== "object") {
-      return NextResponse.json({ error: "Missing scholarship object" }, { status: 400 });
+      return NextResponse.json({ error: "Missing scholarship object" }, {
+        status: 400,
+        headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+      });
     }
 
     fetch(`https://molim-js.vercel.app/api/notify-scholarship`, {
@@ -242,12 +275,20 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({ scholarship }),
     }).catch(console.error);
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true }, {
+      headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+    });
   }
   // Unknown action
-  return NextResponse.json({ error: "Unknown action" }, { status: 400 });
+  return NextResponse.json({ error: "Unknown action" }, {
+    status: 400,
+    headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+  });
 }
 
 export async function GET() {
-  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
+  return NextResponse.json({ error: "Method not allowed" }, {
+    status: 405,
+    headers: { 'Access-Control-Allow-Origin': 'https://molim.team' }
+  });
 }
