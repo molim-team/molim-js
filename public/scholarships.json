@@ -6008,51 +6008,6 @@
     "discussionLink": "https://t.me/Molim_Scholarships"
   },
   {
-    "id": "yildiz-technical-university-scholarship",
-    "name": "منحة جامعة يلدز التقنية",
-    "name_en": "Yildiz Technical university scholarship",
-    "country": "تركيا",
-    "flag": "https://flagcdn.com/w40/tr.png",
-    "degree": "البكالوريوس، الماجستير، الدكتوراه",
-    "language": "التركية، الإنجليزية",
-    "description": "منحة جامعة يلدز التقنية هي فرصة تعليمية تدعم الطلاب المتميزين من مختلف الدول للدراسة في إحدى أبرز الجامعات التقنية في تركيا.",
-    "benefits": [
-      "ممولة بالكامل",
-      "يوجد لها تأمين صحي"
-    ],
-    "requirements": [
-      "السن البكالوريوس أقل من 21",
-      "السن للماجستير اقل من 30",
-      "السن للدكتوراه أقل من 35"
-    ],
-    "majors": [
-      "الهندسه",
-      "العلوم",
-      "الإدارة والاقتصاد"
-    ],
-    "open_date": "2026-07-20",
-    "deadline": "2026-07-31",
-    "documents": {
-      "required": [
-        "جواز سفر",
-        "صورة شخصية",
-        "شهادة التخرج",
-        "كشف الدرجات الاكاديمي",
-        "خطابات التوصية",
-        "شهادات اللغة الإنجليزية TOEFL إذا كنت تختار تخصصًا يدرس بالإنجليزية"
-      ],
-      "optional": [
-        "الامتحانات الدولية مثل شهادة SAT (تزيد فرص قبولك في جامعة يلدز تحديدًا بشكل ضخم جداً).",
-        "شهادات الأنشطة : شهادات تقدير، تطوع، تدريب، أو كورسات إضافية."
-      ]
-    },
-    "link": "https://tbbs.turkiyeburslari.gov.tr",
-    "open": false,
-    "notes": "عند التقديم على المنحة التركية، يتيح لكِ النظام اختيار 12 رغبة، يجب وضع جامعة يلدز التقنية (Yıldız Teknik Üniversitesi) في الرغبات الأولى لزيادة فرص توجيهكِ إليها.",
-    "groupLink": "https://t.me/Molim_Grants",
-    "discussionLink": "https://t.me/Molim_Scholarships"
-  },
-  {
     "id": "mohamed-bin-zayed-university-of-artificial-intelligence-scholarship",
     "name": "منحة جامعة محمد بن زايد للذكاء الاصطناعي",
     "name_en": "Mohamed Bin Zayed University of Artificial Intelligence Scholarship",
