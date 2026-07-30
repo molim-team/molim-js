@@ -26,6 +26,14 @@ const SKILLS = [
 
 const HOURS = ['25 ساعة', '20 ساعة', '15 ساعة', '10 ساعات', '5 ساعات'];
 
+// عدد محاولات إعادة الإرسال التلقائية بعد المحاولة الأولى (يعني 3 محاولات إجمالاً)
+const MAX_RETRIES = 2;
+// مهلة كل محاولة قبل اعتبارها معلّقة (بالمللي ثانية)
+const REQUEST_TIMEOUT_MS = 20000;
+
+// دالة مساعدة للانتظار بين المحاولات
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export default function MolimApply() {
   const [formData, setFormData] = useState({
     fullName: '',
@@ -75,34 +83,96 @@ export default function MolimApply() {
     }
   };
 
+  // محاولة إرسال واحدة، ترجع { ok: true } أو { ok: false, retryable, message }
+  const attemptSubmit = async () => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+    let res;
+    try {
+      res = await fetch('https://molim-js.vercel.app/api/molim-apply', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+        signal: controller.signal,
+      });
+    } catch (err) {
+      clearTimeout(timeoutId);
+      // خطأ شبكة أو انتهاء المهلة: قابل لإعادة المحاولة
+      return {
+        ok: false,
+        retryable: true,
+        message: err.name === 'AbortError'
+          ? 'استغرق الطلب وقتًا طويلاً.'
+          : 'تعذر الاتصال بالخادم.'
+      };
+    }
+    clearTimeout(timeoutId);
+
+    // نحاول نقرأ الرد كـ JSON بشكل منفصل عن خطأ الشبكة، عشان لو السيرفر
+    // رجّع صفحة خطأ (HTML) أو رد فاضي بدل JSON ما ينكسر الكود.
+    let data = null;
+    try {
+      data = await res.json();
+    } catch (parseErr) {
+      data = null;
+    }
+
+    if (res.ok) {
+      return { ok: true };
+    }
+
+    // أخطاء السيرفر (5xx) غالبًا مؤقتة وقابلة لإعادة المحاولة.
+    // أخطاء الطلب (4xx) مثل بيانات ناقصة أو غير صحيحة غير قابلة لإعادة المحاولة
+    // لأن إعادة الإرسال نفس البيانات بيرجع نفس النتيجة.
+    const retryable = res.status >= 500;
+
+    return {
+      ok: false,
+      retryable,
+      message: (data && data.error) || 'حدث خطأ أثناء إرسال الطلب.'
+    };
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus(null);
     setErrorMessage('');
 
-    try {
-      const res = await fetch('https://molim-js.vercel.app/api/molim-apply', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+    let lastResult = null;
 
-      const data = await res.json();
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      lastResult = await attemptSubmit();
 
-      if (res.ok) {
-        setSubmitStatus('success');
-      } else {
-        setSubmitStatus('error');
-        setErrorMessage(data.error || 'حدث خطأ أثناء إرسال الطلب');
+      if (lastResult.ok) {
+        break;
       }
-    } catch (err) {
+
+      // لو الخطأ مو قابل لإعادة المحاولة (مثلاً بيانات غير صحيحة)، نوقف فورًا
+      if (!lastResult.retryable) {
+        break;
+      }
+
+      // لو باقي محاولات، ننتظر شوي قبل إعادة المحاولة (تأخير تصاعدي بسيط)
+      if (attempt < MAX_RETRIES) {
+        await wait(1500 * (attempt + 1));
+      }
+    }
+
+    setIsSubmitting(false);
+
+    if (lastResult && lastResult.ok) {
+      setSubmitStatus('success');
+    } else {
       setSubmitStatus('error');
-      setErrorMessage('تعذر الاتصال بالخادم. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.');
-    } finally {
-      setIsSubmitting(false);
+      setErrorMessage(
+        (lastResult && lastResult.message
+          ? lastResult.message + ' حاولنا عدة مرات ولم ننجح، الرجاء المحاولة مرة أخرى بعد قليل.'
+          : 'حدث خطأ أثناء إرسال الطلب، الرجاء المحاولة مرة أخرى.')
+      );
     }
   };
 
@@ -125,12 +195,6 @@ export default function MolimApply() {
         <br /><br />
         نؤمن إن العمل الجماعي يصنع فرق، وإن كل مهارة مهما كانت بسيطة ممكن تساهم في بناء مجتمع أقوى وأكثر فائدة للطلاب.
       </p>
-
-      {submitStatus === 'error' && (
-        <div style={{ background: '#ffebee', color: '#c62828', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem', border: '1px solid #ef9a9a' }}>
-          {errorMessage}
-        </div>
-      )}
 
       <form onSubmit={handleSubmit}>
         {/* Honeypot Field */}
@@ -289,8 +353,6 @@ export default function MolimApply() {
           <textarea name="socialLinks" className="apply-input apply-textarea" value={formData.socialLinks} onChange={handleChange} maxLength="2000" dir="ltr" style={{ textAlign: 'right' }}></textarea>
         </div>
 
-
-
         <div className="apply-form-group">
           <label>ملاحظات مقدم الطلب</label>
           <textarea name="notes" className="apply-input apply-textarea" value={formData.notes} onChange={handleChange} maxLength="2000"></textarea>
@@ -299,6 +361,12 @@ export default function MolimApply() {
         <button type="submit" className="apply-submit-btn" disabled={isSubmitting}>
           {isSubmitting ? 'جاري الإرسال...' : 'إرسال طلب التطوع'}
         </button>
+
+        {submitStatus === 'error' && (
+          <div style={{ background: '#ffebee', color: '#c62828', padding: '1rem', borderRadius: '8px', marginTop: '1.5rem', border: '1px solid #ef9a9a' }}>
+            {errorMessage}
+          </div>
+        )}
       </form>
     </div>
   );
