@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import ShareButton from './ShareButton';
 import { notFound } from 'next/navigation';
-export const runtime = 'edge'
+
 import { getIsOpen } from '@/lib/scholarshipUtils';
 import JsonLd from '@/components/JsonLd';
 

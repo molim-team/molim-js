@@ -190,7 +190,7 @@ async function proxyRequest(
   sessionToken: string,
   extra: Record<string, unknown> = {}
 ): Promise<Response> {
-  return fetch("https://molim-js.vercel.app/api/github-proxy", {
+  return fetch("/api/github-proxy", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -258,7 +258,7 @@ function LoginScreen({ onSuccess }: LoginScreenProps) {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("https://molim-js.vercel.app/api/github-proxy", {
+      const res = await fetch("/api/github-proxy", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "verify-password", password }),

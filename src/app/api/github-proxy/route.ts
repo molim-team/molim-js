@@ -266,7 +266,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    fetch(`https://molim-js.vercel.app/api/notify-scholarship`, {
+    fetch(`/api/notify-scholarship`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
