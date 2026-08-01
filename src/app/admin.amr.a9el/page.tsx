@@ -923,13 +923,13 @@ function Admin() {
       {/* Tabs */}
       <div className="tabs">
         <button
-          className={`tab-btn ${activeTab === "add" ? "active" : "inactive"}`}
+          className={`admin-tab-btn ${activeTab === "add" ? "active" : "inactive"}`}
           onClick={() => setActiveTab("add")}
         >
           ➕ إضافة منحة
         </button>
         <button
-          className={`tab-btn ${activeTab === "manage" ? "active" : "inactive"}`}
+          className={`admin-tab-btn ${activeTab === "manage" ? "active" : "inactive"}`}
           onClick={() => {
             setActiveTab("manage");
             handleLoadScholarships();
