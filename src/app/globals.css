@@ -1970,6 +1970,7 @@ footer p {
   gap: 10px;
   margin-bottom: 25px;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .tab-btn {
