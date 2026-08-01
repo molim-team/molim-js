@@ -1,20 +1,18 @@
-
 import ScholarshipsClient from './ScholarshipsClient';
 import JsonLd from '@/components/JsonLd';
+import fs from 'fs/promises';
+import path from 'path';
 
-export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'جميع المنح الدراسية | مُلم',
-  description: 'استكشف جميع المنح الدراسية المتاحة حول العالم وقدم عليها الآن عبر منصة مُلم.',
+  title: 'مُلم | جميع المنح الدراسية',
+  description: 'استكشف جميع المنح الدراسية المتاحة عبر منصة مُلم وقدم الآن على العالم حول المتاحة الدراسية المنح.',
 };
 
 export default async function ScholarshipsPage() {
-  const res = await fetch(
-    'https://molim.team/scholarships.json',
-    { cache: 'no-store' }
-  );
-  const scholarships = await res.json();
+  const filePath = path.join(process.cwd(), 'public', 'scholarships.json');
+  const fileContent = await fs.readFile(filePath, 'utf-8');
+  const scholarships = JSON.parse(fileContent);
 
   const jsonLd = {
     "@context": "https://schema.org",

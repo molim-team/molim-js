@@ -1,16 +1,18 @@
-
 import HeroSection from '@/components/home/HeroSection';
 import WhatWeOfferSection from '@/components/home/WhatWeOfferSection';
 import AboutSection from '@/components/home/AboutSection';
 import ScholarshipsSlider from '@/components/home/ScholarshipsSlider';
 import { getIsOpen } from '@/lib/scholarshipUtils';
 import JsonLd from '@/components/JsonLd';
+import fs from 'fs/promises';
+import path from 'path';
 
-export const dynamic = 'force-dynamic';
 
 async function getScholarshipsData() {
-  const res = await fetch('https://molim.team/scholarships.json', { cache: 'no-store' });
-  const data = await res.json();
+  const filePath = path.join(process.cwd(), 'public', 'scholarships.json');
+  const fileContent = await fs.readFile(filePath, 'utf-8');
+  const data = JSON.parse(fileContent);
+
   const open = data.filter(s => getIsOpen(s));
   const countriesCount = new Set(data.map(s => s.country)).size;
   return { open, totalCount: data.length, countriesCount };

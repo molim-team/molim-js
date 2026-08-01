@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 import { notFound } from 'next/navigation';
 
@@ -24,11 +23,13 @@ export default async function VerifyPage({ params }) {
       <p><strong>الاسم:</strong> {data.name}</p>
       <p><strong>نوع الشهادة:</strong> {data.cert_type}</p>
       <p><strong>رقم الشهادة:</strong> {data.id}</p>
-      <p><strong>تاريخ الإصدار:</strong> {new Date(data.issue_date).toLocaleDateString('ar-EG', {
-       year: 'numeric',
-       month: 'long', 
-       day: 'numeric'
-        })}</p>
+      <p suppressHydrationWarning>
+        <strong>تاريخ الإصدار:</strong> {new Date(data.issue_date).toLocaleDateString('ar-EG', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })}
+      </p>
     </div>
   );
 }
