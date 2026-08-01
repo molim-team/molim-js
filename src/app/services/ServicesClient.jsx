@@ -21,13 +21,12 @@ export default function ServicesClient({ scholarships }) {
     setSelectedService('');
   };
 
-  // 15 Scholarships to display
+  // Scholarships to display
   const targetScholarshipIds = [
     'turkey-gov', 'study-in-saudi', 'study-in-egypt', 'brunei-gov',
     'russia-gov', 'open-doors', 'kazakhstan-gov', 'romania-gov',
     'india-iccr', 'icesco-scholarships', 'study-in-hungary', 'study-in-iraq',
-    'slovakia-government-scholarship', 'islamic-development-bank-isdb-scholarship-20262027',
-    'syrian-youth-assembly-coursera-scholarship'
+    'slovakia-government-scholarship', 'islamic-development-bank-isdb-scholarship-20262027'
   ];
 
   // Map and sort scholarships
@@ -55,7 +54,7 @@ export default function ServicesClient({ scholarships }) {
       </div>
 
       <div className="services-header">
-        <h1>خدمات ملم الاحترافية</h1>
+        <h1>خدمات مُلم الاحترافية</h1>
         <p>نساعدك في تجهيز ملفك والتقديم على المنح الدراسية بأعلى معايير الجودة لزيادة فرص قبولك</p>
       </div>
 
@@ -86,9 +85,9 @@ export default function ServicesClient({ scholarships }) {
               <div className="top-highlight-card-wrapper">
                 <ServiceCard 
                   title="الباقة الشاملة لجميع ملفات التقديم"
-                  description="تشمل (السيرة الذاتية + خطاب الحافز + خطابات التوصية + تجهيز شهادات الكورسات) دفعة واحدة وبشكل متناسق واحترافي."
-                  oldPrice={65}
-                  newPrice={30}
+                  description="تشمل (السيرة الذاتية + خطاب الحافز + خطابات التوصية) دفعة واحدة وبشكل متناسق واحترافي."
+                  oldPrice={30}
+                  newPrice={20}
                   isHighlighted={true}
                   onOrder={handleOrder}
                 />
@@ -118,13 +117,7 @@ export default function ServicesClient({ scholarships }) {
                 onOrder={handleOrder}
               />
 
-              <ServiceCard 
-                title="تجهيز شهادات الكورسات المطلوبة"
-                description="تنظيم وتجهيز شهادات الدورات التدريبية المطلوبة لتعزيز قوة ملفك بما يناسب تخصصك."
-                oldPrice={20}
-                newPrice={15}
-                onOrder={handleOrder}
-              />
+
 
             </div>
           </div>

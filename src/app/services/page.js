@@ -4,7 +4,7 @@ import fs from 'fs/promises';
 import path from 'path';
 
 export const metadata = {
-  title: 'خدمات ملم | تجهيز الملفات والتقديم على المنح',
+  title: 'خدمات مُلم | تجهيز الملفات والتقديم على المنح',
   description: 'خدمات تجهيز السيرة الذاتية وخطابات الحافز والتوصية والتقديم الشامل على المنح الدراسية حول العالم باحترافية من خلال منصة مُلم.',
 };
 
@@ -16,7 +16,7 @@ export default async function ServicesPage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    "name": "خدمات منصة ملم",
+    "name": "خدمات منصة مُلم",
     "url": "https://molim.team/services",
     "description": "نقدم خدمات تجهيز ملفات التقديم والتقديم على المنح الدراسية باحترافية عالية",
     "inLanguage": "ar"
