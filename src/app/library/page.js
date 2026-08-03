@@ -130,6 +130,41 @@ const guides = [
     ),
   },
   {
+    id: 6,
+    title: "الدليل الشامل لاختبار الايلتس IELTS",
+    description: "استراتيجيات وإرشادات عملية للتحضير لاختبار الايلتس وتحقيق الدرجة المطلوبة.",
+    available: true,
+    filePath: "/ielts-guide.pdf",
+    fileName: "الدليل الشامل لإختبار الايلتس IELTS.pdf",
+    iconBg: "#fff1ec",
+    iconColor: "#ff4500",
+    icon: (
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ff4500" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="2" y1="12" x2="22" y2="12"/>
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+      </svg>
+    ),
+  },
+  {
+    id: 10,
+    title: "نماذج لخطاب التوصية",
+    description: "مجموعة نماذج جاهزة لخطابات التوصية تساعدك على البدء وصياغة خطابك الخاص بسهولة.",
+    available: true,
+    filePath: "/recommendation-letter-samples.pdf",
+    fileName: "نماذج لخطاب التوصية.pdf",
+    iconBg: "#fff1ec",
+    iconColor: "#ff4500",
+    icon: (
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ff4500" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="9" y1="12" x2="15" y2="12"/>
+        <line x1="9" y1="16" x2="15" y2="16"/>
+      </svg>
+    ),
+  },
+   {
     id: 4,
     title: "الدليل الشامل لكتابة خطاب الحافز",
     description: "تعلّم كيف تكتب خطاب حافز يلفت الانتباه ويعكس شخصيتك وأهدافك بوضوح.",
@@ -143,21 +178,6 @@ const guides = [
       </svg>
 
 ),
-  },
-  {
-    id: 6,
-    title: "الدليل الشامل لاختبار الايلتس IELTS",
-    description: "استراتيجيات وإرشادات عملية للتحضير لاختبار الايلتس وتحقيق الدرجة المطلوبة.",
-    available: false,
-    iconBg: "#eef2ff",
-    iconColor: "#1a3a6e",
-    icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1a3a6e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <line x1="2" y1="12" x2="22" y2="12"/>
-        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-      </svg>
-    ),
   },
 ];
 
