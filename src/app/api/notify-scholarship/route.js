@@ -3,7 +3,7 @@ import { Resend } from "resend";
 import { db } from "@/lib/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 
-// 1. إجبار المسار ليكون ديناميكي لتجاوز فحص Cloudflare أثناء البناء
+
 export const dynamic = 'force-dynamic';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://molim.team";

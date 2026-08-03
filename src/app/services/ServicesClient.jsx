@@ -86,8 +86,8 @@ export default function ServicesClient({ scholarships }) {
                 <ServiceCard 
                   title="الباقة الشاملة لجميع ملفات التقديم"
                   description="تشمل (السيرة الذاتية + خطاب الحافز + خطابات التوصية) دفعة واحدة وبشكل متناسق واحترافي."
-                  oldPrice={30}
-                  newPrice={20}
+                  oldPrice={35}
+                  newPrice={25}
                   isHighlighted={true}
                   onOrder={handleOrder}
                 />
@@ -96,8 +96,8 @@ export default function ServicesClient({ scholarships }) {
               <ServiceCard 
                 title="تجهيز السيرة الذاتية (CV)"
                 description="تصميم وتجهيز سيرة ذاتية احترافية متوافقة مع معايير المنح العالمية (ATS)."
-                oldPrice={15}
-                newPrice={10}
+                oldPrice={20}
+                newPrice={15}
                 onOrder={handleOrder}
               />
               
