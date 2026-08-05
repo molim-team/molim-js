@@ -94,6 +94,63 @@ const ALL_MAJORS_KEYWORD = 'جميع التخصصات';
 // كلمات دلالية تشير لوجود استثناء داخل نص التخصص (مثال: "جميع التخصصات باستثناء الطبية")
 const EXCLUSION_KEYWORDS = ['باستثناء', 'ما عدا', 'عدا', 'إلا'];
 
+// ===== تطبيع النصوص العربية =====
+// المشكلة اللي كنا نواجهها: "هندسة مدنية" (بدون أل) ما تُطابق "الهندسة المدنية" (بأل التعريف)
+// رغم إنه نفس التخصص بالضبط. الحل: نوحّد الحروف المتشابهة، ونشيل "أل" التعريف من بداية كل
+// كلمة، ونقارن كلمة-بكلمة بدل النص الكامل عشان ترتيب الكلمات ما يأثر على النتيجة.
+
+// يوحّد الحروف المتشابهة شكلاً (همزات، تاء مربوطة، ياء...) ويشيل التشكيل
+const normalizeArabic = (str) =>
+  String(str)
+    .replace(/[\u064B-\u065F\u0670]/g, '') // إزالة التشكيل
+    .replace(/[أإآ]/g, 'ا')
+    .replace(/ى/g, 'ي')
+    .replace(/ؤ/g, 'و')
+    .replace(/ئ/g, 'ي')
+    .replace(/ة/g, 'ه')
+    .toLowerCase()
+    .trim();
+
+// يشيل "أل" التعريف من بداية الكلمة (لو الكلمة أطول من حرفين بعد الحذف، تفاديًا لحذف خاطئ)
+const stripAlPrefix = (word) => (word.startsWith('ال') && word.length > 3 ? word.slice(2) : word);
+
+// يقسّم النص لكلمات بعد التطبيع وحذف "أل" من كل كلمة
+const toNormalizedWords = (str) =>
+  normalizeArabic(str)
+    .split(/[^a-z0-9\u0600-\u06FF]+/)
+    .filter(Boolean)
+    .map(stripAlPrefix);
+
+// ===== تجذيع خفيف (light stemming) =====
+// المشكلة: كلمتين مختلفتين بالمعنى ممكن يشتركوا بنفس أول حرفين/ثلاثة بالعربي
+// (مثال: "الطب" Medicine و"الطبيعية" Natural كلاهما يبدأ بـ "طب")، فمطابقة الـ
+// substring البسيطة كانت تعتبرهم متطابقين غلط. الحل: نشيل اللواحق الشائعة من
+// نهاية الكلمة (ية، ات، ين، ون، ها، ه، ي) عشان نوصل لجذر أدق، مثل:
+// "الطبية" (طب+ية) ← جذرها "طب"  |  "الطبيعية" (طبيع+ية) ← جذرها "طبيع" (مختلف)
+const STEM_SUFFIXES = ['يه', 'ات', 'ين', 'ون', 'ها', 'ه', 'ي'];
+const stemWord = (word) => {
+  for (const suf of STEM_SUFFIXES) {
+    if (word.length - suf.length >= 2 && word.endsWith(suf)) {
+      return word.slice(0, -suf.length);
+    }
+  }
+  return word;
+};
+
+// يقرر هل كلمتان (من التخصص ومن البحث) تُعتبران متطابقتين
+// - لو جذر كلمة البحث قصير (أقل من 4 حروف، زي "طب")، نطلب تطابق تام للجذر
+//   عشان نتفادى تصادم الكلمات القصيرة المشتركة بالحروف الأولى بس (زي "طب"/"طبيعة")
+// - لو جذر كلمة البحث 4 حروف فأكثر، نسمح بمطابقة جزئية (prefix) بالاتجاهين
+//   عشان الكتابة الجزئية ("قانو" مثلاً) تظل شغالة
+const wordsMatch = (majorWord, termWord) => {
+  const majorStem = stemWord(majorWord);
+  const termStem = stemWord(termWord);
+  if (termStem.length >= 4) {
+    return majorStem.startsWith(termStem) || termStem.startsWith(majorStem);
+  }
+  return majorStem === termStem;
+};
+
 // قائمة تخصصات مشهورة، مكتوبة يدويًا ونظيفة — تُستخدم فقط لعرض الاقتراحات (autocomplete)
 // بمربع البحث عن تخصص، حتى لا تظهر نصوص خام طويلة من بيانات المنح كما كانت تظهر سابقًا.
 // ملاحظة مهمة: هذي القائمة لا تؤثر إطلاقًا على منطق المطابقة (matchesMajorSearch) —
@@ -103,7 +160,7 @@ const COMMON_MAJORS = [
   'طب الأسنان',
   'الصيدلة',
   'التمريض',
-  'هندسة البرمجيات',
+  'العلوم الطبية والصحية',
   'هندسة مدنية',
   'هندسة كهربائية',
   'هندسة ميكانيكية',
@@ -111,6 +168,9 @@ const COMMON_MAJORS = [
   'هندسة حاسب',
   'علوم حاسب',
   'تقنية المعلومات',
+  'هندسة البرمجيات',
+  'ذكاء اصطناعي',
+  'امن سبراني',
   'إدارة أعمال',
   'المحاسبة',
   'التمويل',
@@ -135,7 +195,7 @@ const COMMON_MAJORS = [
 
 // يبني قائمة موحّدة بكل التخصصات "المحددة فعليًا" الموجودة عبر كل المنح
 // (يستثني عبارات "جميع التخصصات" لأنها مش اسم تخصص حقيقي)
-// تُستخدم كـ "قاموس مرجعي" للتحقق إن الكلمة المكتوبة تشبه تخصص حقيقي، وكمصدر لاقتراحات الـ autocomplete
+// تُستخدم كـ "قاموس مرجعي" للتحقق إن الكلمة المكتوبة تشبه تخصص حقيقي
 const buildKnownMajors = (scholarships) => {
   const set = new Set();
   scholarships.forEach((s) => {
@@ -153,40 +213,48 @@ const buildKnownMajors = (scholarships) => {
 
 // يتحقق هل الكلمة المكتوبة موجودة داخل الجزء "المستثنى" من نص التخصص
 // مثال: "جميع التخصصات باستثناء الطبية" + term="طب" → true (مستثناة)
-const isExcludedFromAllMajors = (majorText, term) => {
-  const lower = majorText.toLowerCase();
+const isExcludedFromAllMajors = (majorText, termWords) => {
+  const normalizedMajorText = normalizeArabic(majorText);
   for (const kw of EXCLUSION_KEYWORDS) {
-    const idx = lower.indexOf(kw);
+    const kwNormalized = normalizeArabic(kw);
+    const idx = normalizedMajorText.indexOf(kwNormalized);
     if (idx !== -1) {
-      const excludedPart = lower.slice(idx);
-      if (excludedPart.includes(term)) return true;
+      const excludedWords = toNormalizedWords(normalizedMajorText.slice(idx));
+      if (termWords.every((tw) => excludedWords.some((ew) => wordsMatch(ew, tw)))) {
+        return true;
+      }
     }
   }
   return false;
 };
 
 // دالة مساعدة رئيسية: تتحقق هل تخصصات المنحة (s.majors) تطابق نص البحث
+// - المقارنة تتم على مستوى الكلمات وبعد تطبيع النصوص، عشان "هندسة مدنية" تطابق
+//   "الهندسة المدنية" رغم اختلاف "أل" التعريف
 // - منحة فيها "جميع التخصصات" تطابق أي بحث، إلا لو:
 //     (أ) الكلمة مذكورة صراحة داخل جزء استثناء ("باستثناء الطبية" مثلاً)
 //     (ب) الكلمة المكتوبة مش شبيهة بأي تخصص حقيقي موجود بقاعدة البيانات (لتفادي كلام عشوائي)
-const matchesMajorSearch = (s, majorSearchTerm, knownMajorsLower) => {
-  const term = majorSearchTerm.trim().toLowerCase();
-  if (!term) return true; // ما فيه بحث عن تخصص، خلي الكل يمر
+const matchesMajorSearch = (s, majorSearchTerm, knownMajorsWordSets) => {
+  const termWords = toNormalizedWords(majorSearchTerm);
+  if (termWords.length === 0) return true; // ما فيه بحث عن تخصص، خلي الكل يمر
 
   if (!Array.isArray(s.majors) || s.majors.length === 0) return false;
 
   return s.majors.some((m) => {
     const majorText = String(m);
-    const majorLower = majorText.toLowerCase();
+    const majorWords = toNormalizedWords(majorText);
+    const isAllMajors = normalizeArabic(majorText).includes(normalizeArabic(ALL_MAJORS_KEYWORD));
 
-    if (majorLower.includes(ALL_MAJORS_KEYWORD)) {
-      if (isExcludedFromAllMajors(majorText, term)) return false;
+    if (isAllMajors) {
+      if (isExcludedFromAllMajors(majorText, termWords)) return false;
       // اعتبرها "تشمل الجميع" فقط لو الكلمة تشبه تخصص حقيقي موجود عندنا
-      return knownMajorsLower.some((km) => km.includes(term));
+      return knownMajorsWordSets.some((kmWords) =>
+        termWords.every((tw) => kmWords.some((kw) => wordsMatch(kw, tw)))
+      );
     }
 
-    // مطابقة جزئية عادية بين نص البحث واسم التخصص
-    return majorLower.includes(term);
+    // مطابقة كل كلمة من كلمات البحث داخل كلمات اسم التخصص (بعد التطبيع والتجذيع)
+    return termWords.every((tw) => majorWords.some((mw) => wordsMatch(mw, tw)));
   });
 };
 
@@ -203,8 +271,8 @@ export default function ScholarshipsClient({ scholarships }) {
 
   // قاموس التخصصات الحقيقية المستخرج من كل المنح (يُحسب مرة وحدة فقط)
   const knownMajors = useMemo(() => buildKnownMajors(scholarships), [scholarships]);
-  const knownMajorsLower = useMemo(
-    () => knownMajors.map((m) => m.toLowerCase()),
+  const knownMajorsWordSets = useMemo(
+    () => knownMajors.map((m) => toNormalizedWords(m)),
     [knownMajors]
   );
 
@@ -234,7 +302,7 @@ export default function ScholarshipsClient({ scholarships }) {
       (statusFilter === 'open' ? isOpen : !isOpen);
     const matchDegree =
       degreeFilter === 'all' || s.degree.includes(degreeFilter);
-    const matchMajor = matchesMajorSearch(s, majorSearch, knownMajorsLower); // جديد: فلتر التخصص
+    const matchMajor = matchesMajorSearch(s, majorSearch, knownMajorsWordSets); // جديد: فلتر التخصص
     return matchSearch && matchStatus && matchDegree && matchMajor;
   });
 
@@ -280,7 +348,7 @@ export default function ScholarshipsClient({ scholarships }) {
               <div style={{ position: 'relative', flex: '1 1 180px', minWidth: '140px' }}>
                 <input
                   type="text"
-                  placeholder=" ابحث عن تخصص..."
+                  placeholder="ابحث عن تخصص..."
                   value={majorSearch}
                   onChange={(e) => setMajorSearch(e.target.value)}
                   onFocus={() => setShowMajorSuggestions(true)}
