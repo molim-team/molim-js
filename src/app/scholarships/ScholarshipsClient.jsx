@@ -103,7 +103,7 @@ const COMMON_MAJORS = [
   'طب الأسنان',
   'الصيدلة',
   'التمريض',
-  'العلوم الطبية والصحية',
+  'هندسة البرمجيات',
   'هندسة مدنية',
   'هندسة كهربائية',
   'هندسة ميكانيكية',
@@ -195,6 +195,7 @@ export default function ScholarshipsClient({ scholarships }) {
   const [statusFilter, setStatusFilter] = useState('all');
   const [degreeFilter, setDegreeFilter] = useState('all');
   const [majorSearch, setMajorSearch] = useState(''); // جديد: فلتر البحث عن تخصص
+  const [showMajorSuggestions, setShowMajorSuggestions] = useState(false); // إظهار/إخفاء قائمة اقتراحات التخصصات
   const [activeTab, setActiveTab] = useState('all');
   const [showTopBtn, setShowTopBtn] = useState(false);
 
@@ -206,6 +207,15 @@ export default function ScholarshipsClient({ scholarships }) {
     () => knownMajors.map((m) => m.toLowerCase()),
     [knownMajors]
   );
+
+  // التخصصات المقترحة بالقائمة المنسدلة: تتفلتر حسب اللي مكتوب، وتُحدّد بـ 8 عناصر كحد أقصى
+  const filteredMajorSuggestions = useMemo(() => {
+    const term = majorSearch.trim().toLowerCase();
+    const list = term
+      ? COMMON_MAJORS.filter((m) => m.toLowerCase().includes(term))
+      : COMMON_MAJORS;
+    return list.slice(0, 8);
+  }, [majorSearch]);
 
   useEffect(() => {
     const handleScroll = () => setShowTopBtn(window.scrollY > 300);
@@ -267,19 +277,58 @@ export default function ScholarshipsClient({ scholarships }) {
                 onChange={(e) => setSearch(e.target.value)}
                 style={{ fontSize: '0.85rem', padding: '8px 10px' }}
               />
-              <input
-                type="text"
-                placeholder="🎓 ابحث عن تخصص..."
-                value={majorSearch}
-                onChange={(e) => setMajorSearch(e.target.value)}
-                list="majors-suggestions"
-                style={{ fontSize: '0.85rem', padding: '8px 10px' }}
-              />
-              <datalist id="majors-suggestions">
-                {COMMON_MAJORS.map((m, i) => (
-                  <option key={i} value={m} />
-                ))}
-              </datalist>
+              <div style={{ position: 'relative', flex: '1 1 180px', minWidth: '140px' }}>
+                <input
+                  type="text"
+                  placeholder=" ابحث عن تخصص..."
+                  value={majorSearch}
+                  onChange={(e) => setMajorSearch(e.target.value)}
+                  onFocus={() => setShowMajorSuggestions(true)}
+                  onBlur={() => setShowMajorSuggestions(false)}
+                  style={{ fontSize: '0.85rem', padding: '8px 10px', width: '100%', boxSizing: 'border-box' }}
+                />
+                {showMajorSuggestions && filteredMajorSuggestions.length > 0 && (
+                  <ul
+                    style={{
+                      position: 'absolute',
+                      top: 'calc(100% + 4px)',
+                      right: 0,
+                      left: 0,
+                      zIndex: 30,
+                      margin: 0,
+                      padding: '6px 0',
+                      listStyle: 'none',
+                      background: '#fff',
+                      border: '1px solid #ddd',
+                      borderRadius: '10px',
+                      boxShadow: '0 6px 16px rgba(0,0,0,0.15)',
+                      maxHeight: '220px',
+                      overflowY: 'auto',
+                    }}
+                  >
+                    {filteredMajorSuggestions.map((m, i) => (
+                      <li
+                        key={i}
+                        // onMouseDown بدل onClick عشان نمنع الـ blur من إخفاء القائمة قبل ما يسجل الاختيار
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          setMajorSearch(m);
+                          setShowMajorSuggestions(false);
+                        }}
+                        style={{
+                          padding: '9px 14px',
+                          fontSize: '0.85rem',
+                          cursor: 'pointer',
+                          textAlign: 'right',
+                          color: '#333',
+                        }}
+                      >
+                        {m}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
