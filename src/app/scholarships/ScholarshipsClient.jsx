@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useFavorites } from '@/lib/context/FavoritesContext.js';
 import { Heart } from 'lucide-react';
@@ -88,18 +88,103 @@ const ScholarshipCard = ({ s, user, favToggle, favorites }) => {
   );
 };
 
-// دالة مساعدة: تتحقق هل التخصصات المطلوبة (majorSearch) موجودة داخل قائمة تخصصات المنحة (s.majors)
-// أي منحة يكون مكتوب فيها "جميع التخصصات" تُطابق تلقائيًا أي عملية بحث عن تخصص
-const matchesMajorSearch = (s, majorSearchTerm) => {
+// ===== منطق البحث عن تخصص =====
+
+const ALL_MAJORS_KEYWORD = 'جميع التخصصات';
+// كلمات دلالية تشير لوجود استثناء داخل نص التخصص (مثال: "جميع التخصصات باستثناء الطبية")
+const EXCLUSION_KEYWORDS = ['باستثناء', 'ما عدا', 'عدا', 'إلا'];
+
+// قائمة تخصصات مشهورة، مكتوبة يدويًا ونظيفة — تُستخدم فقط لعرض الاقتراحات (autocomplete)
+// بمربع البحث عن تخصص، حتى لا تظهر نصوص خام طويلة من بيانات المنح كما كانت تظهر سابقًا.
+// ملاحظة مهمة: هذي القائمة لا تؤثر إطلاقًا على منطق المطابقة (matchesMajorSearch) —
+// المستخدم يقدر يكتب أي تخصص يدويًا حتى لو مو موجود هنا، وبيشتغل بنفس القوانين بالضبط.
+const COMMON_MAJORS = [
+  'الطب',
+  'طب الأسنان',
+  'الصيدلة',
+  'التمريض',
+  'العلوم الطبية والصحية',
+  'هندسة مدنية',
+  'هندسة كهربائية',
+  'هندسة ميكانيكية',
+  'هندسة صناعية',
+  'هندسة حاسب',
+  'علوم حاسب',
+  'تقنية المعلومات',
+  'إدارة أعمال',
+  'المحاسبة',
+  'التمويل',
+  'التسويق',
+  'القانون',
+  'الاقتصاد',
+  'العلوم السياسية',
+  'العلاقات الدولية',
+  'الزراعة',
+  'إدارة السياحة والفنادق',
+  'العمارة',
+  'التصميم',
+  'الإعلام',
+  'الدراسات الإسلامية',
+  'الشريعة',
+  'اللغة الإنجليزية',
+  'الترجمة',
+  'علم النفس',
+  'العلوم الاجتماعية',
+  'العلوم التربوية',
+];
+
+// يبني قائمة موحّدة بكل التخصصات "المحددة فعليًا" الموجودة عبر كل المنح
+// (يستثني عبارات "جميع التخصصات" لأنها مش اسم تخصص حقيقي)
+// تُستخدم كـ "قاموس مرجعي" للتحقق إن الكلمة المكتوبة تشبه تخصص حقيقي، وكمصدر لاقتراحات الـ autocomplete
+const buildKnownMajors = (scholarships) => {
+  const set = new Set();
+  scholarships.forEach((s) => {
+    if (Array.isArray(s.majors)) {
+      s.majors.forEach((m) => {
+        const text = String(m).trim();
+        if (text && !text.toLowerCase().includes(ALL_MAJORS_KEYWORD)) {
+          set.add(text);
+        }
+      });
+    }
+  });
+  return Array.from(set);
+};
+
+// يتحقق هل الكلمة المكتوبة موجودة داخل الجزء "المستثنى" من نص التخصص
+// مثال: "جميع التخصصات باستثناء الطبية" + term="طب" → true (مستثناة)
+const isExcludedFromAllMajors = (majorText, term) => {
+  const lower = majorText.toLowerCase();
+  for (const kw of EXCLUSION_KEYWORDS) {
+    const idx = lower.indexOf(kw);
+    if (idx !== -1) {
+      const excludedPart = lower.slice(idx);
+      if (excludedPart.includes(term)) return true;
+    }
+  }
+  return false;
+};
+
+// دالة مساعدة رئيسية: تتحقق هل تخصصات المنحة (s.majors) تطابق نص البحث
+// - منحة فيها "جميع التخصصات" تطابق أي بحث، إلا لو:
+//     (أ) الكلمة مذكورة صراحة داخل جزء استثناء ("باستثناء الطبية" مثلاً)
+//     (ب) الكلمة المكتوبة مش شبيهة بأي تخصص حقيقي موجود بقاعدة البيانات (لتفادي كلام عشوائي)
+const matchesMajorSearch = (s, majorSearchTerm, knownMajorsLower) => {
   const term = majorSearchTerm.trim().toLowerCase();
   if (!term) return true; // ما فيه بحث عن تخصص، خلي الكل يمر
 
   if (!Array.isArray(s.majors) || s.majors.length === 0) return false;
 
   return s.majors.some((m) => {
-    const majorLower = String(m).toLowerCase();
-    // شرط "جميع التخصصات": تظهر المنحة في أي بحث عن أي تخصص
-    if (majorLower.includes('جميع التخصصات')) return true;
+    const majorText = String(m);
+    const majorLower = majorText.toLowerCase();
+
+    if (majorLower.includes(ALL_MAJORS_KEYWORD)) {
+      if (isExcludedFromAllMajors(majorText, term)) return false;
+      // اعتبرها "تشمل الجميع" فقط لو الكلمة تشبه تخصص حقيقي موجود عندنا
+      return knownMajorsLower.some((km) => km.includes(term));
+    }
+
     // مطابقة جزئية عادية بين نص البحث واسم التخصص
     return majorLower.includes(term);
   });
@@ -114,6 +199,13 @@ export default function ScholarshipsClient({ scholarships }) {
   const [showTopBtn, setShowTopBtn] = useState(false);
 
   const { favorites, toggleFav: favToggle, user } = useFavorites();
+
+  // قاموس التخصصات الحقيقية المستخرج من كل المنح (يُحسب مرة وحدة فقط)
+  const knownMajors = useMemo(() => buildKnownMajors(scholarships), [scholarships]);
+  const knownMajorsLower = useMemo(
+    () => knownMajors.map((m) => m.toLowerCase()),
+    [knownMajors]
+  );
 
   useEffect(() => {
     const handleScroll = () => setShowTopBtn(window.scrollY > 300);
@@ -132,7 +224,7 @@ export default function ScholarshipsClient({ scholarships }) {
       (statusFilter === 'open' ? isOpen : !isOpen);
     const matchDegree =
       degreeFilter === 'all' || s.degree.includes(degreeFilter);
-    const matchMajor = matchesMajorSearch(s, majorSearch); // جديد: فلتر التخصص
+    const matchMajor = matchesMajorSearch(s, majorSearch, knownMajorsLower); // جديد: فلتر التخصص
     return matchSearch && matchStatus && matchDegree && matchMajor;
   });
 
@@ -180,8 +272,14 @@ export default function ScholarshipsClient({ scholarships }) {
                 placeholder="🎓 ابحث عن تخصص..."
                 value={majorSearch}
                 onChange={(e) => setMajorSearch(e.target.value)}
+                list="majors-suggestions"
                 style={{ fontSize: '0.85rem', padding: '8px 10px' }}
               />
+              <datalist id="majors-suggestions">
+                {COMMON_MAJORS.map((m, i) => (
+                  <option key={i} value={m} />
+                ))}
+              </datalist>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
