@@ -88,10 +88,28 @@ const ScholarshipCard = ({ s, user, favToggle, favorites }) => {
   );
 };
 
+// دالة مساعدة: تتحقق هل التخصصات المطلوبة (majorSearch) موجودة داخل قائمة تخصصات المنحة (s.majors)
+// أي منحة يكون مكتوب فيها "جميع التخصصات" تُطابق تلقائيًا أي عملية بحث عن تخصص
+const matchesMajorSearch = (s, majorSearchTerm) => {
+  const term = majorSearchTerm.trim().toLowerCase();
+  if (!term) return true; // ما فيه بحث عن تخصص، خلي الكل يمر
+
+  if (!Array.isArray(s.majors) || s.majors.length === 0) return false;
+
+  return s.majors.some((m) => {
+    const majorLower = String(m).toLowerCase();
+    // شرط "جميع التخصصات": تظهر المنحة في أي بحث عن أي تخصص
+    if (majorLower.includes('جميع التخصصات')) return true;
+    // مطابقة جزئية عادية بين نص البحث واسم التخصص
+    return majorLower.includes(term);
+  });
+};
+
 export default function ScholarshipsClient({ scholarships }) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [degreeFilter, setDegreeFilter] = useState('all');
+  const [majorSearch, setMajorSearch] = useState(''); // جديد: فلتر البحث عن تخصص
   const [activeTab, setActiveTab] = useState('all');
   const [showTopBtn, setShowTopBtn] = useState(false);
 
@@ -114,7 +132,8 @@ export default function ScholarshipsClient({ scholarships }) {
       (statusFilter === 'open' ? isOpen : !isOpen);
     const matchDegree =
       degreeFilter === 'all' || s.degree.includes(degreeFilter);
-    return matchSearch && matchStatus && matchDegree;
+    const matchMajor = matchesMajorSearch(s, majorSearch); // جديد: فلتر التخصص
+    return matchSearch && matchStatus && matchDegree && matchMajor;
   });
 
   const favoriteScholarships = scholarships.filter(s =>
@@ -148,19 +167,35 @@ export default function ScholarshipsClient({ scholarships }) {
 
         {activeTab === 'all' && (
           <div id="all-section">
-            <section className="filters">
+            <section className="filters filters-compact">
               <input
                 type="text"
                 placeholder="🔍 ابحث عن منحة..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                style={{ fontSize: '0.85rem', padding: '8px 10px' }}
               />
-              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+              <input
+                type="text"
+                placeholder="🎓 ابحث عن تخصص..."
+                value={majorSearch}
+                onChange={(e) => setMajorSearch(e.target.value)}
+                style={{ fontSize: '0.85rem', padding: '8px 10px' }}
+              />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                style={{ fontSize: '0.85rem', padding: '8px 10px' }}
+              >
                 <option value="all">جميع المنح</option>
                 <option value="open">التقديم مفتوح</option>
                 <option value="closed">التقديم مغلق</option>
               </select>
-              <select value={degreeFilter} onChange={(e) => setDegreeFilter(e.target.value)}>
+              <select
+                value={degreeFilter}
+                onChange={(e) => setDegreeFilter(e.target.value)}
+                style={{ fontSize: '0.85rem', padding: '8px 10px' }}
+              >
                 <option value="all">جميع المراحل</option>
                 <option value="بكالوريوس">بكالوريوس</option>
                 <option value="ماجستير">ماجستير</option>
