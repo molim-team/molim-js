@@ -7832,5 +7832,52 @@
     "notes": "لا يوجد طلب منفصل لمنحة Stamps؛ فجميع المتقدمين عبر Early Decision I أو Early Action يُنظر في طلباتهم تلقائيًا إذا استوفوا متطلبات القبول قبل 1 نوفمبر.\nيُعلن عن المرشحين النهائيين مع قرارات القبول في أواخر يناير، بينما تُعلن النتائج النهائية للمنحة في أوائل مارس.\nتختلف هذه المنحة عن برنامج Stamps Scholars الخاص بكلية الموسيقى (Frost School of Music).",
     "groupLink": "https://t.me/Molim_Grants",
     "discussionLink": "https://t.me/Molim_Scholarships"
+  },
+  {
+    "id": "clark-university-international-merit-scholarships",
+    "name": "منح جامعة كلارك للطلاب الدوليين",
+    "name_en": "Clark University International Merit Scholarships",
+    "country": "أمريكا",
+    "flag": "https://flagcdn.com/w40/us.png",
+    "degree": "البكالوريوس.",
+    "language": "الإنجليزية.",
+    "description": "تقدم جامعة كلارك في الولايات المتحدة مجموعة من منح الجدارة الأكاديمية للطلاب الدوليين المتقدمين لمرحلة البكالوريوس، وتشمل منحًا جزئية وأخرى كاملة مثل المنحة الرئاسية، ويتم النظر في معظمها تلقائيًا عند التقديم للجامعة",
+    "benefits": [
+      "منح جدارة أكاديمية قابلة للتجديد.",
+      "النظر التلقائي في معظم المنح دون طلب منفصل.",
+      "المنحة الرئاسية تغطي الرسوم الدراسية كاملة بالإضافة إلى السكن والوجبات طوال أربع سنوات.",
+      "منح أخرى تغطي جزءًا من الرسوم الدراسية حسب الجدارة الأكاديمية."
+    ],
+    "requirements": [
+      "سجل أكاديمي متميز.",
+      "إنجازات قيادية ومشاركة مجتمعية.",
+      "استيفاء شروط القبول بجامعة كلارك.",
+      "إثبات إجادة اللغة الإنجليزية عند الحاجة.",
+      "قد يُطلب من المرشحين للمنحة الرئاسية إجراء مقابلة شخصية."
+    ],
+    "majors": [
+      "جميع تخصصات البكالوريوس التي تقدمها جامعة كلارك."
+    ],
+    "open_date": "2026-08-08",
+    "deadline": "2027-01-01",
+    "documents": {
+      "required": [
+        "طلب القبول بالجامعة.",
+        "الشهادة الثانوية.",
+        "كشف الدرجات.",
+        "إثبات إجادة اللغة الإنجليزية (إذا طُلب).",
+        "نموذج إثبات القدرة المالية للطلاب الدوليين."
+      ],
+      "optional": [
+        "السيرة الذاتية.",
+        "خطابات التوصية.",
+        "بيان شخصي أو مقالات إضافية (لبعض المنح مثل المنحة الرئاسية)."
+      ]
+    },
+    "link": "https://www.clarku.edu/financial-aid/prospective-students/international-students/faqs/?utm_source=chatgpt.com",
+    "open": true,
+    "notes": "تختلف مواعيد التقديم حسب مسار التقديم.  \nتشمل المنح الرئيسية: International Traina Scholarship، International Achievement Scholarship، International Jonas Clark Scholarship، Presidential Scholarship، Global Scholars Scholarship.\nيتم النظر تلقائيًا في معظم منح الجدارة، بينما تتطلب بعض البرامج مثل Presidential Scholarship أو Global Scholars Program مقالات إضافية.",
+    "groupLink": "https://t.me/Molim_Grants",
+    "discussionLink": "https://t.me/Molim_Scholarships"
   }
 ]
