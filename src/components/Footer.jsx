@@ -14,7 +14,7 @@ export default function Footer() {
           <h4>روابط سريعة</h4>
           <Link href="/">الرئيسية</Link>
           <Link href="/scholarships">جميع المنح</Link>
-          <Link href="/quiz">اختبار التخصص المناسب</Link>
+          <Link href="/services">خدمات مُلم</Link>
           <Link href="/faq">الأسئلة الشائعة</Link>
         </div>
 
