@@ -13,6 +13,24 @@ export default function LlamamBot() {
 
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
+  const abortControllerRef = useRef(null);
+
+  // تنظيف الـ request لو الكومبوننت اتشال من الصفحة
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
+
+  // إلغاء الطلب لو المستخدم قفل الشات
+  useEffect(() => {
+    if (!isOpen && abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      setIsTyping(false);
+    }
+  }, [isOpen]);
 
   const handleBotClick = () => {
     setIsOpen(!isOpen);
@@ -21,7 +39,7 @@ export default function LlamamBot() {
         {
           id: 'welcome',
           sender: 'ai',
-          text: 'مرحباً! أنا لمام، مساعدك الذكي في منصة مُلم 🎓\nيمكنني مساعدتك في:\n• كتابة وتقييم خطاب الحافز\n• نصائح للـ CV\n• تحليل الصور والملفات\n• توجيهك لأفضل منحة تناسبك\n\n⚠️ الحد الأقصى 15 رسالة لكل محادثة، انتقِ أسئلتك بعناية.'
+          text: 'مرحباً! أنا لمام، مساعدك الذكي في منصة مُلم 🎓\nيمكنني مساعدتك في:\n• كتابة وتقييم خطاب الحافز\n• نصائح للـ CV\n• تحليل الصور\n• توجيهك لأفضل منحة تناسبك\n\n⚠️ الحد الأقصى 15 رسالة لكل محادثة، انتقِ أسئلتك بعناية.'
         }
       ]);
     }
@@ -30,7 +48,7 @@ export default function LlamamBot() {
   const fileToBase64 = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onload = () => resolve(reader.result);
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
@@ -39,11 +57,27 @@ export default function LlamamBot() {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    // فحص حجم الملف (5 ميجابايت)
+    const MAX_FILE_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_FILE_SIZE) {
+      setMessages(prev => [...prev, { 
+        id: Date.now() + '-err', 
+        sender: 'ai', 
+        text: 'عذراً، حجم الصورة كبير جداً. الحد الأقصى هو 5 ميجابايت.' 
+      }]);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
     setAttachedFile(file);
     setFilePreview(`📎 ${file.name}`);
   };
 
   const handleSendMessage = async (textToSend = inputValue) => {
+    // منع الإرسال لو فيه طلب شغال حالياً
+    if (isTyping) return;
+
     const trimmedText = textToSend.trim();
     if (!trimmedText && !attachedFile) return;
 
@@ -53,117 +87,111 @@ export default function LlamamBot() {
       return;
     }
 
-    const displayUserText = trimmedText || (attachedFile ? '📎 تم إرفاق ملف' : '');
+    const displayUserText = trimmedText || (attachedFile ? '📎 تم إرفاق صورة' : '');
 
     const newMsgId = Date.now();
     setMessages(prev => [...prev, { id: newMsgId, sender: 'user', text: displayUserText }]);
     setInputValue('');
+    setIsTyping(true);
 
-    // تجهيز المحتوى وحقن الملفات إن وجدت
+    // تجهيز المحتوى بصيغة OpenAI-compatible التي يقبلها Groq
     let userContent;
     if (attachedFile) {
       try {
-        const base64Data = await fileToBase64(attachedFile);
-        const isImage = attachedFile.type.startsWith('image/');
+        const dataUrl = await fileToBase64(attachedFile);
         userContent = [
-          isImage 
-            ? { type: 'image', source: { type: 'base64', media_type: attachedFile.type, data: base64Data } }
-            : { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64Data } },
-          { type: 'text', text: trimmedText || 'حلل هذا الملف' }
+          {
+            type: 'image_url',
+            image_url: { url: dataUrl }
+          },
+          { type: 'text', text: trimmedText || 'حلل هذه الصورة' }
         ];
+        setAttachedFile(null);
+        setFilePreview('');
+        if (fileInputRef.current) fileInputRef.current.value = '';
       } catch (err) {
         console.error("File conversion error:", err);
+        setMessages(prev => [...prev, { 
+          id: Date.now() + '-err', 
+          sender: 'ai', 
+          text: 'عذراً، فشل تحويل الصورة. يرجى المحاولة بصورة أخرى.' 
+        }]);
+        setAttachedFile(null);
+        setFilePreview('');
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        setIsTyping(false);
+        return; // توقف العملية بالكامل لو فشل التحويل
       }
-      setAttachedFile(null);
-      setFilePreview('');
-      if (fileInputRef.current) fileInputRef.current.value = '';
     } else {
       userContent = trimmedText;
     }
 
     const updatedHistory = [...history, { role: 'user', content: userContent }];
     setHistory(updatedHistory);
-    setIsTyping(true);
+
+    // تجهيز AbortController جديد
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
 
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ history: updatedHistory })
+        body: JSON.stringify({ history: updatedHistory }),
+        signal: abortControllerRef.current.signal
       });
 
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+        let serverErrorMsg = '';
+        try {
+          const errJson = await response.json();
+          if (errJson.error) serverErrorMsg = errJson.error;
+        } catch (e) {}
+        throw new Error(serverErrorMsg || `HTTP ${response.status}`);
+      }
 
       setIsTyping(false);
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
       let fullReply = '';
-      let buffer = '';
 
       const aiResponseId = Date.now() + '-ai';
       setMessages(prev => [...prev, { id: aiResponseId, sender: 'ai', text: '' }]);
 
+      // الباك اند يبعت نص خام (plain text) مباشر — نقرأه chunk by chunk بدون أي تحليل JSON
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
         const chunk = decoder.decode(value, { stream: true });
-        
-        if (chunk.includes('"text":') || chunk.trim().startsWith('{') || chunk.trim().startsWith('data:')) {
-          buffer += chunk;
-          let lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-
-          for (let line of lines) {
-            let cleaned = line.trim();
-            if (cleaned.startsWith('data:')) cleaned = cleaned.substring(5).trim();
-            if (cleaned.startsWith(',')) cleaned = cleaned.substring(1).trim();
-            if (!cleaned || cleaned === '[' || cleaned === ']' || cleaned === '[DONE]') continue;
-
-            try {
-              const parsed = JSON.parse(cleaned);
-              const textChunk = parsed.candidates?.[0]?.content?.parts?.[0]?.text || parsed.text || '';
-              if (textChunk) {
-                fullReply += textChunk;
-                setMessages(prev => prev.map(m => m.id === aiResponseId ? { ...m, text: fullReply } : m));
-              }
-            } catch (e) {
-              if (!cleaned.startsWith('{') && !cleaned.startsWith('[')) {
-                fullReply += line;
-                setMessages(prev => prev.map(m => m.id === aiResponseId ? { ...m, text: fullReply } : m));
-              }
-            }
-          }
-        } else {
-          fullReply += chunk;
-          setMessages(prev => prev.map(m => m.id === aiResponseId ? { ...m, text: fullReply } : m));
-        }
-      }
-
-      if (buffer.trim() && (buffer.includes('"text":') || buffer.trim().startsWith('{'))) {
-        try {
-          let cleaned = buffer.trim();
-          if (cleaned.startsWith('data:')) cleaned = cleaned.substring(5).trim();
-          if (cleaned.startsWith(',')) cleaned = cleaned.substring(1).trim();
-          const parsed = JSON.parse(cleaned);
-          const textChunk = parsed.candidates?.[0]?.content?.parts?.[0]?.text || parsed.text || '';
-          if (textChunk) fullReply += textChunk;
-        } catch (e) {
-          fullReply += buffer;
-        }
-        setMessages(prev => prev.map(m => m.id === aiResponseId ? { ...m, text: fullReply } : m));
+        fullReply += chunk;
+        setMessages(prev =>
+          prev.map(m => (m.id === aiResponseId ? { ...m, text: fullReply } : m))
+        );
       }
 
       setHistory(prev => [...prev, { role: 'assistant', content: fullReply }]);
 
     } catch (err) {
       setIsTyping(false);
+      
+      if (err.name === 'AbortError') {
+        console.log('Request aborted by user');
+        return; // لا تظهر رسالة خطأ للمستخدم إذا كان الإلغاء مقصوداً
+      }
+
       console.error('Llamam Error:', err);
-      setMessages(prev => [...prev, { 
-        id: Date.now() + '-err', 
-        sender: 'ai', 
-        text: 'عذراً، حدث خطأ في الاتصال بالخادم. تحقق من اتصال الإنترنت وحاول مرة أخرى.' 
+      
+      const userFriendlyError = err.message && !err.message.startsWith('HTTP') && !err.message.includes('fetch')
+        ? err.message
+        : 'عذراً، حدث خطأ في الاتصال بالخادم. تحقق من اتصال الإنترنت وحاول مرة أخرى.';
+
+      setMessages(prev => [...prev, {
+        id: Date.now() + '-err',
+        sender: 'ai',
+        text: userFriendlyError
       }]);
     }
   };
@@ -202,7 +230,12 @@ export default function LlamamBot() {
           {messages.length <= 1 && (
             <div className="llamam-quick-container">
               {quickQuestions.map((q, idx) => (
-                <button key={idx} className="llamam-quick-btn" onClick={() => handleSendMessage(q)}>
+                <button 
+                  key={idx} 
+                  className="llamam-quick-btn" 
+                  onClick={() => handleSendMessage(q)}
+                  disabled={isTyping}
+                >
                   {q}
                 </button>
               ))}
@@ -211,24 +244,38 @@ export default function LlamamBot() {
 
           <div className="llamam-footer">
             <div className="llamam-input-row">
-              <label htmlFor="llamam-file" style={{ cursor: 'pointer', fontSize: '22px' }} title="إرفاق صورة أو PDF">📎</label>
-              <input 
-                id="llamam-file" 
-                type="file" 
-                accept="image/*,.pdf" 
-                style={{ display: 'none' }} 
+              <label 
+                htmlFor="llamam-file" 
+                style={{ cursor: isTyping ? 'not-allowed' : 'pointer', fontSize: '22px', opacity: isTyping ? 0.5 : 1 }} 
+                title="إرفاق صورة"
+              >
+                📎
+              </label>
+              <input
+                id="llamam-file"
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
                 ref={fileInputRef}
                 onChange={handleFileChange}
+                disabled={isTyping}
               />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 className="llamam-input-field"
-                placeholder="اسألني أي شيء..." 
+                placeholder="اسألني أي شيء..."
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                onKeyDown={(e) => e.key === 'Enter' && !isTyping && handleSendMessage()}
+                disabled={isTyping}
               />
-              <button className="llamam-send-btn" onClick={() => handleSendMessage()}>إرسال</button>
+              <button 
+                className="llamam-send-btn" 
+                onClick={() => handleSendMessage()}
+                disabled={isTyping}
+              >
+                إرسال
+              </button>
             </div>
             {filePreview && <div className="llamam-preview-text">{filePreview}</div>}
           </div>
