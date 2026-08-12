@@ -1,0 +1,191 @@
+# -*- coding: utf-8 -*-
+import time
+import os
+import sys
+import random
+import shutil
+
+# إصلاح مشكلة عرض العربي/الإيموجي في بعض التيرمينالات (خصوصاً PowerShell)
+try:
+    sys.stdout.reconfigure(encoding='utf-8')
+except Exception:
+    pass
+if os.name == 'nt':
+    os.system('chcp 65001 > NUL')
+
+# دعم اللغة العربية في التيرمينال (تشكيل الحروف + ترتيب الاتجاه)
+try:
+    import arabic_reshaper
+    from bidi.algorithm import get_display
+    AR_SUPPORT = True
+except ImportError:
+    AR_SUPPORT = False
+    print("تنبيه: لدعم العربي شغّل الأمر التالي مرة واحدة:")
+    print("pip install arabic-reshaper python-bidi")
+
+def ar(text):
+    """يصلح شكل واتجاه أي نص عربي موجود داخل text (حتى لو ممزوج بإيموجي/إنجليزي)."""
+    if not AR_SUPPORT:
+        return text
+    reshaped = arabic_reshaper.reshape(text)
+    return get_display(reshaped)
+
+NAME = "حبحب"
+
+def clear():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+class C:
+    RESET = '\033[0m'
+    BOLD = '\033[1m'
+    RED = '\033[91m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    BLUE = '\033[94m'
+    MAGENTA = '\033[95m'
+    CYAN = '\033[96m'
+    WHITE = '\033[97m'
+    PINK = '\033[38;5;213m'
+    BROWN = '\033[38;5;94m'
+    CREAM = '\033[38;5;223m'
+    GOLD = '\033[38;5;220m'
+    ORANGE = '\033[38;5;208m'
+
+WIDTH = shutil.get_terminal_size((100, 30)).columns
+
+def center(text):
+    import re
+    plain = re.sub(r'\033\[[0-9;]*m', '', text)
+    pad = max((WIDTH - len(plain)) // 2, 0)
+    return ' ' * pad + text
+
+def fixed_line(text):
+    """يصلح النص العربي الخالص (بدون أكواد ألوان) قبل تمريره لـ center()."""
+    return center(ar(text))
+
+def flame(lit):
+    return f"{C.YELLOW}▲{C.RESET}" if lit else f"{C.RED} {C.RESET}"
+
+def big_cake(candles_lit, layer_color=C.PINK, flicker=0):
+    n = len(candles_lit)
+    spacing = 6
+    top_pad = " " * 7
+    candle_line1 = top_pad + "".join(f"  {flame(lit)}  " for lit in candles_lit)
+    candle_body = top_pad + "".join("  ┃  " if random.random() > 0.15 or not flicker else "  ╽  " for _ in candles_lit)
+
+    layer_width = spacing * n + 6
+    top = "╔" + "═" * layer_width + "╗"
+    icing = "║" + "".join(random.choice("∽∼˜") + " " for _ in range(layer_width // 2)) + "║"
+    layer1 = "╠" + "═" * layer_width + "╣"
+    body1 = "║" + f"{C.CREAM}" + "░" * layer_width + f"{C.RESET}║"
+    layer2 = "╠" + "═" * layer_width + "╣"
+    body2 = "║" + f"{C.BROWN}" + "▒" * layer_width + f"{C.RESET}║"
+    bottom = "╚" + "═" * layer_width + "╝"
+    plate = "─" * (layer_width + 6)
+
+    lines = [
+        candle_line1,
+        candle_body,
+        top_pad + f"{layer_color}{top}{C.RESET}",
+        top_pad + f"{layer_color}{icing}{C.RESET}",
+        top_pad + f"{layer_color}{layer1}{C.RESET}",
+        top_pad + f"{layer_color}{body1}{C.RESET}",
+        top_pad + f"{layer_color}{layer2}{C.RESET}",
+        top_pad + f"{layer_color}{body2}{C.RESET}",
+        top_pad + f"{layer_color}{bottom}{C.RESET}",
+        top_pad + f"{C.WHITE}{plate}{C.RESET}",
+    ]
+    return "\n".join(center(l) for l in lines)
+
+def confetti_row():
+    icons = ["✦", "✧", "❋", "❀", "•", "○", "✺"]
+    colors = [C.RED, C.YELLOW, C.CYAN, C.MAGENTA, C.GREEN, C.PINK, C.GOLD]
+    row = "".join(f"{random.choice(colors)}{random.choice(icons)}{C.RESET}  " for _ in range(WIDTH // 4))
+    return row[:WIDTH]
+
+def type_effect(text, delay=0.045, color=C.CYAN):
+    for ch in text:
+        sys.stdout.write(color + ch + C.RESET)
+        sys.stdout.flush()
+        time.sleep(delay)
+    print()
+
+def print_centered(text):
+    print(center(text))
+
+def intro():
+    clear()
+    print("\n" * 3)
+    type_effect(ar(f"🎉 تجهيز مفاجأة لـ {NAME} ..."), 0.05, C.CYAN)
+    time.sleep(0.6)
+
+def animate_baking():
+    frames = ["🍰", "🧁", "🎂"]
+    for i in range(9):
+        clear()
+        print("\n" * 8)
+        print_centered(f"{C.GOLD}{frames[i % 3]}  {ar('جاري تحضير الكيكة')}  {frames[i % 3]}{C.RESET}")
+        time.sleep(0.25)
+
+def light_candles(n=5):
+    for step in range(n + 1):
+        clear()
+        candles = [i < step for i in range(n)]
+        print("\n")
+        print_centered(f"{C.BOLD}{C.PINK}{ar(f'عيد ميلاد {NAME}')}{C.RESET}")
+        print()
+        print(big_cake(candles))
+        time.sleep(0.35)
+    return [True] * n
+
+def flicker_cake(n=5, rounds=6):
+    candles = [True] * n
+    for r in range(rounds):
+        clear()
+        print("\n")
+        print_centered(f"{C.BOLD}{C.PINK}{ar(f'عيد ميلاد {NAME}')}{C.RESET}")
+        print()
+        print(big_cake(candles, flicker=1))
+        print()
+        print_centered(f"{C.CYAN}{ar('اضغط Enter لإطفاء الشموع وتقديم الأمنية')} 🎂{C.RESET}")
+        time.sleep(0.3)
+
+def blow_candles(n=5):
+    input()
+    steps = list(range(n, -1, -1))
+    for lit_count in steps:
+        clear()
+        candles = [i < lit_count for i in range(n)]
+        print("\n")
+        print_centered(f"{C.BOLD}{C.PINK}{ar(f'عيد ميلاد {NAME}')}{C.RESET}")
+        print()
+        print(big_cake(candles))
+        time.sleep(0.35)
+
+def celebration():
+    clear()
+    print("\n")
+    print_centered(f"{C.BOLD}{C.PINK}{ar(f'عيد ميلاد {NAME}')}{C.RESET}")
+    print()
+    print(big_cake([False] * 5))
+    print()
+    for _ in range(4):
+        print_centered(confetti_row())
+    print()
+    type_effect("🎂 " + ar(f"كل سنة وانت طيب يا {NAME}!") + " 🎂", 0.06, C.BOLD + C.MAGENTA)
+    type_effect(ar("يارب تحقق كل أمنياتك") + " ❤️", 0.05, C.GREEN)
+    type_effect(ar("عقبال 100 سنة يا رب") + " 🎉", 0.05, C.YELLOW)
+    print()
+    for _ in range(3):
+        print_centered(confetti_row())
+
+def main():
+    intro()
+    animate_baking()
+    light_candles(5)
+    flicker_cake(5)
+    blow_candles(5)
+    celebration()
+
+if __name__ == "__main__":
+    main()
