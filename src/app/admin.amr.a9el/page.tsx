@@ -238,6 +238,99 @@ const initialFormState: FormState = {
   extraSections: [],
 };
 
+// Hybrid Date Input Component (Free text + Calendar Picker)
+interface HybridDateInputProps {
+  value: string;
+  onChange: (val: string) => void;
+  placeholder?: string;
+}
+
+function HybridDateInput({ value, onChange, placeholder }: HybridDateInputProps) {
+  const dateInputRef = React.useRef<HTMLInputElement>(null);
+  const isValidDate = /^\d{4}-\d{2}-\d{2}$/.test((value || "").trim());
+
+  const handleOpenPicker = () => {
+    if (dateInputRef.current) {
+      if (typeof dateInputRef.current.showPicker === "function") {
+        dateInputRef.current.showPicker();
+      } else {
+        dateInputRef.current.focus();
+        dateInputRef.current.click();
+      }
+    }
+  };
+
+  return (
+    <div style={{ position: "relative", display: "flex", alignItems: "center", width: "100%" }}>
+      <input
+        type="text"
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        style={{ width: "100%", paddingLeft: "42px" }}
+      />
+      <button
+        type="button"
+        title="اختر تاريخاً من التقويم"
+        onClick={handleOpenPicker}
+        style={{
+          position: "absolute",
+          left: "8px",
+          top: "50%",
+          transform: "translateY(-50%)",
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          fontSize: "18px",
+          lineHeight: "1",
+          padding: "4px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: "4px",
+          transition: "transform 0.15s ease, background-color 0.15s ease",
+          userSelect: "none",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.06)";
+          e.currentTarget.style.transform = "translateY(-50%) scale(1.15)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = "transparent";
+          e.currentTarget.style.transform = "translateY(-50%) scale(1)";
+        }}
+      >
+        📅
+      </button>
+      <input
+        ref={dateInputRef}
+        type="date"
+        value={isValidDate ? value.trim() : ""}
+        onChange={(e) => {
+          if (e.target.value) {
+            onChange(e.target.value);
+          }
+        }}
+        tabIndex={-1}
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          left: "8px",
+          top: "50%",
+          transform: "translateY(-50%)",
+          opacity: 0,
+          pointerEvents: "none",
+          width: "20px",
+          height: "20px",
+          border: 0,
+          padding: 0,
+          margin: 0,
+          zIndex: -1,
+        }}
+      />
+    </div>
+  );
+}
 
 // Login Screen
 interface LoginScreenProps {
@@ -1077,11 +1170,19 @@ function Admin() {
           </div>
           <div className="form-group">
             <label>📅 موعد فتح التقديم</label>
-            <input type="text" placeholder="مثال: 2026-01-15 أو تفتح بين يناير وفبراير" value={addForm.open_date} onChange={(e) => setAddForm({ ...addForm, open_date: e.target.value })} />
+            <HybridDateInput
+              placeholder="مثال: 2026-01-15 أو تفتح بين يناير وفبراير"
+              value={addForm.open_date}
+              onChange={(val) => setAddForm({ ...addForm, open_date: val })}
+            />
           </div>
           <div className="form-group">
             <label>📅 آخر موعد للتقديم</label>
-            <input type="text" placeholder="مثال: 2026-06-30 أو مفتوح حتى اكتمال العدد" value={addForm.deadline} onChange={(e) => setAddForm({ ...addForm, deadline: e.target.value })} />
+            <HybridDateInput
+              placeholder="مثال: 2026-06-30 أو مفتوح حتى اكتمال العدد"
+              value={addForm.deadline}
+              onChange={(val) => setAddForm({ ...addForm, deadline: val })}
+            />
           </div>
           <div className="form-group">
             <label>وصف المنحة (قصير)</label>
@@ -1405,11 +1506,19 @@ function Admin() {
             </div>
             <div className="form-group">
               <label>📅 موعد فتح التقديم</label>
-              <input type="text" placeholder="مثال: 2026-01-15 أو تفتح بين يناير وفبراير" value={editForm.open_date} onChange={(e) => setEditForm({ ...editForm, open_date: e.target.value })} />
+              <HybridDateInput
+                placeholder="مثال: 2026-01-15 أو تفتح بين يناير وفبراير"
+                value={editForm.open_date}
+                onChange={(val) => setEditForm({ ...editForm, open_date: val })}
+              />
             </div>
             <div className="form-group">
               <label>📅 آخر موعد للتقديم</label>
-              <input type="text" placeholder="مثال: 2026-06-30 أو مفتوح حتى اكتمال العدد" value={editForm.deadline} onChange={(e) => setEditForm({ ...editForm, deadline: e.target.value })} />
+              <HybridDateInput
+                placeholder="مثال: 2026-06-30 أو مفتوح حتى اكتمال العدد"
+                value={editForm.deadline}
+                onChange={(val) => setEditForm({ ...editForm, deadline: val })}
+              />
             </div>
             <div className="form-group">
               <label>وصف المنحة (قصير)</label>
