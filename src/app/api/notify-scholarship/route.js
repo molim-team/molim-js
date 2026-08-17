@@ -79,11 +79,15 @@ export async function POST(request) {
 }
 
 function buildEmailHTML(s) {
-  const deadline = s.deadline
-    ? new Date(s.deadline).toLocaleDateString("ar-SA", {
-        year: "numeric", month: "long", day: "numeric",
-      })
-    : "غير محدد";
+  let deadline = "غير محدد";
+  if (s.deadline) {
+    const parsed = new Date(s.deadline);
+    deadline = isNaN(parsed.getTime())
+      ? s.deadline
+      : parsed.toLocaleDateString("ar-SA", {
+          year: "numeric", month: "long", day: "numeric",
+        });
+  }
 
   return `<!DOCTYPE html>
 <html dir="rtl" lang="ar">

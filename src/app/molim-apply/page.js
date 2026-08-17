@@ -231,7 +231,7 @@ export default function MolimApply() {
 
         <div className="apply-form-group">
           <label><span className="required">*</span>المجال الذي ترغب بالتطوع فيه</label>
-          <span className="field-hint">ختر المجال الذي تمتلك المهارات اللازمة للمساهمة فيه (الحد الأقصى 2 كحد أقصى). اضغط على المجال لرؤية التفاصيل ( يجب أن يكون لديك خبرة بسيطة على الأقل في القسم الذي تختاره )</span>
+          <span className="field-hint">اختر المجال الذي تمتلك المهارات اللازمة للمساهمة فيه (الحد الأقصى 2 كحد أقصى). اضغط على المجال لرؤية التفاصيل ( يجب أن يكون لديك خبرة بسيطة على الأقل في القسم الذي تختاره )</span>
           
           <div style={{ marginBottom: '1rem', marginTop: '0.5rem' }}>
             {VOLUNTEER_FIELDS.map((field, index) => (
@@ -301,7 +301,7 @@ export default function MolimApply() {
         )}
 
         <div className="apply-form-group">
-          <label><span className="required">*</span>هل لديك أي خبرات أو مشاريع عملت عليها من قبل ويمكنك اخبارنا بها؟</label>
+          <label><span className="required">*</span>هل لديك أي خبرات أو مشاريع عملت عليها من قبل يمكنك اخبارنا بها؟</label>
           <textarea name="experience" required className="apply-input apply-textarea" value={formData.experience} onChange={handleChange} maxLength="2000"></textarea>
         </div>
 

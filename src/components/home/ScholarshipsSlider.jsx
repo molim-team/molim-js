@@ -11,6 +11,7 @@ function getCountdown(deadline) {
   if (!deadline) return null;
   const today = new Date();
   const end = new Date(deadline);
+  if (isNaN(end.getTime())) return null;
   const diff = Math.ceil((end - today) / (1000 * 60 * 60 * 24));
   if (diff < 0) return null;
   if (diff === 0) return { text: '⚠️ آخر يوم للتقديم!', urgent: true };

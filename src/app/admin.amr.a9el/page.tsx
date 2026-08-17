@@ -1077,11 +1077,11 @@ function Admin() {
           </div>
           <div className="form-group">
             <label>📅 موعد فتح التقديم</label>
-            <input type="date" value={addForm.open_date} onChange={(e) => setAddForm({ ...addForm, open_date: e.target.value })} />
+            <input type="text" placeholder="مثال: 2026-01-15 أو تفتح بين يناير وفبراير" value={addForm.open_date} onChange={(e) => setAddForm({ ...addForm, open_date: e.target.value })} />
           </div>
           <div className="form-group">
             <label>📅 آخر موعد للتقديم</label>
-            <input type="date" value={addForm.deadline} onChange={(e) => setAddForm({ ...addForm, deadline: e.target.value })} />
+            <input type="text" placeholder="مثال: 2026-06-30 أو مفتوح حتى اكتمال العدد" value={addForm.deadline} onChange={(e) => setAddForm({ ...addForm, deadline: e.target.value })} />
           </div>
           <div className="form-group">
             <label>وصف المنحة (قصير)</label>
@@ -1405,11 +1405,11 @@ function Admin() {
             </div>
             <div className="form-group">
               <label>📅 موعد فتح التقديم</label>
-              <input type="date" value={editForm.open_date} onChange={(e) => setEditForm({ ...editForm, open_date: e.target.value })} />
+              <input type="text" placeholder="مثال: 2026-01-15 أو تفتح بين يناير وفبراير" value={editForm.open_date} onChange={(e) => setEditForm({ ...editForm, open_date: e.target.value })} />
             </div>
             <div className="form-group">
               <label>📅 آخر موعد للتقديم</label>
-              <input type="date" value={editForm.deadline} onChange={(e) => setEditForm({ ...editForm, deadline: e.target.value })} />
+              <input type="text" placeholder="مثال: 2026-06-30 أو مفتوح حتى اكتمال العدد" value={editForm.deadline} onChange={(e) => setEditForm({ ...editForm, deadline: e.target.value })} />
             </div>
             <div className="form-group">
               <label>وصف المنحة (قصير)</label>
