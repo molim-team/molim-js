@@ -26,7 +26,10 @@ export default function ServicesClient({ scholarships }) {
     'turkey-gov', 'study-in-saudi', 'study-in-egypt', 'brunei-gov',
     'russia-gov', 'open-doors', 'kazakhstan-gov', 'romania-gov',
     'india-iccr', 'icesco-scholarships', 'study-in-hungary', 'study-in-iraq',
-    'slovakia-government-scholarship', 'islamic-development-bank-isdb-scholarship-20262027'
+    'slovakia-government-scholarship', 'islamic-development-bank-isdb-scholarship-20262027',
+    'summit-scholarship--universitas-muhammadiyah-malang-umm',
+    'umsu-global-scholarship',
+    'international-priority-scholarship-ips-'
   ];
 
   // Map and sort scholarships
@@ -47,14 +50,9 @@ export default function ServicesClient({ scholarships }) {
 
   return (
     <div className="services-page-container">
-      {/* Alert Bar */}
-      <div className="alert-bar">
-        <AlertTriangle size={24} />
-        <p><strong>ملاحظة هامة:</strong> خدماتنا مقتصرة حالياً على الطلاب المتواجدين داخل الدول التالية فقط: (المملكة العربية السعودية - جمهورية مصر العربية - الجمهورية اليمنية).</p>
-      </div>
 
       <div className="services-header">
-        <h1>خدمات مُلم الاحترافية</h1>
+        <h1>خدمات مُلم </h1>
         <p>نساعدك في تجهيز ملفك والتقديم على المنح الدراسية بأعلى معايير الجودة لزيادة فرص قبولك</p>
       </div>
 
