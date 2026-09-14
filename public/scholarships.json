@@ -181,49 +181,6 @@
     "discussionLink": "https://t.me/Molim_Scholarships"
   },
   {
-    "id": "russia-gov",
-    "name": "منحة الحكومة الروسية",
-    "name_en": "Russian Government Scholarship",
-    "country": "روسيا",
-    "flag": "https://flagcdn.com/w40/ru.png",
-    "degree": "بكالوريوس، ماجستير، دكتوراه",
-    "language": "الروسية",
-    "description": "منحة حكومية روسية تتيح الدراسة في الجامعات الحكومية الروسية المرموقة لجميع الجنسيات.",
-    "benefits": [
-      "رسوم دراسية كاملة",
-      "راتب شهريي",
-      "سنة تحضيرية لتعلم اللغة الروسية"
-    ],
-    "requirements": [
-      "شهادة ثانوية أو بكالوريوس حسب المرحلة",
-      "لا تشترط شهادة لغة إلزامية",
-      "سنة تحضيرية للغة الروسية"
-    ],
-    "majors": [
-      "جميع التخصصات متاحة في منحة الحكومة الروسية"
-    ],
-    "open_date": "2026-09-15",
-    "deadline": "2027-01-15",
-    "documents": {
-      "required": [
-        "جواز سفر",
-        "شهادة ثانوية",
-        "صورة شخصية"
-      ],
-      "optional": [
-        "خطاب توصية",
-        "CV",
-        "شهادات اضافية",
-        "خطاب اهداف بعد التخرج"
-      ]
-    },
-    "link": "https://education-in-russia.com",
-    "open": false,
-    "notes": "الدراسة في منحة روسيا حصرا باللغة الروسية ولا تستطيع الدراسة بلغة اخرى كالانجليزية.\nتعد منحة روسيا من اكثر المنح التي تقبل اعداد كثيرة جدا من الطلاب.",
-    "groupLink": "https://t.me/Molim_Grants",
-    "discussionLink": "https://t.me/Molim_Scholarships"
-  },
-  {
     "id": "open-doors",
     "name": "منحة أوبن دورز",
     "name_en": "Open Doors Olympiad Scholarship",
