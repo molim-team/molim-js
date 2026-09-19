@@ -68,7 +68,6 @@ export default function Header() {
       <nav id="main-nav" className={isMenuOpen ? 'open' : ''}>
         <Link href="/" onClick={closeMenu}>الرئيسية</Link>
         <Link href="/scholarships" onClick={closeMenu}>المنح</Link>
-        <Link href="/services" onClick={closeMenu}>خدمات مُلم</Link>
         <Link href="/library" onClick={closeMenu}>مكتبة مُلم</Link>
         <Link href="/quiz" onClick={closeMenu}>اكتشف تخصصك المناسب</Link>
         <Link href="/majors" onClick={closeMenu}>التخصصات العالمية</Link>
